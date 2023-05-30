@@ -41,12 +41,15 @@ char *commandsNames[COMMANDS_NUMBER] = {
 };
 
 char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
-    ".extern", // 1
-    ".entry", // 2
-    
-};
+    ".extern",
+    ".entry",
+    "mcro",
+    "endmcro"};
 
-//Complex A, B, C, D, E, F;
+isMacroName(char command[])
+{
+    // TODO: check with macro service if the command is a known macro
+}
 
 /* Function to get the command from the user */
 void getCommand(char command[])
@@ -85,9 +88,8 @@ void removeSpacesAndTabs(char *str)
     Input: command - the command to search for.
     Output: The index of the command if found, otherwise -1.
 */
-int getCommandIndex(char command[])
+int getCommandIndexByList(char command[], char *list[])
 {
-
     int commandLength = 0;
     int commandIndex = 0;
 
@@ -98,7 +100,7 @@ int getCommandIndex(char command[])
     for (commandIndex = 0; commandIndex < COMMANDS_NUMBER; commandIndex++)
     {
         /* Two-way inclusion check of the string*/
-        if (strlen(commandsNames[commandIndex]) == commandLength && strncmp(commandsNames[commandIndex], command, commandLength) == 0)
+        if (strlen(list[commandIndex]) == commandLength && strncmp(list[commandIndex], command, commandLength) == 0)
         {
             return commandIndex;
         }
@@ -147,21 +149,49 @@ char *skipNumber(char *command)
 void parseCommand(char command[])
 {
     int commandIndex;
-    commandIndex = getCommandIndex(command);
+    commandIndex = getCommandIndexByList(command, commandsNames);
     if (commandIndex == -1)
     {
+        if (isMacroName(command))
+        {
+            // TODO: send to the executer the lines of the macro
+        }
+        int commandPrefix = getCommandIndexByList(command, commandsPrefix);
+        if (commandPrefix != -1)
+        {
+            switch (commandPrefix)
+            {
+                case 0: // extern
+                    /* code */
+                    break;
+                case 1: // entry
+                    /* code */
+                    break;
+                case 2: // mcro
+                    /* code */
+                    break;
+                case 3: // endmcro
+                    /* code */
+                    break;
+                default: // useless
+                    break;
+            }
+        }
         printf(ERROR_INVALID_COMMAND);
         return;
     }
+    else
+    {
+        // TODO: its a regular command without any prefix - send the command to the executer
+    }
     removeSpacesAndTabs(command);
     command = command + strlen(commandsNames[commandIndex]);
-
 }
 
 int main()
 {
     char command[MAX_COMMAND_LENGTH];
-    
+
     while (true)
     {
         getCommand(command);
