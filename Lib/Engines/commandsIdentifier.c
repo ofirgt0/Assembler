@@ -22,22 +22,22 @@
 #define ERROR_UNDEFINED_COMPLEX_VAR "Undefined complex variable\n"
 
 char *commandsNames[COMMANDS_NUMBER] = {
-    "mov", // 1
-    "cmp", // 2
-    "add", // 3
-    "sub", // 4
-    "not", // 5
-    "clr", // 6
-    "lea",
-    "inc",
-    "dec",
-    "jmp",
+    "mov", // 0
+    "cmp", // 1
+    "add", // 2
+    "sub", // 3
+    "not", // 4
+    "clr", // 5
+    "lea", // 6
+    "inc", // 7
+    "dec", // 8
+    "jmp", // 9
     "bne",
     "red",
     "prn",
     "jsr",
     "rts",
-    "stop", // 16
+    "stop", // 15
 };
 
 char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
@@ -46,24 +46,24 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
     "mcro",
     "endmcro"};
 
-isMacroName(char command[])
-{
-    // TODO: check with macro service if the command is a known macro
-}
+// isMacroName(char command[])
+// {
+//     // TODO: check with macro service if the command is a known macro
+// }
 
 /* Function to get the command from the user */
-void getCommand(char command[])
-{
-    printf("\nEnter command:\n");
-    if (fgets(command, MAX_COMMAND_LENGTH, stdin) == NULL)
-    {
-        printf("\nexit the program\n");
-        exit(0);
-    }
+// void getCommand(char command[])
+// {
+//     printf("\nEnter command:\n");
+//     if (fgets(command, MAX_COMMAND_LENGTH, stdin) == NULL)
+//     {
+//         printf("\nexit the program\n");
+//         exit(0);
+//     }
 
-    printf("your command is:\n");
-    printf("%s", command);
-}
+//     printf("your command is:\n");
+//     printf("%s", command);
+// }
 
 /*
     Removes spaces and tabs from a string.
@@ -146,7 +146,7 @@ char *skipNumber(char *command)
     Input: command - the command string to execute.
     Output: None.
 */
-void parseCommand(char command[])
+void parseCommand(char command[]) //todo: naming - handleNewLine
 {
     int commandIndex;
     commandIndex = getCommandIndexByList(command, commandsNames);

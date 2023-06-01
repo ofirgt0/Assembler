@@ -8,7 +8,7 @@ void handleNewLine(const char *line) { //TODO: DELETE THIS FUNCTION AND IMPLEMEN
 // Input: filename - the name of the file to be read and processed
 void fileReader(const char *filename) {
     FILE *file = fopen(filename, "r");
-    if (file == NULL) {
+    if (file == NULL) { // TODO: put in macro
         printf("Failed to open file: %s\n", filename);
         return;
     }
@@ -23,7 +23,7 @@ void fileReader(const char *filename) {
 
 int main(int argc, char *argv[]) {
     int i;
-    if (argc < 2) {
+    if (argc < 2) { // TODO: PUT IN MACRO
         printf("Usage: %s <file1> <file2> ...\n", argv[0]);
         return 1;
     }
