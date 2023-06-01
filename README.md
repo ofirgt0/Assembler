@@ -2,12 +2,12 @@
 
 A repository for an assembly-to-machine language converter developed as part of a bachelor's degree program.
 
-# filesReader
+# filesReader - done, without tests
 
 - main - the main will get files names from the cmd and will run in loop on them. every iteration will call the function fileReader
 - fileReader - run on the given file, and call the function handleNeWLine in the executer
 
-# macroService.c:
+# macroService.c
 
 - hold a static link list of macros.
   - each macro contain:

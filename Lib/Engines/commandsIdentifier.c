@@ -187,28 +187,3 @@ void parseCommand(char command[])
     removeSpacesAndTabs(command);
     command = command + strlen(commandsNames[commandIndex]);
 }
-
-int main()
-{
-    char command[MAX_COMMAND_LENGTH];
-
-    while (true)
-    {
-        getCommand(command);
-        if (strcmp(command, "stop") == 0)
-        {
-            if (strlen(command) == 4)
-            {
-                printf("good bye\n");
-                exit(0);
-            }
-            else
-                printf(ERROR_EXTRANEOUS_TEXT);
-        }
-        else
-        {
-            executeCommand(command);
-        }
-    }
-    return 0;
-}
