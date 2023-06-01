@@ -85,6 +85,10 @@ A repository for an assembly-to-machine language converter developed as part of 
 
 - will hold all of the sructures of all the program
 
+
+# TODO:
+- create makefile
+
 # Questions for hadasa:
 
 1. what we should do with the extern + entries exept save them in file? (page 41)
