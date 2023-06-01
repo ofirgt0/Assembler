@@ -22,3 +22,7 @@ static struct Macro* macroHead = NULL;
 void addMacro(char* macroName, char* fileName, struct Line* linesHead){
     
 }
+
+Line *getMacro(char* macroName){
+    
+}
