@@ -4,21 +4,23 @@
 #include <string.h>
 
 // Structure for a line in the macro
-struct Line {
+struct Line
+{
     char code;
     int opcode;
     int dstRegister;
     int srcRegister;
-    struct Line* next;
+    struct Line *next;
 };
 
-struct Macro {
+struct Macro
+{
     char macroName[50];
-    struct Line* lines;
-    struct Macro* next;
+    struct Line *lines;
+    struct Macro *next;
 };
 
-static struct Macro* macroHead = NULL;
+static struct Macro *macroHead = NULL;
 
 void addNewMacro(char *macroName, char *fileName, struct Line line)
 {
@@ -31,7 +33,7 @@ void addNewMacro(char *macroName, char *fileName, struct Line line)
         return;
     }
     strcpy(newMacro->macroName, macroName);
-    newMacro->lines = line; //TODO: FIX THIS - ERROR WHILE POINTER = STRUCT
+    newMacro->lines = line; // TODO: FIX THIS - ERROR WHILE POINTER = STRUCT
     newMacro->next = NULL;
 
     struct Macro *currentMacro = macroHead;
@@ -64,7 +66,8 @@ bool isMacroName(char *macroName)
     return getMacro(macroName) != NULL;
 }
 
-bool setExistMacro(char* macroName){
+bool setExistMacro(char *macroName)
+{
     // struct Macro* currentMacro = macroHead;
     // while (currentMacro != NULL){
     //     if (strcmp(currentMacro->macroName, macroName) == 0)
@@ -74,6 +77,10 @@ bool setExistMacro(char* macroName){
     // return false;
 }
 
-void sendMacro(){
-
+void sendMacro()
+{
 }
+
+///
+
+//
