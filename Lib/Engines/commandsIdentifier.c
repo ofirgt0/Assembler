@@ -3,23 +3,22 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
-#include "complex.h"
 
-#define MAX_COMMAND_LENGTH 100
-#define COMMANDS_NUMBER 16
-#define COMMANDS_PREFIX_NUMBER 4
 #define VAR_SEPERATOR ','
-#define FLOAT_NUMBER_DOT '.'
+#define COMMANDS_NUMBER 16
 #define REGISTER_PREFIX '@'
+#define FLOAT_NUMBER_DOT '.'
+#define MAX_COMMAND_LENGTH 100
+#define COMMANDS_PREFIX_NUMBER 4
 
-#define ERROR_EXTRANEOUS_TEXT "Extraneous text after end of command\n"
-#define ERROR_MISSING_PARAMETER "Missing parameter\n"
-#define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
-#define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
 #define ERROR_MISSING_COMMA "Illegal comma\n"
-#define ERROR_MULTIPLE_CONSECUTIVE_COMMAS "Multiple consecutive commas\n"
+#define ERROR_MISSING_PARAMETER "Missing parameter\n"
 #define ERROR_INVALID_COMMAND "Undefined command name\n"
 #define ERROR_UNDEFINED_COMPLEX_VAR "Undefined complex variable\n"
+#define ERROR_EXTRANEOUS_TEXT "Extraneous text after end of command\n"
+#define ERROR_MULTIPLE_CONSECUTIVE_COMMAS "Multiple consecutive commas\n"
+#define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
+#define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
 
 char *commandsNames[COMMANDS_NUMBER] = {
     "mov", // 0
@@ -146,7 +145,7 @@ char *skipNumber(char *command)
     Input: command - the command string to execute.
     Output: None.
 */
-void parseCommand(char command[]) //todo: naming - handleNewLine
+void commandIdentifier(char command[])
 {
     int commandIndex;
     commandIndex = getCommandIndexByList(command, commandsNames);
@@ -186,4 +185,8 @@ void parseCommand(char command[]) //todo: naming - handleNewLine
     }
     removeSpacesAndTabs(command);
     command = command + strlen(commandsNames[commandIndex]);
+}
+
+struct Line commandParser(char *line, ){
+    
 }

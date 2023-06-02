@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 /**
  * Write a string to a file.
@@ -23,4 +24,15 @@ void writeToFile(const char* filename, const char* string) {
             printf("Failed to open/create the file.\n");
         }
     }
+}
+
+bool isFileExist(const char *fileName)
+{
+    FILE *file = fopen(fileName, "r");
+    if (file != NULL)
+    {
+        fclose(file);
+        return true;
+    }
+    return false;
 }
