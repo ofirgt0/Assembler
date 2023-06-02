@@ -12,6 +12,11 @@
 #define COMMANDS_PREFIX_NUMBER 4
 #define MACRO_COMMAND "mcro"
 #define END_MACRO_COMMAND "endmcro"
+#define DEFAULT_ADRESS 0
+#define ABSOLUTE_A_R_E_DECIMAL_CODE 0
+#define EXTERNAL_A_R_E_DECIMAL_CODE 1
+#define RELOCATABLE_A_R_E_DECIMAL_CODE 2
+
 
 #define ERROR_MISSING_COMMA "Illegal comma\n"
 #define ERROR_MISSING_PARAMETER "Missing parameter\n"
@@ -21,6 +26,19 @@
 #define ERROR_MULTIPLE_CONSECUTIVE_COMMAS "Multiple consecutive commas\n"
 #define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
 #define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
+
+struct Line //TODO: MOVE THIS STRUCT TO DATA STRUCTURE
+{ 
+    char code;
+    int opcode;
+    int dstRegister;
+    int srcRegister;
+    int address;
+    char *label;
+    char *originalCommand;
+    struct Line *next;
+};
+
 
 char *commandsNames[COMMANDS_NUMBER] = {
     "mov", // 1
@@ -221,10 +239,10 @@ void commandIdentifier(char command[], char *fileName)
             printf(ERROR_INVALID_COMMAND);
             return;
         }
-        removeSpacesAndTabs(command);
-        command = command + strlen(commandsNames[commandIndex]);
+        //removeSpacesAndTabs(command);
+        //command = command + strlen(commandsNames[commandIndex]);
         
-        struct Line *parsedLine = commandParser(command);
+        struct Line *parsedLine = commandParser(command, commandIndex);
         macroFlag ? insertMacroNewLine(parsedLine) : insertNewCommand(parsedLine, fileName);
     }
 }
@@ -253,7 +271,44 @@ int getCharIndexBySeparatorIndex(const char *str, int sepIndex)
     return charIndex;
 }
 
-struct Line commandParser(char *line)
+char* cutString(const char* str, int startIndex, int endIndex) {
+    int strLength = strlen(str);
+    int cutLength = endIndex - startIndex + 1;
+
+    if (startIndex >= 0 && endIndex < strLength && startIndex <= endIndex) {
+        char* result = malloc(cutLength + 1);
+        strncpy(result, str + startIndex, cutLength);
+        result[cutLength] = '\0';
+        return result;
+    } else {
+        char* result = malloc(1);
+        result[0] = '\0';
+        return result;
+    }
+}
+
+
+struct Line* commandParser(char *line, int commandIndex, char label)
 {
-    return NULL;
+    struct Line *newLine = (struct Line *)malloc(sizeof(struct Line));
+
+    if (newLine == NULL)
+    {
+        // Error: Memory allocation failed
+        printf("Error: Memory allocation failed\n");
+        return;
+    }
+    strcpy(newLine->originalCommand, line);
+    newLine->code = ABSOLUTE_A_R_E_DECIMAL_CODE; // TODO: understand the meaning of the A R E code (!!!)
+    newLine->address = DEFAULT_ADRESS;
+    newLine->opcode = commandIndex;
+
+    int startOfRegister1 = strlen(commandsNames[commandIndex]) + 1;
+    
+    cutString(line, startOfRegister1, startOfRegister1 + 3);
+    newLine->dstRegister = line.dstRegister;
+    newLine->srcRegister = line.srcRegister;
+    newLine->label = label;
+    newLine->next = NULL;
+    return newLine;
 }
