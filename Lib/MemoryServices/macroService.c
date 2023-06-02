@@ -77,10 +77,16 @@ bool setExistMacro(char *macroName)
     // return false;
 }
 
-void sendMacro()
+void sendMacro(char *macroName)
 {
+    struct Macro *macro = getMacro(macroName);
+    if (macro == NULL)
+    {
+        // Error: Macro not found
+        printf("Error: Macro not found\n");
+        return;
+    }
+    struct Line *currentLine = macro->lines;
+    while (currentLine != NULL)
+    {
 }
-
-///
-
-//

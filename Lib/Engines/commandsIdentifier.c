@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
-#include "complex.h"
 
 #define VAR_SEPERATOR ','
 #define COMMANDS_NUMBER 16
@@ -146,7 +145,7 @@ char *skipNumber(char *command)
     Input: command - the command string to execute.
     Output: None.
 */
-void parseCommand(char command[])
+void commandIdentifier(char command[])
 {
     int commandIndex;
     commandIndex = getCommandIndexByList(command, commandsNames);
@@ -186,4 +185,8 @@ void parseCommand(char command[])
     }
     removeSpacesAndTabs(command);
     command = command + strlen(commandsNames[commandIndex]);
+}
+
+struct Line commandParser(char *line, ){
+    
 }
