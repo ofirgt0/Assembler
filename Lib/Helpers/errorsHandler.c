@@ -31,3 +31,8 @@ void printLogPrefix(char *fileName, int address)
 {
     printf("Error in file %s at address %d: ", fileName, address);
 }
+
+int getErrorsCounter()
+{
+    return errorsCounter;
+}
