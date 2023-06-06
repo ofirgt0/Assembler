@@ -1,95 +1,99 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #define MAX_LABEL_NAME_LENGTH 100
 
+/*counter of the instructions addresses.*/
+extern int IC;
+
+/*counter of the data addresses.*/
+extern int DC;
+
+/*dynamic array of .data instructions.*/
+extern int **data;
+
+/*dynamic array of .string instructions.*/
+extern char **strings;
+
+/*dynamic array of labels structures (externals, entries, commands).*/
+extern Label *labels;
+extern int labelsPhySize;     // labels array physical size (memory allocated).
+extern int labelsLogicalSize; // labels array logical size (that amount of labels that exists in the input file).
+
+// TODO: adding structure for binary words
 /*
 * addNewLabel:
   @input: newLabel
-  - add the label to the array.
-  - write the label in the rellevant file.
-* addNewExternal:
-  @input: newLabel
-  - add the label to the array.
-  - write the label in the rellevant file.
-* addNewEntry:
-  @input: newLabel
-  - add the label to the array.
-  - write the label in the rellevant file.
+  - add the label to the array based on the the label type (externals, entries, commands).
 * getLabel:
   @input: labelName
   - the function return the address of the label. if not exist - return default 0.
 
 - note: consider the option to use generic function that will do the functionallty and few func that will call this one with rellevant file name and list.
 
-*/
-
-/**
- * labelName: An array of characters to store the label name
- * address: An integer to store the address associated with the label.
- * data: A dynamic 2D array of integers to store the data associated with the label.
- * strings: A dynamic 2D array of integers to store the ASCII values of strings associated
- * externals: A pointer to another struct Label, representing the list of external labels associated with the label.
- * entries: A pointer to another struct Label, representing the list of entry labels associated with the label.
- * labels: A pointer to another struct Label, representing the list of labels associated with the label.
- * DC: An integer that store the counter, for the data addresses.
- * IC: An integer that store the counter, for the instruction addresses.
- */
-
-struct Label
+ /* Define an enumeration to represent the type of a label */
+typedef enum
 {
-    char labelName[MAX_LABEL_NAME_LENGTH];
+    Ext,
+    Entry,
+    Command
+} LabelType;
+
+// this is the definitions of a label.
+typedef struct label
+{
+    char name[MAX_LABEL_NAME_LENGTH];
+    LabelType type;
     int address;
-};
+    // pIntNode extAddrs;
 
-struct Label *getLabel(char *labelName)
+} Label;
+
+Label *getLabel(char *labelName)
 {
-    struct Label *label = labelHead;
-    while (label != NULL)
+    for (int i = 0; i < labelsLogicalSize; i++)
     {
-        if (strcmp(label->labelName, labelName) == 0)
-            return label;
-        label = label->labels;
+        if (strcmp(labels[i].name, labelName) == 0)
+        {
+            return &labels[i];
+        }
     }
     return NULL;
 }
 
-/**
- *Checking if a a label with the same name already exists by calling the getExistingLabel function.
- * להוסיף
- * להוסיף
- * להוסיף
- * להוסיף
- *
- *
- */
-
-void addNewLabel(const char *labelType, const char *fileName, struct Label newLabel)
+bool addNewLabel(LabelType type, int address, char name[MAX_LABEL_NAME_LENGTH])
 {
-    /* If the label does not already exist, a new label is created, and added to the list of the labels */
-    struct Label *newLabel = (struct Label *)malloc(sizeof(struct Label));
-    if (newLabel == NULL)
+    for (int i = 0; i < labelsLogicalSize; i++)
     {
-        /* Error: Memory allocation failed */
-        printf("Error: allocation has been failed\n");
-        return;
-    }
-}
-
-/**
- *A boolean function Checking if a a label with the same name already exists.
- * @return true if the name already exists.
- * @return false if the name does not exists.
- */
-bool isExistingLabel(const char *labelName, struct Label *labels, int numLabels)
-{
-    for (int i = 0; i < numLabels; i++)
-    {
-        if (strcmp(labels[i].labelName, labelName) == 0)
+        if (strcmp(labels[i].name, name) == 0) /* Check if a label with the same name already exists in the list */
         {
-            return true;
+            // TODO: handle error
+            // sprintf(errorMsg, "label %s already exists", name); /* Create an error message */
+            return false;
         }
     }
 
-    return false;
+    /* If the label does not already exist,
+       a new label is created, and added to the labels array */
+
+    // if the labels array is full: create an array twice as big and copy old array to new array.
+    if (labelsLogicalSize >= labelsPhySize)
+    {
+        labelsPhySize *= 2;
+        labels = realloc(labels, labelsPhySize * sizeof(Label));
+        if (labels == NULL)
+        {
+            /* Error: Memory allocation failed */
+            printf("Error: allocation has been failed\n");
+            return false;
+        }
+    }
+
+    /*update the labels array with the new label.*/
+    labels[labelsLogicalSize].address = address;
+    labels[labelsLogicalSize].type = type;
+    strcpy(labels[labelsLogicalSize].name, name);
+    labelsLogicalSize++;
+    return true;
 }
