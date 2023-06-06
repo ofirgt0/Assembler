@@ -6,6 +6,12 @@
 
 static struct Macro *macroHead = NULL;
 
+/**
+ * Adds a new macro to the list of macros.
+ * @param macroName The name of the macro.
+ * @param fileName The name of the file associated with the macro.
+ * @param line The line structure representing the macro line to be added.
+ */
 void addNewMacro(char *macroName, char *fileName, struct Line line)
 {
     struct Macro *newMacro = getMacro(macroName);
@@ -21,12 +27,20 @@ void addNewMacro(char *macroName, char *fileName, struct Line line)
         }
         strcpy(newMacro->macroName, macroName);
         newMacro->next = NULL;
+        newMacro->lines = NULL;
 
-        struct Macro *currentMacro = macroHead;
-        while (currentMacro->next != NULL)
-            currentMacro = currentMacro->next;
+        if (macroHead == NULL)
+        {
+            macroHead = newMacro;
+        }
+        else
+        {
+            struct Macro *currentMacro = macroHead;
+            while (currentMacro->next != NULL)
+                currentMacro = currentMacro->next;
 
-        currentMacro->next = newMacro;
+            currentMacro->next = newMacro;
+        }
     }
 
     struct Line *newLine = (struct Line *)malloc(sizeof(struct Line));
@@ -48,12 +62,24 @@ void addNewMacro(char *macroName, char *fileName, struct Line line)
     newLine->commandIndex = line.commandIndex;
     newLine->next = NULL;
 
-    struct Line *currentLine = macroHead->lines;
-    while (currentLine->next != NULL)
-        currentLine = currentLine->next;
-    currentLine->next = newLine;
+    if (macroHead->lines == NULL)
+    {
+        macroHead->lines = newLine;
+    }
+    else
+    {
+        struct Line *currentLine = macroHead->lines;
+        while (currentLine->next != NULL)
+            currentLine = currentLine->next;
+        currentLine->next = newLine;
+    }
 }
 
+/**
+ * Retrieves a macro based on its name.
+ * @param macroName The name of the macro.
+ * @return The macro structure if found, or NULL if not found.
+ */
 struct Macro *getMacro(char *macroName)
 {
     struct Macro *macro = macroHead;
@@ -66,22 +92,56 @@ struct Macro *getMacro(char *macroName)
     return NULL;
 }
 
+/**
+ * Checks if a given macro name exists.
+ * @param macroName The name of the macro.
+ * @return true if the macro name exists, false otherwise.
+ */
 bool isMacroName(char *macroName)
 {
     return getMacro(macroName) != NULL;
 }
 
-bool setExistMacro(char *macroName, char *fileName, struct Line line)
+/**
+ * Sets the last line of a macro with the provided values.
+ * @param macroName The name of the macro.
+ * @param line The line containing the values to set.
+ */
+void setExistMacro(char *macroName, struct Line line)
 {
-    // struct Macro* currentMacro = macroHead;
-    // while (currentMacro != NULL){
-    //     if (strcmp(currentMacro->macroName, macroName) == 0)
-    //         return true;
-    //     currentMacro = currentMacro->next;
-    // }
-    // return false;
-    // TODO: Implement the logic for checking if a macro with the given name and line exists.
-    //       You can uncomment and modify the provided code according to your requirements.
+    struct Macro *macro = getMacro(macroName);
+
+    if (macro == NULL)
+    {
+        /*Macro does not exist*/
+        printf("Error: Macro '%s' does not exist.\n", macroName);
+        return;
+    }
+
+    /*Find the last line of the macro*/
+    struct Line *lastLine = macro->lines;
+    if (lastLine == NULL)
+    {
+        /*Macro has no lines*/
+        printf("Error: Macro '%s' has no lines.\n", macroName);
+        return;
+    }
+
+    while (lastLine->next != NULL)
+        lastLine = lastLine->next;
+
+    /*Set the values of the last line*/
+    lastLine->code = line.code;
+    lastLine->opcode = line.opcode;
+    lastLine->dstRegister = line.dstRegister;
+    lastLine->srcRegister = line.srcRegister;
+    lastLine->address = line.address;
+    lastLine->label = line.label;
+    lastLine->originalCommand = line.originalCommand;
+    lastLine->commandIndex = line.commandIndex;
+    lastLine->next = NULL;
+
+    printf("Last line of macro '%s' has been set.\n", macroName);
 }
 
 void sendMacro(char *macroName)

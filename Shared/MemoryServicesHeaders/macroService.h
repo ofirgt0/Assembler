@@ -60,12 +60,11 @@ bool isMacroName(char *macroName);
  * @param line      The line to check.
  * @return true if the macro with the line exists, false otherwise.
  */
-bool setExistMacro(char *macroName, char *fileName, struct Line line);
-
-/**
- * Send a macro with the given name for processing.
- * @param macroName The name of the macro to send.
- */
-void sendMacro(char *macroName);
+void setExistMacro(char *macroName, struct Line line)
+    /**
+     * Send a macro with the given name for processing.
+     * @param macroName The name of the macro to send.
+     */
+    void sendMacro(char *macroName);
 
 #endif // MACRO_SERVICE_H
