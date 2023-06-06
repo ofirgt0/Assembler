@@ -1,28 +1,8 @@
+#include "macroService.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
-// Structure for a line in the macro
-struct Line
-{ // TODO: MOVE THIS STRUCT TO DATA STRUCTURE
-    int commandIndex;
-    char code;
-    int opcode;
-    int dstRegister;
-    int srcRegister;
-    int address;
-    char *label;
-    char *originalCommand;
-    struct Line *next;
-};
-
-struct Macro
-{
-    char macroName[50];
-    struct Line *lines;
-    struct Macro *next;
-};
 
 static struct Macro *macroHead = NULL;
 
@@ -100,6 +80,8 @@ bool setExistMacro(char *macroName, char *fileName, struct Line line)
     //     currentMacro = currentMacro->next;
     // }
     // return false;
+    // TODO: Implement the logic for checking if a macro with the given name and line exists.
+    //       You can uncomment and modify the provided code according to your requirements.
 }
 
 void sendMacro(char *macroName)
@@ -114,5 +96,7 @@ void sendMacro(char *macroName)
     struct Line *currentLine = macro->lines;
     while (currentLine != NULL)
     {
+        // TODO: Process the lines of the macro
+        currentLine = currentLine->next;
     }
 }

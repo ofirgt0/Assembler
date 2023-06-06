@@ -1,4 +1,7 @@
+#ifndef WRITE_TO_FILE_H
+#define WRITE_TO_FILE_H
 #include <stdio.h>
+#include <stdbool.h>
 
 /**
  * Write a string to a file.
@@ -8,19 +11,16 @@
  *
  * @param filename The name of the file to write to.
  * @param string   The string to be written to the file.
+ * @return true if the operation is successful, otherwise - false.
  */
-void writeToFile(const char* filename, const char* string) {
-    FILE* file = fopen(filename, "a");  // Open the file in "append" mode
-    if (file != NULL) {
-        fprintf(file, "\n%s", string);  // Write the string to a new line at the end of the file
-        fclose(file);  // Close the file
-    } else {
-        file = fopen(filename, "w");  // Open the file in "write" mode (create a new file)
-        if (file != NULL) {
-            fprintf(file, "%s", string);  // Write the string to the file
-            fclose(file);  // Close the file
-        } else {
-            printf("Failed to open/create the file.\n");
-        }
-    }
-}
+bool writeToFile(const char *filename, const char *string);
+
+/**
+ * Check if a file exists.
+ *
+ * @param fileName The name of the file to check.
+ * @return true if the file exists, otherwise - false.
+ */
+bool isFileExist(const char *fileName);
+
+#endif // WRITE_TO_FILE_H

@@ -85,8 +85,8 @@ A repository for an assembly-to-machine language converter developed as part of 
 
 - will hold all of the sructures of all the program
 
-
 # TODO:
+
 - create makefile
 
 # Questions for hadasa:
@@ -100,3 +100,27 @@ A repository for an assembly-to-machine language converter developed as part of 
 7. .data 1 1,3 ,4,5 is a valid line?
 8. there is an option that label is initiate inside macro? if there is - what will be the address of the label?
 9. there is a range of addresses for each part of program? (for example 100 first addresses for instructions and 100-200 for data)
+
+# algorithem explanation:
+
+1. file reader start running on each fileName in list from main and for each line in file calling the command identifier
+2. the command idetifier check if the command is regular command (without labels and not memory type).
+  - try Get Label, save the label in the struct and remove the label from the command
+  - if the command is regular
+    - if !macroFlag parse to generic line struct and send to the memoryManger.
+    - if macroFlag - parse to generic line struct and send to the macro service and save the line under the current macro
+  - if not - check for prefix (.data, .string, .external, .extern) and save it in the data service in Line struct
+3. the data service get a line from the commands identfier:
+  - if there is a label - save label
+  - if it is a data / string - save data
+  - if there is extern/ entry - save them
+  * note: for each of them - increase the DC
+  - if it is a regular command - add an address and send to the commands executer
+  * note: increase the IC
+  * note: save in file the different data if needed
+
+  functions:
+  * getLabelAddress - the commands executer will ask for label address every time he will got label inside the command(like inside jmp)
+  * insertData - for .string and .data
+  * insertExternOrEntry - for .extern and .entry
+  * memoryCreator - the main function of the file' with all the logic above.

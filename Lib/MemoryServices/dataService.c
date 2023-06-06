@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "errorsHandler.h"
 #define MAX_LABEL_NAME_LENGTH 100
 
 /*counter of the instructions addresses.*/
@@ -18,10 +19,10 @@ extern char **strings;
 
 /*dynamic array of labels structures (externals, entries, commands).*/
 extern Label *labels;
-extern int labelsPhySize;     // labels array physical size (memory allocated).
-extern int labelsLogicalSize; // labels array logical size (that amount of labels that exists in the input file).
+extern int labelsPhySize;     /*labels array physical size (memory allocated).*/
+extern int labelsLogicalSize; /*labels array logical size (that amount of labels that exists in the input file).*/
 
-// TODO: adding structure for binary words
+// TODO: add structure for binary words
 /*
 * addNewLabel:
   @input: newLabel
@@ -66,14 +67,11 @@ bool addNewLabel(LabelType type, int address, char name[MAX_LABEL_NAME_LENGTH])
 {
     for (int i = 0; i < labelsLogicalSize; i++)
     {
-        if (strcmp(labels[i].name, name) == 0) /* Check if a label with the same name already exists in the list */
+        if (strcmp(labels[i].name, name) == 0)
         {
-            // TODO: handle error
-            // sprintf(errorMsg, "label %s already exists", name); /* Create an error message */
-            return false;
+            EXISTING_LABEL(name); /* Handle error: Label already exists */
         }
     }
-
     /* If the label does not already exist,
        a new label is created, and added to the labels array */
 
@@ -89,7 +87,6 @@ bool addNewLabel(LabelType type, int address, char name[MAX_LABEL_NAME_LENGTH])
             return false;
         }
     }
-
     /*update the labels array with the new label.*/
     labels[labelsLogicalSize].address = address;
     labels[labelsLogicalSize].type = type;
