@@ -3,24 +3,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include "errorsHandler.h"
-#define MAX_LABEL_NAME_LENGTH 100
-
-/*counter of the instructions addresses.*/
-extern int IC;
-
-/*counter of the data addresses.*/
-extern int DC;
-
-/*dynamic array of .data instructions.*/
-extern int **data;
-
-/*dynamic array of .string instructions.*/
-extern char **strings;
-
-/*dynamic array of labels structures (externals, entries, commands).*/
-extern Label *labels;
-extern int labelsPhySize;     /*labels array physical size (memory allocated).*/
-extern int labelsLogicalSize; /*labels array logical size (that amount of labels that exists in the input file).*/
+#include "dataService.h"
+#define MAX_LABEL_NAME_LENGTH 31
+#define HASH_TABLE_SIZE 100
 
 // TODO: add structure for binary words
 /*
@@ -31,66 +16,212 @@ extern int labelsLogicalSize; /*labels array logical size (that amount of labels
   @input: labelName
   - the function return the address of the label. if not exist - return default 0.
 
-- note: consider the option to use generic function that will do the functionallty and few func that will call this one with rellevant file name and list.
+- note: consider the option to use generic function that will do the functionallty and few func that will call this one with rellevant file name and list. */
 
- /* Define an enumeration to represent the type of a label */
-typedef enum
+/* Define the label lists */
+static Label *extLabelList = NULL;
+static Label *entryLabelList = NULL;
+static Label *commandLabelList = NULL;
+static Label *dataLabelList = NULL;
+static Label *stringsLabelList = NULL;
+
+/**
+ * Retrieves a label by its name from the hash table.
+ * @param labelName The label name to search for.
+ * @param type The type of the label.
+ * @return A pointer to the found label, or NULL if not found.
+ */
+Label *getLabel(const char *labelName, LabelType type)
 {
-    Ext,
-    Entry,
-    Command
-} LabelType;
+    Label *currentLabel = NULL;
 
-// this is the definitions of a label.
-typedef struct label
-{
-    char name[MAX_LABEL_NAME_LENGTH];
-    LabelType type;
-    int address;
-    // pIntNode extAddrs;
-
-} Label;
-
-Label *getLabel(char *labelName)
-{
-    for (int i = 0; i < labelsLogicalSize; i++)
+    switch (type)
     {
-        if (strcmp(labels[i].name, labelName) == 0)
+    case Ext:
+        currentLabel = extLabelList;
+        break;
+    case Entry:
+        currentLabel = entryLabelList;
+        break;
+    case Command:
+        currentLabel = commandLabelList;
+        break;
+    case Data:
+        currentLabel = dataLabelList;
+        break;
+    case Strings:
+        currentLabel = stringsLabelList;
+        break;
+    }
+
+    while (currentLabel != NULL)
+    {
+        if (strcmp(currentLabel->name, labelName) == 0)
         {
-            return &labels[i];
+            return currentLabel;
         }
+        currentLabel = currentLabel->next;
     }
     return NULL;
 }
 
-bool addNewLabel(LabelType type, int address, char name[MAX_LABEL_NAME_LENGTH])
+/**
+ * Adds a new label to the hash table.
+ * @param type The type of the label (Ext, Entry, Command).
+ * @param address The address of the label.
+ * @param name The name of the label.
+ * @return true if the label was added successfully, false otherwise.
+ */
+bool addNewLabel(LabelType type, int address, const char *name)
 {
-    for (int i = 0; i < labelsLogicalSize; i++)
-    {
-        if (strcmp(labels[i].name, name) == 0)
-        {
-            EXISTING_LABEL(name); /* Handle error: Label already exists */
-        }
-    }
-    /* If the label does not already exist,
-       a new label is created, and added to the labels array */
+    Label *labelList = NULL;
 
-    // if the labels array is full: create an array twice as big and copy old array to new array.
-    if (labelsLogicalSize >= labelsPhySize)
+    switch (type)
     {
-        labelsPhySize *= 2;
-        labels = realloc(labels, labelsPhySize * sizeof(Label));
-        if (labels == NULL)
+    case Ext:
+        labelList = extLabelList;
+        break;
+    case Entry:
+        labelList = entryLabelList;
+        break;
+    case Command:
+        labelList = commandLabelList;
+        break;
+    case Data:
+        labelList = dataLabelList;
+        break;
+    case Strings:
+        labelList = stringsLabelList;
+        break;
+    }
+
+    if (getLabel(name, type) != NULL)
+    {
+        EXISTING_LABEL(name); /* Handle error: Label already exists */
+        return false;
+    }
+
+    Label *newLabel = (Label *)malloc(sizeof(Label));
+    if (newLabel == NULL)
+    {
+        printf("Error: Allocation has failed.\n");
+        return false;
+    }
+
+    newLabel->address = address;
+    newLabel->type = type;
+    strcpy(newLabel->name, name);
+    newLabel->next = NULL;
+
+    if (labelList == NULL)
+    {
+        labelList = newLabel;
+    }
+    else
+    {
+        Label *currentLabel = labelList;
+        while (currentLabel->next != NULL)
         {
-            /* Error: Memory allocation failed */
-            printf("Error: allocation has been failed\n");
-            return false;
+            currentLabel = currentLabel->next;
+        }
+        currentLabel->next = newLabel;
+    }
+
+    switch (type)
+    {
+    case Ext:
+        extLabelList = labelList;
+        break;
+    case Entry:
+        entryLabelList = labelList;
+        break;
+    case Command:
+        commandLabelList = labelList;
+        break;
+    case Data:
+        dataLabelList = labelList;
+        break;
+    case Strings:
+        stringsLabelList = labelList;
+        break;
+    }
+
+    return true;
+}
+
+/**
+ * Adds a new data or strings label to the list.
+ * @param type The type of the label (DATA or STRINGS).
+ * @param address The address of the label.
+ * @param name The name of the label.
+ * @return true if the label was added successfully, false otherwise.
+ */
+bool addNewDataOrStrings(LabelType type, int address, const char *name)
+{
+    bool result = addNewLabel(type, address, name);
+    if (result)
+    {
+        if (type == Data)
+        {
+            data[dataCount++] = address;
+            // IC += address; /*Not so clear – need to check again about the intent of the implementation*/
+        }
+        else if (type == Strings)
+        {
+            strings[stringsCount++] = strdup(name);
+            // DC += address; /*Not so clear – need to check again about the intent of the implementation*/
         }
     }
-    /*update the labels array with the new label.*/
-    labels[labelsLogicalSize].address = address;
-    labels[labelsLogicalSize].type = type;
-    strcpy(labels[labelsLogicalSize].name, name);
-    labelsLogicalSize++;
-    return true;
+    return result;
+}
+
+/**
+ * Adds a new command label to the list.
+ * @param Command The type of the label.
+ * @param address The address of the label.
+ * @param name The name of the label.
+ * @return true if the label was added successfully, false otherwise.
+ */
+bool addNewCommand(int address, const char *name)
+{
+    bool result = addNewLabel(Command, address, name);
+    if (result)
+    {
+        // IC += sizeof(int); /*Not so clear – need to check again about the intent of the implementation*/
+    }
+    return result;
+}
+
+/**
+ * Adds a new external label to the list.
+ * @param Ext The type of the label.
+ * @param address The address of the label.
+ * @param name The name of the label.
+ * @return true if the label was added successfully, false otherwise.
+ */
+bool addNewExternal(LabelType type, int address, const char *name)
+{
+    bool result = addNewLabel(Ext, address, name);
+    if (result)
+    {
+        // IC += sizeof(int); /*Not so clear – need to check again about the intent of the implementation*/
+    }
+    return result;
+}
+
+/**
+ * Adds a new entry label to the list.
+ * @param Entry The type of the label.
+ * @param address The address of the label.
+ * @param name The name of the label.
+ * @return true if the label was added successfully, false otherwise.
+ */
+bool addNewEntry(LabelType type, int address, const char *name)
+{
+    bool result = addNewLabel(Entry, address, name);
+    if (result)
+    {
+        // IC += sizeof(int); /*Not so clear – need to check again about the intent of the implementation*/
+    }
+    return result;
 }
