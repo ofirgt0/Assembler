@@ -5,7 +5,6 @@
 #include "errorsHandler.h"
 #include "dataService.h"
 #define MAX_LABEL_NAME_LENGTH 31
-#define HASH_TABLE_SIZE 100
 
 // TODO: add structure for binary words
 /*

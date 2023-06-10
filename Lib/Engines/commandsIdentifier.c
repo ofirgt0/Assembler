@@ -3,22 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
-
-#define VAR_SEPERATOR ','
-#define COMMANDS_NUMBER 16
-#define REGISTER_PREFIX '@'
-#define FLOAT_NUMBER_DOT '.'
-#define MAX_COMMAND_LENGTH 100
-#define COMMANDS_PREFIX_NUMBER 4
-
-#define ERROR_MISSING_COMMA "Illegal comma\n"
-#define ERROR_MISSING_PARAMETER "Missing parameter\n"
-#define ERROR_INVALID_COMMAND "Undefined command name\n"
-#define ERROR_UNDEFINED_COMPLEX_VAR "Undefined complex variable\n"
-#define ERROR_EXTRANEOUS_TEXT "Extraneous text after end of command\n"
-#define ERROR_MULTIPLE_CONSECUTIVE_COMMAS "Multiple consecutive commas\n"
-#define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
-#define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
+#include "commandsIdentifier.h"
 
 char *commandsNames[COMMANDS_NUMBER] = {
     "mov", // 1
@@ -160,20 +145,20 @@ void commandIdentifier(char command[])
         {
             switch (commandPrefix)
             {
-                case 0: // extern
-                    /* code */
-                    break;
-                case 1: // entry
-                    /* code */
-                    break;
-                case 2: // mcro
-                    /* code */
-                    break;
-                case 3: // endmcro
-                    /* code */
-                    break;
-                default: // useless
-                    break;
+            case 0: // extern
+                /* code */
+                break;
+            case 1: // entry
+                /* code */
+                break;
+            case 2: // mcro
+                /* code */
+                break;
+            case 3: // endmcro
+                /* code */
+                break;
+            default: // useless
+                break;
             }
         }
         printf(ERROR_INVALID_COMMAND);
@@ -187,6 +172,6 @@ void commandIdentifier(char command[])
     command = command + strlen(commandsNames[commandIndex]);
 }
 
-struct Line commandParser(char *line, ){
-    
+struct Line commandParser(char *line, )
+{
 }
