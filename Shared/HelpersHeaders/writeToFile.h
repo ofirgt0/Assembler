@@ -16,6 +16,17 @@
 bool writeToFile(const char *filename, const char *string);
 
 /**
+ * Writes a label to a file.
+ * If the label is of type Ext or Entry and the corresponding file does not exist,
+ * the function returns true without creating the file.
+ * Otherwise, it writes the label to the file.
+ * @param filename The name of the file to write to.
+ * @param label    The label to be written to the file.
+ * @return true if the operation is successful or if the file does not need to be created, otherwise - false.
+ */
+bool writeLabelToFile(const char *filename, Label *label);
+
+/**
  * Check if a file exists.
  *
  * @param fileName The name of the file to check.

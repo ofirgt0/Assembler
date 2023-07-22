@@ -4,8 +4,8 @@
 #include "errorsHandler.h"
 
 /* Extern declarations for global variables */
-extern int IC = 0;
-extern int DC = 0;
+extern int IC;
+extern int DC;
 extern int **data;
 extern char **strings;
 extern int dataCount;
@@ -31,6 +31,13 @@ typedef struct label
 } Label;
 
 /**
+ * Classifies a label by type and retrieves the pointer to its list.
+ * @param type The type of the label.
+ * @return A pointer to the list of labels for the given type.
+ */
+Label **classifyLabelByType(LabelType type);
+
+/**
  * Retrieves a label by its name from the hash table.
  * @param labelName The label name to search for.
  * @param type The type of the label.
@@ -54,7 +61,7 @@ bool addNewLabel(LabelType type, int address, const char *name);
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewDataOrStrings(LabelType type, int address, const char *name);
+bool addNewDataOrStringsLabel(LabelType type, int address, const char *name);
 
 /**
  * Adds a new label to the hash table.
@@ -63,7 +70,7 @@ bool addNewDataOrStrings(LabelType type, int address, const char *name);
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewCommand(int address, const char *name);
+bool addNewCommandLabel(int address, const char *name);
 
 /**
  * Adds a new external label to the list.
@@ -72,7 +79,7 @@ bool addNewCommand(int address, const char *name);
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewExternal(LabelType type, int address, const char *name);
+bool addNewExternalLabel(LabelType type, int address, const char *name);
 
 /**
  * Adds a new entry label to the list.
@@ -81,6 +88,6 @@ bool addNewExternal(LabelType type, int address, const char *name);
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewEntry(LabelType type, int address, const char *name);
+bool addNewEntryLabel(LabelType type, int address, const char *name);
 
 #endif /* DATASERVICE_H */

@@ -12,22 +12,28 @@
 bool writeToFile(const char *filename, const char *string)
 {
 
-    FILE *file = fopen(filename, "a"); /* Open the file in "append" mode */
+    /* Open the file in "append" mode */
+    FILE *file = fopen(filename, "a");
 
     if (file != NULL)
     {
-        fprintf(file, "\n%s", string); /* Write the string to a new line at the end of the file */
-        fclose(file);                  /* Close the file */
+        /* Write the string to a new line at the end of the file */
+        fprintf(file, "\n%s", string);
+        /* Close the file */
+        fclose(file);
         return true;
     }
     else
     {
-        file = fopen(filename, "w"); /* Open the file in "write" mode (create a new file) */
+        /* Open the file in "write" mode (create a new file) */
+        file = fopen(filename, "w");
 
         if (file != NULL)
         {
-            fprintf(file, "%s", string); /* Write the string to the file */
-            fclose(file);                /* Close the file */
+            /* Write the string to the file */
+            fprintf(file, "%s", string);
+            /* Close the file */
+            fclose(file);
             return true;
         }
         else
@@ -36,6 +42,27 @@ bool writeToFile(const char *filename, const char *string)
             return false;
         }
     }
+}
+
+/**
+ * Writes a label to a file.
+ * If the label is of type Ext or Entry and the corresponding file does not exist,
+ * the function returns true without creating the file.
+ * Otherwise, it writes the label to the file.
+ * @param filename The name of the file to write to.
+ * @param label    The label to be written to the file.
+ * @return true if the operation is successful or if the file does not need to be created, otherwise - false.
+ */
+bool writeLabelToFile(const char *filename, Label *label)
+{
+    if ((label->type == Ext || label->type == Entry) && !isFileExist(filename))
+    {
+        return true;
+    }
+
+    char labelText[256];
+    sprintf(labelText, "%s %d %d", label->name, label->address, label->type);
+    return writeToFile(filename, labelText);
 }
 
 /**

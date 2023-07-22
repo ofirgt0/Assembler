@@ -77,7 +77,7 @@ int getErrorsCounter();
  * Macro for reporting an existing label error.
  * @param labelName The name of the existing label.
  */
-#define EXISTING_LABEL(labelName)                         \
+#define EXISTING_LABEL(labelName, fileName, address)      \
     do                                                    \
     {                                                     \
         errorsCounter++;                                  \

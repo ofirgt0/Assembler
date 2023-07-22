@@ -4,18 +4,9 @@
 #include <string.h>
 #include "errorsHandler.h"
 #include "dataService.h"
+#include "writeToFile.h"
+
 #define MAX_LABEL_NAME_LENGTH 31
-
-// TODO: add structure for binary words
-/*
-* addNewLabel:
-  @input: newLabel
-  - add the label to the array based on the the label type (externals, entries, commands).
-* getLabel:
-  @input: labelName
-  - the function return the address of the label. if not exist - return default 0.
-
-- note: consider the option to use generic function that will do the functionallty and few func that will call this one with rellevant file name and list. */
 
 /* Define the label lists */
 static Label *extLabelList = NULL;
@@ -23,6 +14,38 @@ static Label *entryLabelList = NULL;
 static Label *commandLabelList = NULL;
 static Label *dataLabelList = NULL;
 static Label *stringsLabelList = NULL;
+
+/* Define the global variables */
+int IC = 0;
+int DC = 0;
+int **data;
+char **strings;
+int dataCount = 0;
+int stringsCount = 0;
+
+/**
+ * Classifies a label by type and retrieves the pointer to its list.
+ * @param type The type of the label.
+ * @return A pointer to the list of labels for the given type.
+ */
+Label **classifyLabelByType(LabelType type)
+{
+    switch (type)
+    {
+    case Ext:
+        return &extLabelList;
+    case Entry:
+        return &entryLabelList;
+    case Command:
+        return &commandLabelList;
+    case Data:
+        return &dataLabelList;
+    case Strings:
+        return &stringsLabelList;
+    default:
+        return NULL;
+    }
+}
 
 /**
  * Retrieves a label by its name from the hash table.
@@ -32,26 +55,7 @@ static Label *stringsLabelList = NULL;
  */
 Label *getLabel(const char *labelName, LabelType type)
 {
-    Label *currentLabel = NULL;
-
-    switch (type)
-    {
-    case Ext:
-        currentLabel = extLabelList;
-        break;
-    case Entry:
-        currentLabel = entryLabelList;
-        break;
-    case Command:
-        currentLabel = commandLabelList;
-        break;
-    case Data:
-        currentLabel = dataLabelList;
-        break;
-    case Strings:
-        currentLabel = stringsLabelList;
-        break;
-    }
+    Label *currentLabel = *classifyLabelByType(type);
 
     while (currentLabel != NULL)
     {
@@ -73,26 +77,7 @@ Label *getLabel(const char *labelName, LabelType type)
  */
 bool addNewLabel(LabelType type, int address, const char *name)
 {
-    Label *labelList = NULL;
-
-    switch (type)
-    {
-    case Ext:
-        labelList = extLabelList;
-        break;
-    case Entry:
-        labelList = entryLabelList;
-        break;
-    case Command:
-        labelList = commandLabelList;
-        break;
-    case Data:
-        labelList = dataLabelList;
-        break;
-    case Strings:
-        labelList = stringsLabelList;
-        break;
-    }
+    Label **labelList = classifyLabelByType(type);
 
     if (getLabel(name, type) != NULL)
     {
@@ -126,25 +111,6 @@ bool addNewLabel(LabelType type, int address, const char *name)
         currentLabel->next = newLabel;
     }
 
-    switch (type)
-    {
-    case Ext:
-        extLabelList = labelList;
-        break;
-    case Entry:
-        entryLabelList = labelList;
-        break;
-    case Command:
-        commandLabelList = labelList;
-        break;
-    case Data:
-        dataLabelList = labelList;
-        break;
-    case Strings:
-        stringsLabelList = labelList;
-        break;
-    }
-
     return true;
 }
 
@@ -155,20 +121,22 @@ bool addNewLabel(LabelType type, int address, const char *name)
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewDataOrStrings(LabelType type, int address, const char *name)
+bool addNewDataOrStringsLabel(LabelType type, int address, const char *name)
 {
     bool result = addNewLabel(type, address, name);
     if (result)
     {
         if (type == Data)
         {
-            data[dataCount++] = address;
-            // IC += address; /*Not so clear – need to check again about the intent of the implementation*/
+            data[dataCount++] = &address;
+            DC++;
+            writeLabelToFile("ps.ob", getLabel(name, Data));
         }
         else if (type == Strings)
         {
             strings[stringsCount++] = strdup(name);
-            // DC += address; /*Not so clear – need to check again about the intent of the implementation*/
+            DC += strlen(name) + 1; // +1 for null termination - Marking the end of the string.
+            writeLabelToFile("ps.ob", getLabel(name, Strings));
         }
     }
     return result;
@@ -181,12 +149,13 @@ bool addNewDataOrStrings(LabelType type, int address, const char *name)
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewCommand(int address, const char *name)
+bool addNewCommandLabel(int address, const char *name)
 {
     bool result = addNewLabel(Command, address, name);
     if (result)
     {
-        // IC += sizeof(int); /*Not so clear – need to check again about the intent of the implementation*/
+        IC += sizeof(int);
+        writeLabelToFile("ps.ob", getLabel(name, Command));
     }
     return result;
 }
@@ -198,12 +167,13 @@ bool addNewCommand(int address, const char *name)
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewExternal(LabelType type, int address, const char *name)
+bool addNewExternalLabel(LabelType type, int address, const char *name)
 {
     bool result = addNewLabel(Ext, address, name);
     if (result)
     {
-        // IC += sizeof(int); /*Not so clear – need to check again about the intent of the implementation*/
+        IC += sizeof(int);
+        writeLabelToFile("ps.ext", getLabel(name, Ext));
     }
     return result;
 }
@@ -215,12 +185,13 @@ bool addNewExternal(LabelType type, int address, const char *name)
  * @param name The name of the label.
  * @return true if the label was added successfully, false otherwise.
  */
-bool addNewEntry(LabelType type, int address, const char *name)
+bool addNewEntryLabel(LabelType type, int address, const char *name)
 {
     bool result = addNewLabel(Entry, address, name);
     if (result)
     {
-        // IC += sizeof(int); /*Not so clear – need to check again about the intent of the implementation*/
+        IC += sizeof(int);
+        writeLabelToFile("ps.ent", getLabel(name, Entry));
     }
     return result;
 }
