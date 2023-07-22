@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include "commandsIdentifier.h"
 
 #define VAR_SEPERATOR ','
 #define COMMANDS_NUMBER 16
@@ -10,6 +11,13 @@
 #define FLOAT_NUMBER_DOT '.'
 #define MAX_COMMAND_LENGTH 100
 #define COMMANDS_PREFIX_NUMBER 4
+#define MACRO_COMMAND "mcro"
+#define END_MACRO_COMMAND "endmcro"
+#define DEFAULT_ADRESS 0
+#define ABSOLUTE_A_R_E_DECIMAL_CODE 0
+#define EXTERNAL_A_R_E_DECIMAL_CODE 1
+#define RELOCATABLE_A_R_E_DECIMAL_CODE 2
+
 
 #define ERROR_MISSING_COMMA "Illegal comma\n"
 #define ERROR_MISSING_PARAMETER "Missing parameter\n"
@@ -19,6 +27,19 @@
 #define ERROR_MULTIPLE_CONSECUTIVE_COMMAS "Multiple consecutive commas\n"
 #define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
 #define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
+
+struct Line //TODO: MOVE THIS STRUCT TO DATA STRUCTURE
+{ 
+    char code;
+    int opcode;
+    int dstRegister;
+    int srcRegister;
+    int address;
+    char *label;
+    char *originalCommand;
+    struct Line *next;
+};
+
 
 char *commandsNames[COMMANDS_NUMBER] = {
     "mov", // 1
@@ -44,6 +65,8 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
     ".entry",
     "mcro",
     "endmcro"};
+
+static bool macroFlag = false;
 
 isMacroName(char command[])
 {
@@ -82,6 +105,26 @@ void removeSpacesAndTabs(char *str)
     str[j] = '\0';
 }
 
+void replaceMultipleSpaces(char* str) {
+    int i, j;
+    int whitespaceCount = 0;
+    int len = strlen(str);
+
+    for (i = 0, j = 0; i < len; i++) {
+        if (str[i] == ' ' || str[i] == '\t') 
+            whitespaceCount++;
+        else 
+            whitespaceCount = 0;
+
+        if (whitespaceCount <= 1) {
+            str[j] = str[i];
+            j++;
+        }
+    }
+
+    str[j] = '\0';
+}
+
 /*
     Gets the index of a command in the commandsNames array.
     Input: command - the command to search for.
@@ -93,9 +136,8 @@ int getCommandIndexByList(char command[], char *list[])
     int commandIndex = 0;
 
     while (command[commandLength] != ' ' && command[commandLength] != '\t' && command[commandLength] != VAR_SEPERATOR && command[commandLength] != '\0')
-    {
         commandLength++;
-    }
+
     for (commandIndex = 0; commandIndex < COMMANDS_NUMBER; commandIndex++)
     {
         /* Two-way inclusion check of the string*/
@@ -145,48 +187,129 @@ char *skipNumber(char *command)
     Input: command - the command string to execute.
     Output: None.
 */
-void commandIdentifier(char command[])
+void commandIdentifier(char command[], char *fileName)
 {
     int commandIndex;
+    replaceMultipleSpaces(command);
     commandIndex = getCommandIndexByList(command, commandsNames);
-    if (commandIndex == -1)
+    if (commandIndex == -1 && !macroFlag) // TODO: make sure that there is no option for label or extern inside a macro
     {
         if (isMacroName(command))
-        {
-            // TODO: send to the executer the lines of the macro
-        }
+            sendMacro(command);
+
+        if (strncmp(END_MACRO_COMMAND, command, strlen(END_MACRO_COMMAND)))
+            macroFlag = false;
+
         int commandPrefix = getCommandIndexByList(command, commandsPrefix);
         if (commandPrefix != -1)
         {
+            char *secondVar = command + getCharIndexBySeparatorIndex(command, 1);
             switch (commandPrefix)
             {
-                case 0: // extern
-                    /* code */
-                    break;
-                case 1: // entry
-                    /* code */
-                    break;
-                case 2: // mcro
-                    /* code */
-                    break;
-                case 3: // endmcro
-                    /* code */
-                    break;
-                default: // useless
-                    break;
+            case 0: // extern
+            {
+                addNewExtern(secondVar, fileName);
+                break;
+            }
+            case 1: // entry
+            {
+                addNewEntry(secondVar, fileName);
+                break;
+            }
+            case 2: // mcro
+            {
+                bool isSuccess = addNewMacro(secondVar, fileName); // TODO: splite between creating macro and insert new line to the macro
+                if (isSuccess)
+                    macroFlag = true;
+                break;
+            }
+            default: // useless
+                break;
             }
         }
-        printf(ERROR_INVALID_COMMAND);
-        return;
+        else
+        {
+            printf(ERROR_INVALID_COMMAND);
+            return;
+        }
     }
-    else
+    else // its a regular command (without prefix)
     {
-        // TODO: its a regular command without any prefix - send the command to the executer
+        if(commandIndex == -1)
+        {
+            printf(ERROR_INVALID_COMMAND);
+            return;
+        }
+        //removeSpacesAndTabs(command);
+        //command = command + strlen(commandsNames[commandIndex]);
+        
+        struct Line *parsedLine = commandParser(command, commandIndex);
+        macroFlag ? insertMacroNewLine(parsedLine) : insertNewCommand(parsedLine, fileName);
     }
-    removeSpacesAndTabs(command);
-    command = command + strlen(commandsNames[commandIndex]);
 }
 
-struct Line commandParser(char *line, ){
+int getCharIndexBySeparatorIndex(const char *str, int sepIndex)
+{
+    char delimiters[] = " ,:"; // Delimiters: space, comma, colon
+    int charIndex = 0;
+    int separatorCount = 0;
+
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (strchr(delimiters, str[i]) != NULL)
+        {
+            separatorCount++;
+            if (separatorCount > sepIndex)
+                break;
+        }
+        else
+            charIndex++;
+    }
+
+    if (separatorCount < sepIndex)
+        charIndex = -1; // Separator index not found
+
+    return charIndex;
+}
+
+char* cutString(const char* str, int startIndex, int endIndex) {
+    int strLength = strlen(str);
+    int cutLength = endIndex - startIndex + 1;
+
+    if (startIndex >= 0 && endIndex < strLength && startIndex <= endIndex) {
+        char* result = malloc(cutLength + 1);
+        strncpy(result, str + startIndex, cutLength);
+        result[cutLength] = '\0';
+        return result;
+    } else {
+        char* result = malloc(1);
+        result[0] = '\0';
+        return result;
+    }
+}
+
+
+struct Line* commandParser(char *line, int commandIndex, char label)
+{
+    struct Line *newLine = (struct Line *)malloc(sizeof(struct Line));
+
+    if (newLine == NULL)
+    {
+        // Error: Memory allocation failed
+        printf("Error: Memory allocation failed\n");
+        return;
+    }
+    strcpy(newLine->originalCommand, line);
+    newLine->code = ABSOLUTE_A_R_E_DECIMAL_CODE; // TODO: understand the meaning of the A R E code (!!!)
+    newLine->address = DEFAULT_ADRESS;
+    newLine->opcode = commandIndex;
+
+    int startOfRegister1 = strlen(commandsNames[commandIndex]) + 1;
     
+    cutString(line, startOfRegister1, startOfRegister1 + 3);
+    newLine->dstRegister = line.dstRegister;
+    newLine->srcRegister = line.srcRegister;
+    newLine->label = label;
+    newLine->next = NULL;
+    return newLine;
 }

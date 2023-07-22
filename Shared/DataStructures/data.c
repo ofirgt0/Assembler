@@ -1,9 +1,14 @@
-struct Line {
+struct Line
+{ 
+    int commandIndex;
     char code;
     int opcode;
     int dstRegister;
     int srcRegister;
-    struct Line* next;
+    int address;
+    char *label;
+    char *originalCommand;
+    struct Line *next;
 };
 
 struct Macro {

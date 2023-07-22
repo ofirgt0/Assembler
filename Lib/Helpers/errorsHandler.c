@@ -1,37 +1,17 @@
+#include "errorsHandler.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-/* Macros for common errors: */
-
-#define EXTRANEOUS_TEXT(fileName, address)            \
-    errorsCounter++;                                  \
-    printLogPrefix(fileName, address);                \
-    printf("Extraneous text after end of command\n"); \
-    return;
-
-#define MISSING_PARAMETER(fileName, address) \
-    errorsCounter++;                         \
-    printLogPrefix(fileName, address);       \
-    printf("Missing parameter\n");           \
-    return;
-
-#define MISSING_COMMA(fileName, address) \
-    errorsCounter++;                     \
-    printLogPrefix(fileName, address);   \
-    printf("Missing comma\n");           \
-    return;
-
-#define MULTIPLE_CONSECUTIVE_COMMAS(fileName, address) \
-    errorsCounter++;                                   \
-    printLogPrefix(fileName, address);                 \
-    printf("Multiple consecutive commas\n");           \
-    return;
-
+/* Variable to store the count of errors */
 static int errorsCounter = 0;
 
+/* Function to print error log prefix */
 void printLogPrefix(char *fileName, int address)
 {
     printf("Error in file %s at address %d: ", fileName, address);
 }
 
+/* Function to get the count of errors */
 int getErrorsCounter()
 {
     return errorsCounter;
