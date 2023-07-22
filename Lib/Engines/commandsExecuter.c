@@ -3,26 +3,17 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
-
-#define commandsFileSuffixType '.as'
-
-struct Line
-{ // TODO: MOVE THIS STRUCT TO DATA STRUCTURE
-    int commandIndex;
-    char code;
-    int opcode;
-    int dstRegister;
-    int srcRegister;
-    int address;
-    char *label;
-    char *originalCommand;
-    struct Line *next;
-};
+#include "commandsExecuter.h"
 
 static struct Line *linesHead = NULL;
-struct Line *(*functionsArray[16])(struct Line line) = 
+struct Line *(*functionsArray[16])(struct Line line) =
     {mov, cmp, add, sub, not, clr, lea, inc, dec, jmp, bne, red, prn, jsr, rts, stop};
 
+/**
+ * Insert a new command into the command execution list.
+ * @param line The command line to insert.
+ * @param fileName The name of the file.
+ */
 void insertNewCommand(struct Line line, char *fileName)
 {
     struct Line *newLine = (struct Line *)malloc(sizeof(struct Line));
@@ -44,14 +35,22 @@ void insertNewCommand(struct Line line, char *fileName)
     newLine->commandIndex = line.commandIndex;
     newLine->next = NULL;
 
-    struct Line *currentLine = linesHead;
-    while (currentLine->next != NULL)
-        currentLine = currentLine->next;
-    currentLine->next = newLine;
+    if (linesHead == NULL)
+        linesHead = newLine;
+    else
+    {
+        struct Line *currentLine = linesHead;
+        while (currentLine->next != NULL)
+            currentLine = currentLine->next;
+        currentLine->next = newLine;
+    }
 
     writeToFile(fileName + commandsFileSuffixType, newLine->originalCommand);
 }
 
+/**
+ * Execute the commands in the command execution list.
+ */
 void executeCommands()
 {
     if (getErrorsCounter() > 0)
@@ -63,6 +62,8 @@ void executeCommands()
     struct Line *jumpTo = NULL;
     while (linesHead != NULL) // we run on the head because after the execution of the commands we delete the lines
     {
+        jumpTo = linesHead;
+
         if (linesHead->commandIndex >= 0 && linesHead->commandIndex < sizeof(functionsArray) / sizeof(functionsArray[0]))
         {
             jumpTo = functionsArray[linesHead->commandIndex](*linesHead); // TODO: split the commands that return pointer from the void functions
@@ -71,8 +72,6 @@ void executeCommands()
                 linesHead = jumpTo;
             else
                 linesHead = linesHead->next;
-
-            jumpTo = NULL;
         }
         else
         {
@@ -88,7 +87,7 @@ struct Line *mov(struct Line line) {}
 struct Line *cmp(struct Line line) {}
 struct Line *add(struct Line line) {}
 struct Line *sub(struct Line line) {}
-struct Line *not(struct Line line) {}
+struct Line * not(struct Line line) {}
 struct Line *clr(struct Line line) {}
 struct Line *lea(struct Line line) {}
 struct Line *inc(struct Line line) {}

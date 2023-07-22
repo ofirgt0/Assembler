@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include "commandsIdentifier.h"
 
 #define VAR_SEPERATOR ','
 #define COMMANDS_NUMBER 16
