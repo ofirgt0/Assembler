@@ -64,7 +64,8 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
     ".extern",
     ".entry",
     "mcro",
-    "endmcro"};
+    "endmcro"
+    };
 
 static bool macroFlag = false;
 
@@ -103,7 +104,7 @@ void removeSpacesAndTabs(char *str)
         }
     }
     str[j] = '\0';
-}
+}//useless?
 
 void replaceMultipleSpaces(char* str) {
     int i, j;
@@ -138,7 +139,7 @@ int getCommandIndexByList(char command[], char *list[])
     while (command[commandLength] != ' ' && command[commandLength] != '\t' && command[commandLength] != VAR_SEPERATOR && command[commandLength] != '\0')
         commandLength++;
 
-    for (commandIndex = 0; commandIndex < COMMANDS_NUMBER; commandIndex++)
+    for (commandIndex = 0; commandIndex < COMMANDS_NUMBER; commandIndex++) // TODO: change to real list length
     {
         /* Two-way inclusion check of the string*/
         if (strlen(list[commandIndex]) == commandLength && strncmp(list[commandIndex], command, commandLength) == 0)
@@ -190,12 +191,13 @@ char *skipNumber(char *command)
 void commandIdentifier(char command[], char *fileName)
 {
     int commandIndex;
-    replaceMultipleSpaces(command);
+    //TODO-OFIR: check for label before commad
     commandIndex = getCommandIndexByList(command, commandsNames);
+    replaceMultipleSpaces(command);
     if (commandIndex == -1 && !macroFlag) // TODO: make sure that there is no option for label or extern inside a macro
     {
-        if (isMacroName(command))
-            sendMacro(command);
+        if (isMacroName(command))// TODO: think if we can do it outside of the big if
+            sendMacro(command); //TODO: WE CAN STOP HERE
 
         if (strncmp(END_MACRO_COMMAND, command, strlen(END_MACRO_COMMAND)))
             macroFlag = false;
