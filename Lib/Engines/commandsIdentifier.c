@@ -14,7 +14,7 @@
 #define COMMANDS_PREFIX_NUMBER 4
 #define MACRO_COMMAND "mcro"
 #define END_MACRO_COMMAND "endmcro"
-#define DEFAULT_ADRESS 0
+#define DEFAULT_ADDRESS 0
 #define ABSOLUTE_A_R_E_DECIMAL_CODE 0
 #define EXTERNAL_A_R_E_DECIMAL_CODE 1
 #define RELOCATABLE_A_R_E_DECIMAL_CODE 2
@@ -194,8 +194,9 @@ void commandIdentifier(char command[], char *fileName)
     int commandIndex;
     char* label = tryGetLabel(command);
     commandIndex = getCommandIndexByList(command, commandsNames);
+    command = command + strlen(commandsNames[commandIndex]);
     replaceMultipleSpaces(command);
-    
+
     if (commandIndex == -1 && !macroFlag) // TODO: make sure that there is no option for label or extern inside a macro
     {
         if (isMacroName(command))// TODO: think if we can do it outside of the big if
@@ -247,7 +248,7 @@ void commandIdentifier(char command[], char *fileName)
         //removeSpacesAndTabs(command);
         //command = command + strlen(commandsNames[commandIndex]);
         
-        struct Line *parsedLine = commandParser(command, commandIndex);
+        struct Line *parsedLine = commandParser(command, commandIndex, label);
         macroFlag ? insertMacroNewLine(parsedLine) : insertNewCommand(parsedLine, fileName);
     }
 }
@@ -320,7 +321,7 @@ char* cutString(const char* str, int startIndex, int endIndex) {
 }
 
 
-struct Line* commandParser(char *line, int commandIndex, char label)
+struct Line* commandParser(char *line, int commandIndex, char* label, int AREcode)
 {
     struct Line *newLine = (struct Line *)malloc(sizeof(struct Line));
 
@@ -332,7 +333,7 @@ struct Line* commandParser(char *line, int commandIndex, char label)
     }
     strcpy(newLine->originalCommand, line);
     newLine->code = ABSOLUTE_A_R_E_DECIMAL_CODE; // TODO: understand the meaning of the A R E code (!!!)
-    newLine->address = DEFAULT_ADRESS;
+    newLine->address = DEFAULT_ADDRESS;
     newLine->opcode = commandIndex;
 
     int startOfRegister1 = strlen(commandsNames[commandIndex]) + 1;
