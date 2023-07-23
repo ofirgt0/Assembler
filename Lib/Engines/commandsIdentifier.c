@@ -6,6 +6,7 @@
 #include "commandsIdentifier.h"
 
 #define VAR_SEPERATOR ','
+#define LABEL_SEPERATOR ':'
 #define COMMANDS_NUMBER 16
 #define REGISTER_PREFIX '@'
 #define FLOAT_NUMBER_DOT '.'
@@ -191,9 +192,10 @@ char *skipNumber(char *command)
 void commandIdentifier(char command[], char *fileName)
 {
     int commandIndex;
-    //TODO-OFIR: check for label before commad
+    char* label = tryGetLabel(command);
     commandIndex = getCommandIndexByList(command, commandsNames);
     replaceMultipleSpaces(command);
+    
     if (commandIndex == -1 && !macroFlag) // TODO: make sure that there is no option for label or extern inside a macro
     {
         if (isMacroName(command))// TODO: think if we can do it outside of the big if
@@ -272,6 +274,33 @@ int getCharIndexBySeparatorIndex(const char *str, int sepIndex)
         charIndex = -1; // Separator index not found
 
     return charIndex;
+}
+
+int getCharIndexBySeparator(char *str, char seperator)
+{
+    int i;
+
+    for (i = 0; str[i] != '\0'; i++)
+    {
+        if (strchr(seperator, str[i]) != NULL)
+                return i;
+    }
+
+    return 0;
+}
+
+char* tryGetLabel(char* command){
+    int index = getCharIndexBySeparator(command, LABEL_SEPERATOR);
+
+    if(index == 0)
+        return NULL;
+
+    char* label = (char*) malloc((index + 1) * sizeof(char));
+    strncpy(label, command, index - 1); // -1 because we dont need the seperator inside the label name
+    label[index + 1] = '\0'; // Null-terminate the new string
+    command += index; // We dont need the label anymore
+
+    return label;
 }
 
 char* cutString(const char* str, int startIndex, int endIndex) {

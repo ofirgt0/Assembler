@@ -15,11 +15,31 @@ void fileReader(const char *filename) {
 
     char line[256];
     while (fgets(line, sizeof(line), file) != NULL) {
+        
+        removePrefixSpaces(line);
+        if(line == '\0')
+            continue;
+
         handleNewLine(line);
     }
 
     fclose(file);
 }
+
+void removePrefixSpaces(char* command){
+    int i, j;
+    for (i = 0, j = 0; command[i]; i++)
+    {
+        if (command[i] == ' ' || command[i] == '\n' || command[i] == '\t')
+        {
+            command++;
+        }
+        else{
+            return;
+        }
+    }
+}
+
 
 int main(int argc, char *argv[]) {
     int i;
