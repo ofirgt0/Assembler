@@ -19,7 +19,6 @@
 #define EXTERNAL_A_R_E_DECIMAL_CODE 1
 #define RELOCATABLE_A_R_E_DECIMAL_CODE 2
 
-
 #define ERROR_MISSING_COMMA "Illegal comma\n"
 #define ERROR_MISSING_PARAMETER "Missing parameter\n"
 #define ERROR_INVALID_COMMAND "Undefined command name\n"
@@ -29,44 +28,42 @@
 #define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
 #define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
 
-struct Line //TODO: MOVE THIS STRUCT TO DATA STRUCTURE
-{ 
-    //char code; //A R E?
+struct Line // TODO: MOVE THIS STRUCT TO DATA STRUCTURE
+{
+    // char code; //A R E?
     int opcode;
     int dstRegister; // if exist
     int srcRegister; // if exist
     int address;
     Label *label;
-    char *originalCommand; //useless - we dont gonna use this
+    char *originalCommand; // useless - we dont gonna use this
     struct Line *next;
 };
 
-
 char *commandsNames[COMMANDS_NUMBER] = {
-    "mov", // 1
-    "cmp", // 2
-    "add", // 3
-    "sub", // 4
-    "not", // 5
-    "clr", // 6
-    "lea",
-    "inc",
-    "dec",
-    "jmp",
-    "bne",
-    "red",
-    "prn",
-    "jsr",
-    "rts",
-    "stop", // 16
+    "mov", // 0
+    "cmp", // 1
+    "add", // 2
+    "sub", // 3
+    "not", // 4 - one var
+    "clr", // 5 - one var
+    "lea", // 6
+    "inc", // 7 - one var
+    "dec", // 8 - one var
+    "jmp", // 9 - one var
+    "bne", // 10 - one var
+    "red", // 11 - one var
+    "prn", // 12 - one var
+    "jsr", // 13 - one var
+    "rts", // 14 - 0 var
+    "stop", // 15 - 0 var
 };
 
 char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
     ".extern",
     ".entry",
     "mcro",
-    "endmcro"
-    };
+    "endmcro"};
 
 static bool macroFlag = false;
 
@@ -105,20 +102,23 @@ void removeSpacesAndTabs(char *str)
         }
     }
     str[j] = '\0';
-}//useless?
+} // useless?
 
-void replaceMultipleSpaces(char* str) {
+void replaceMultipleSpaces(char *str)
+{
     int i, j;
     int whitespaceCount = 0;
     int len = strlen(str);
 
-    for (i = 0, j = 0; i < len; i++) {
-        if (str[i] == ' ' || str[i] == '\t') 
+    for (i = 0, j = 0; i < len; i++)
+    {
+        if (str[i] == ' ' || str[i] == '\t')
             whitespaceCount++;
-        else 
+        else
             whitespaceCount = 0;
 
-        if (whitespaceCount <= 1) {
+        if (whitespaceCount <= 1)
+        {
             str[j] = str[i];
             j++;
         }
@@ -158,6 +158,7 @@ int getCommandIndexByList(char command[], char *list[])
 */
 bool isRegisterName(char registerName[])
 {
+    if(strlen(registerName)<2) return false;
     return registerName[0] == REGISTER_PREFIX && registerName[1] == 'r' && registerName[2] >= '0' && registerName[2] <= '7';
 }
 
@@ -191,65 +192,59 @@ char *skipNumber(char *command)
 */
 void commandIdentifier(char command[], char *fileName)
 {
-    int commandIndex;
-    char* label = tryGetLabel(command);
-    commandIndex = getCommandIndexByList(command, commandsNames);
-    command = command + strlen(commandsNames[commandIndex]);
-    replaceMultipleSpaces(command);
-
-    if (commandIndex == -1 && !macroFlag) // TODO: make sure that there is no option for label or extern inside a macro
+    if (isMacroName(command)) // TODO: think if we can do it outside of the big if
     {
-        if (isMacroName(command))// TODO: think if we can do it outside of the big if
-            sendMacro(command); //TODO: WE CAN STOP HERE
+        sendMacro(command); // TODO: WE CAN STOP HERE
+        return;
+    }
 
-        if (strncmp(END_MACRO_COMMAND, command, strlen(END_MACRO_COMMAND)))
-            macroFlag = false;
-
-        int commandPrefix = getCommandIndexByList(command, commandsPrefix);
-        if (commandPrefix != -1)
+    int commandPrefix = getCommandIndexByList(command, commandsPrefix);
+    if (commandPrefix != -1)
+    {
+        char *secondVar = command + getCharIndexBySeparatorIndex(command, 1); // TODO: rewrite this function
+        switch (commandPrefix)
         {
-            char *secondVar = command + getCharIndexBySeparatorIndex(command, 1);
-            switch (commandPrefix)
-            {
             case 0: // extern
             {
-                addNewExtern(secondVar, fileName);
-                break;
+                addNewExtern(secondVar, fileName); // TODO: in dataService
+                return;
             }
             case 1: // entry
             {
-                addNewEntry(secondVar, fileName);
-                break;
+                addNewEntry(secondVar, fileName); // TODO: in dataService
+                return;
             }
             case 2: // mcro
             {
                 bool isSuccess = addNewMacro(secondVar, fileName); // TODO: splite between creating macro and insert new line to the macro
                 if (isSuccess)
                     macroFlag = true;
-                break;
+                return;
+            }
+            case 3: // endmcro
+            {
+                macroFlag = false;
+                return;
             }
             default: // useless
-                break;
-            }
-        }
-        else
-        {
-            printf(ERROR_INVALID_COMMAND);
-            return;
+                return;
         }
     }
-    else // its a regular command (without prefix)
+
+    char *label = tryGetLabel(command);
+
+    int commandIndex;
+    commandIndex = getCommandIndexByList(command, commandsNames);
+    command = command + strlen(commandsNames[commandIndex]);
+
+    replaceMultipleSpaces(command);
+    struct Line *parsedLine = commandParser(command, commandIndex, label);
+    macroFlag ? insertMacroNewLine(parsedLine) : insertNewCommand(parsedLine, fileName);
+
+    if (commandIndex == -1)
     {
-        if(commandIndex == -1)
-        {
-            printf(ERROR_INVALID_COMMAND);
-            return;
-        }
-        //removeSpacesAndTabs(command);
-        //command = command + strlen(commandsNames[commandIndex]);
-        
-        struct Line *parsedLine = commandParser(command, commandIndex, label);
-        macroFlag ? insertMacroNewLine(parsedLine) : insertNewCommand(parsedLine, fileName);
+        printf(ERROR_INVALID_COMMAND);
+        return;
     }
 }
 
@@ -284,46 +279,50 @@ int getCharIndexBySeparator(char *str, char seperator)
     for (i = 0; str[i] != '\0'; i++)
     {
         if (strchr(seperator, str[i]) != NULL)
-                return i;
+            return i;
     }
 
     return 0;
 }
 
-char* tryGetLabel(char* command){
+char *tryGetLabel(char *command)
+{
     int index = getCharIndexBySeparator(command, LABEL_SEPERATOR);
 
-    if(index == 0)
+    if (index == 0)
         return NULL;
 
-    char* label = (char*) malloc((index + 1) * sizeof(char));
+    char *label = (char *)malloc((index + 1) * sizeof(char));
     strncpy(label, command, index - 1); // -1 because we dont need the seperator inside the label name
-    label[index + 1] = '\0'; // Null-terminate the new string
-    command += index; // We dont need the label anymore
+    label[index + 1] = '\0';            // Null-terminate the new string
+    command += index;                   // We dont need the label anymore
 
     return label;
 }
 
-char* cutString(const char* str, int startIndex, int endIndex) {
+char *cutString(const char *str, int startIndex, int endIndex)
+{
     int strLength = strlen(str);
     int cutLength = endIndex - startIndex + 1;
 
-    if (startIndex >= 0 && endIndex < strLength && startIndex <= endIndex) {
-        char* result = malloc(cutLength + 1);
+    if (startIndex >= 0 && endIndex < strLength && startIndex <= endIndex)
+    {
+        char *result = malloc(cutLength + 1);
         strncpy(result, str + startIndex, cutLength);
         result[cutLength] = '\0';
         return result;
-    } else {
-        char* result = malloc(1);
+    }
+    else
+    {
+        char *result = malloc(1);
         result[0] = '\0';
         return result;
     }
 }
 
-
-struct Line* commandParser(char *line, int commandIndex, char* label, int AREcode)
+Line *commandParser(char *line, int commandIndex, char *label)
 {
-    struct Line *newLine = (struct Line *)malloc(sizeof(struct Line));
+    struct Line *newLine = (struct Line*)malloc(sizeof(struct Line*));
 
     if (newLine == NULL)
     {
@@ -332,16 +331,166 @@ struct Line* commandParser(char *line, int commandIndex, char* label, int AREcod
         return;
     }
     strcpy(newLine->originalCommand, line);
-    newLine->code = ABSOLUTE_A_R_E_DECIMAL_CODE; // TODO: understand the meaning of the A R E code (!!!)
-    newLine->address = DEFAULT_ADDRESS;
-    newLine->opcode = commandIndex;
+    if(commandIndex > 13)// 0 vars
+    {
+        if(strlen(line)>0){
+            //TODO: handle error
+        }
+    }
+    else if(commandIndex < 14 && commandIndex > 3 && commandIndex != 6)// one var
+    {
+        if(isRegisterName(line)){
 
-    int startOfRegister1 = strlen(commandsNames[commandIndex]) + 1;
-    
-    cutString(line, startOfRegister1, startOfRegister1 + 3);
-    newLine->dstRegister = line.dstRegister;
-    newLine->srcRegister = line.srcRegister;
-    newLine->label = label;
-    newLine->next = NULL;
+        }
+        else if(isLabelExist(line)){ //from data service
+
+        }
+        else{
+            /// TODO: handle error - there is no option for command
+        }
+    }
+    else // in this part we r in the case of 2 vars
+    {
+        char* firstVar = getSubstringBySeperator(line, VAR_SEPERATOR);
+        int firstRegisterNumber = tryGetNumber(firstVar);
+        if(firstVar != NaN) // validate NaN is a known word in c
+        {
+
+        } 
+        else if (isLabelExist(line))// check if the part after the command is register
+        {
+            
+        }
+        else{
+            /// TODO: handle error unknown var
+        }
+
+    }
+
+
+
     return newLine;
+}
+
+double tryGetNumber(char* str) {
+    char* endptr;
+    double number = strtod(str, &endptr);
+
+    // Check if conversion was successful and if the entire string was processed
+    if (*endptr == '\0') {
+        return number;
+    }
+
+    // If conversion failed or not the entire string was processed, return NaN (Not a Number)
+    return 0.0 / 0.0;
+}
+
+char *getSubstringBySeperator(char* str, char seperator){
+    if (input == NULL) 
+        return NULL;
+
+    // find the index of the separator (if present)
+    const char* separator_ptr = strchr(input, separator);
+
+    // calculate the length of the new substring
+    size_t new_string_length = separator_ptr ? (size_t)(separator_ptr - input) : strlen(input);
+
+    // allocate memory for the new substring
+    char* new_string = (char*)malloc((new_string_length + 1) * sizeof(char));
+    if (new_string == NULL) {
+        return NULL;
+    }
+
+    // copy characters from the input string to the new substring
+    strncpy(new_string, input, new_string_length);
+    new_string[new_string_length] = '\0'; // null terminate the new substring
+
+    return new_string;
+}
+
+void fromMaman22(){
+    if (isVarName(command[0])) {
+        if (commandIndex == 2) {
+            /* 1 var*/
+            if (strlen(command) != 1) {
+                printf(ERROR_EXTRANEOUS_TEXT);
+                return;
+            }
+            abs_comp(extractComplexNumber(command[0]));
+            return;
+        } else if (commandIndex == 6) {
+            /* 1 var*/
+            if (strlen(command) != 1) {
+                printf(ERROR_EXTRANEOUS_TEXT);
+                return;
+            }
+            print_comp(extractComplexNumber(command[0]));
+            return;
+        }
+
+        if (command[1] != VAR_SEPERATOR) {
+            printf(ERROR_MISSING_COMMA);
+            return;
+        }
+        if (commandIndex == 1 || commandIndex == 4 || commandIndex == 7) {
+            /* 2 vars*/
+            if (!isVarName(command[2])) {
+                printf(ERROR_MISSING_PARAMETER);
+                return;
+            }
+            if (command[3]) {
+                printf(ERROR_EXTRANEOUS_TEXT);
+                return;
+            }
+            if (commandIndex == 1) {
+                /* 2 vars*/
+                mult_comp_comp(extractComplexNumber(command[0]), extractComplexNumber(command[2]));
+                return;
+            } else if (commandIndex == 4) {
+                /* 2 vars*/
+                sub_comp(extractComplexNumber(command[0]), extractComplexNumber(command[2]));
+                return;
+            } else if (commandIndex == 7) {
+                /* 2 vars*/
+                add_comp(extractComplexNumber(command[0]), extractComplexNumber(command[2]));
+                return;
+            }
+        }
+	
+        if (commandIndex == 0 || commandIndex == 5 || commandIndex == 3) {
+            /* 1 var 1 num*/
+	    										
+            if (!isdigit(command[2])) {
+                if (command[2] != '-' || !isdigit(command[3])) {
+                    /*case for negative number*/
+                    printf(ERROR_SECOND_PARAMETER_ISNT_NUMBER);
+                    return;
+                }
+            }
+            char * nextNumber = skipNumber(command + 2);
+            if (strlen(nextNumber) == 0) {
+                if (commandIndex == 0) mult_comp_img(extractComplexNumber(command[0]), atof(command + 2));
+                else if (commandIndex == 5) mult_comp_real(extractComplexNumber(command[0]), atof(command + 2));
+                return;
+            } else if (commandIndex == 3) {
+                /* 1 var 2 numbers*/
+                if ( * nextNumber != VAR_SEPERATOR) {
+                    printf(ERROR_MISSING_COMMA);
+                    return;
+                }
+                nextNumber++;
+                if ( *skipNumber(nextNumber)) {
+                    printf(ERROR_EXTRANEOUS_TEXT);
+                    return;
+                }
+                read_comp(extractComplexNumber(command[0]), atof(command + 2), atof(nextNumber));
+            } else {
+                printf(ERROR_EXTRANEOUS_TEXT);
+                return;
+            }
+        }
+    } else {
+        printf(ERROR_UNDEFINED_COMPLEX_VAR);
+        return;
+    }
 }
