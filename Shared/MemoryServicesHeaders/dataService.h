@@ -10,9 +10,9 @@ extern int *codeImage; /* Holds all the instruction words. */
 extern int *dataImage; /* Holds all the data words. */
 
 /* Initialize the label lists. */
-extern Label *externalLabelList;
-extern Label *entryLabelList;
-extern Label *normalCommandLabelList;
+extern LabelNode *externalLabelList;
+extern LabelNode *entryLabelList;
+extern LabelNode *normalCommandLabelList;
 extern DataLabel *dataLabelList;
 extern StringLabel *stringLabelList;
 
@@ -27,6 +27,7 @@ typedef enum
 /* Define the label structure */
 typedef struct Label
 {
+    LabelType type;
     char name[MAX_LABEL_NAME_LENGTH]; /* Holds the label's name. */
     int address;                      /* Holds the label's address. */
 } Label;

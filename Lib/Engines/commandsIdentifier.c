@@ -31,13 +31,13 @@
 
 struct Line //TODO: MOVE THIS STRUCT TO DATA STRUCTURE
 { 
-    char code;
+    //char code; //A R E?
     int opcode;
-    int dstRegister;
-    int srcRegister;
+    int dstRegister; // if exist
+    int srcRegister; // if exist
     int address;
-    char *label;
-    char *originalCommand;
+    Label *label;
+    char *originalCommand; //useless - we dont gonna use this
     struct Line *next;
 };
 
