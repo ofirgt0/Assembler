@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-void handleNewLine(const char *line) { //TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER
+void logNewLine(const char *line) { //TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER
     printf("Processing line: %s\n", line);
 }
 
@@ -14,14 +14,26 @@ void fileReader(const char *filename) {
     }
 
     char line[256];
+    // first run - save label, macro
     while (fgets(line, sizeof(line), file) != NULL) {
         
         removePrefixSpaces(line);
         if(line == '\0')
             continue;
 
-        handleNewLine(line);
+        getMacroAndLabel(line);
     }
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        
+        removePrefixSpaces(line);
+        if(line == '\0')
+            continue;
+
+        logNewLine(line);
+        parseCommand(line);
+    }
+
 
     fclose(file);
 }

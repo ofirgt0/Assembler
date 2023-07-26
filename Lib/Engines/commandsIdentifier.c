@@ -320,7 +320,7 @@ char *cutString(const char *str, int startIndex, int endIndex)
     }
 }
 
-Line *commandParser(char *line, int commandIndex, char *label)
+void *commandParser(char *line, int commandIndex, char *label)
 {
     struct Line *newLine = (struct Line*)malloc(sizeof(struct Line*));
 
@@ -359,7 +359,7 @@ Line *commandParser(char *line, int commandIndex, char *label)
         } 
         else if (isLabelExist(line))// check if the part after the command is register
         {
-            
+
         }
         else{
             /// TODO: handle error unknown var
@@ -408,89 +408,54 @@ char *getSubstringBySeperator(char* str, char seperator){
     return new_string;
 }
 
-void fromMaman22(){
-    if (isVarName(command[0])) {
-        if (commandIndex == 2) {
-            /* 1 var*/
-            if (strlen(command) != 1) {
-                printf(ERROR_EXTRANEOUS_TEXT);
-                return;
-            }
-            abs_comp(extractComplexNumber(command[0]));
-            return;
-        } else if (commandIndex == 6) {
-            /* 1 var*/
-            if (strlen(command) != 1) {
-                printf(ERROR_EXTRANEOUS_TEXT);
-                return;
-            }
-            print_comp(extractComplexNumber(command[0]));
-            return;
-        }
 
-        if (command[1] != VAR_SEPERATOR) {
-            printf(ERROR_MISSING_COMMA);
-            return;
-        }
-        if (commandIndex == 1 || commandIndex == 4 || commandIndex == 7) {
-            /* 2 vars*/
-            if (!isVarName(command[2])) {
-                printf(ERROR_MISSING_PARAMETER);
-                return;
-            }
-            if (command[3]) {
-                printf(ERROR_EXTRANEOUS_TEXT);
-                return;
-            }
-            if (commandIndex == 1) {
-                /* 2 vars*/
-                mult_comp_comp(extractComplexNumber(command[0]), extractComplexNumber(command[2]));
-                return;
-            } else if (commandIndex == 4) {
-                /* 2 vars*/
-                sub_comp(extractComplexNumber(command[0]), extractComplexNumber(command[2]));
-                return;
-            } else if (commandIndex == 7) {
-                /* 2 vars*/
-                add_comp(extractComplexNumber(command[0]), extractComplexNumber(command[2]));
-                return;
-            }
-        }
-	
-        if (commandIndex == 0 || commandIndex == 5 || commandIndex == 3) {
-            /* 1 var 1 num*/
-	    										
-            if (!isdigit(command[2])) {
-                if (command[2] != '-' || !isdigit(command[3])) {
-                    /*case for negative number*/
-                    printf(ERROR_SECOND_PARAMETER_ISNT_NUMBER);
-                    return;
-                }
-            }
-            char * nextNumber = skipNumber(command + 2);
-            if (strlen(nextNumber) == 0) {
-                if (commandIndex == 0) mult_comp_img(extractComplexNumber(command[0]), atof(command + 2));
-                else if (commandIndex == 5) mult_comp_real(extractComplexNumber(command[0]), atof(command + 2));
-                return;
-            } else if (commandIndex == 3) {
-                /* 1 var 2 numbers*/
-                if ( * nextNumber != VAR_SEPERATOR) {
-                    printf(ERROR_MISSING_COMMA);
-                    return;
-                }
-                nextNumber++;
-                if ( *skipNumber(nextNumber)) {
-                    printf(ERROR_EXTRANEOUS_TEXT);
-                    return;
-                }
-                read_comp(extractComplexNumber(command[0]), atof(command + 2), atof(nextNumber));
-            } else {
-                printf(ERROR_EXTRANEOUS_TEXT);
-                return;
-            }
-        }
-    } else {
-        printf(ERROR_UNDEFINED_COMPLEX_VAR);
+// --------------------------------------------------------------------------------------------------
+
+static int linesCounter = 0;
+static char* currentMacro = NULL;
+
+void startFirstRun(char command[], int lineNumber, char* fileName){
+    if(macroFlag)
+    {
+        linesCounter++;
         return;
+    }
+    char *label = tryGetLabel(command);
+    
+    int prefixIndex = getCommandIndexByList(command, commandsPrefix);
+    if (prefixIndex != -1)
+    {
+        char *secondVar = command + strlen(commandsPrefix[prefixIndex]) // in this part we have the label in the hand
+        switch (prefixIndex)
+        {
+            case 0: // extern
+            {
+                addNewExtern(secondVar); // TODO: in dataService
+                return;
+            }
+            case 1: // entry
+            {
+                addNewEntry(secondVar); // TODO: in dataService
+                return;
+            }
+            case 2: // mcro
+            {
+                strcpy(secondVar,currentMacro);
+                addMacro(secondVar, lineNumber); // TODO: splite between creating macro and insert new line to the macro                
+                macroFlag = true;
+                return;
+            }
+            case 3: // endmcro
+            {
+                updateLinesCount(linesCounter);
+                
+                macroFlag = false;
+                currentMacro = NULL;
+                linesCounter = 0;
+                return;
+            }
+            default: // useless
+                return;
+        }
     }
 }

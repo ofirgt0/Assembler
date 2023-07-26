@@ -8,7 +8,7 @@
 struct Line
 {
     int commandIndex;
-    char code;
+    int AREcode;
     int opcode;
     int dstRegister;
     int srcRegister;

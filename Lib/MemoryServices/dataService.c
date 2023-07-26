@@ -24,30 +24,6 @@ static StringLabel *stringLabelList = NULL;
 static int IC = 0; /* Instruction counter. */
 static int DC = 0; /* Data counter. */
 
-/* Initialize the Code Image and Data Image. */
-int *codeImage = NULL; /* Holds all the instruction words that we have promoted so far. */
-int *dataImage = NULL; /* Holds all the data words that we have promoted so far. */
-
-/*
- * Private function to search for a label in a given list.
- * @param labelList: The list in which to search.
- * @param labelName: The name of the label to search for.
- * @return The found label or NULL if the label was not found.
- */
-LabelNode *searchLabelInList(LabelNode *labelList, const char *labelName)
-{
-    LabelNode *currentLabel = labelList;
-    while (currentLabel != NULL)
-    {
-        if (strcmp(currentLabel->label->name, labelName) == 0)
-        {
-            return currentLabel;
-        }
-        currentLabel = currentLabel->next;
-    }
-    return NULL;
-}
-
 /*
  * Function to search for a label in all linked lists.
  * @param labelName: The name of the label to search for.
@@ -133,7 +109,7 @@ bool tryAddNewLabel(char *type, char *labelName)
 
     newLabel->next = relevantList;
     relevantList = newLabel;
-    IC += sizeof(int);
+    DC += sizeof(int);
 
     switch (determineLabelType(type))
     {
@@ -160,8 +136,14 @@ bool tryAddNewLabel(char *type, char *labelName)
         return false;
     }
 
-    newLabel->address = address;
-    strcpy(newLabel->name, name);
-
     return true;
 }
+
+
+/// TODO: (liron u can do it) create insert label for each type
+
+void addNewExtern(char* externName);
+void addNewEntry(char* externName);
+void addData(int data[], char* labelName);
+void addString(char* string, char* labelName);
+void addNewLabel();

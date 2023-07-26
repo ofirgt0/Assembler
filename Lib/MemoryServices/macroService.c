@@ -160,3 +160,61 @@ void sendMacro(char *macroName)
         currentLine = currentLine->next;
     }
 }
+
+
+// -----------------------------------------------------------------------------------------------
+
+typedef struct macroDataNode
+{
+    char* macroName;
+    int lineNumber;
+    int linesCount;
+    struct macroDataNode* next;
+};
+
+static struct linkedList* head = NULL;
+
+void addMacro(const char* macroName, int lineNumber) {
+    // Create a new node
+    struct macroDataNode* newNode = (struct macroDataNode*)malloc(sizeof(struct macroDataNode));
+    if (newNode == NULL) {
+        printf("Error: Memory allocation failed.\n");
+        return;
+    }
+    if(searchNode(macroName)!=NULL)
+    {
+        /// TODO: handle error which macro already exist 
+    }
+
+    // Copy the macroName to the new node
+    newNode->macroName = strdup(macroName); // Note: Remember to free this memory later
+    newNode->lineNumber = lineNumber;
+    newNode->linesCount = 0;
+
+    // Insert the new node at the beginning of the list
+    newNode->next = head;
+    head = newNode;
+}
+
+struct macroData* searchNode(const char* macroName) {
+    struct macroDataNode* current = head;
+    while (current != NULL) {
+        if (strcmp(current->macroName, macroName) == 0) {
+            return current; // Found the node with the given macroName
+        }
+        current = current->next;
+    }
+    return NULL; // Node with the given macroName not found
+}
+
+void updateLinesCount(const char* macroName, int newLinesCount) {
+    struct macroDataNode* current = head;
+    while (current != NULL) {
+        if (strcmp(current->macroName, macroName) == 0) {
+            current->linesCount = newLinesCount; // Update the linesCount property
+            return;
+        }
+        current = current->next;
+    }
+    printf("Macro '%s' not found in the list.\n", macroName);
+}

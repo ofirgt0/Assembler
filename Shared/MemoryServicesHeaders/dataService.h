@@ -10,11 +10,11 @@ extern int *codeImage; /* Holds all the instruction words. */
 extern int *dataImage; /* Holds all the data words. */
 
 /* Initialize the label lists. */
-extern LabelNode *externalLabelList;
-extern LabelNode *entryLabelList;
-extern LabelNode *normalCommandLabelList;
-extern DataLabel *dataLabelList;
-extern StringLabel *stringLabelList;
+extern static LabelNode *externalLabelList;
+extern static LabelNode *entryLabelList;
+extern static LabelNode *normalCommandLabelList;
+extern static DataLabel *dataLabelList;
+extern static StringLabel *stringLabelList;
 
 /* Representing the types of labels. */
 typedef enum
