@@ -23,6 +23,8 @@
 #define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
 #define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
 
+extern char *commandsNames[];
+
 /**
  * Check if the given command is a known macro.
  * @param command The command to check.
