@@ -139,6 +139,15 @@ bool tryAddNewLabel(char *type, char *labelName)
     return true;
 }
 
+void addNewLine1(char* prefixLabel, int opcode, int immidiate1, int register2){}
+
+void addNewLine3(char* prefixLabel, int opcode, int label1, int register2){}
+
+void addNewLine5(char* prefixLabel, int opcode, int register1, int register2){
+    IC++;
+    encode() // in the encoder
+}
+
 
 /// TODO: (liron u can do it) create insert label for each type
 

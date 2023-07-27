@@ -21,7 +21,7 @@ void fileReader(const char *filename) {
         if(line == '\0')
             continue;
 
-        getMacroAndLabel(line);
+        startFirstRun(line);
     }
 
     while (fgets(line, sizeof(line), file) != NULL) {

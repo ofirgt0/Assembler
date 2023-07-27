@@ -41,21 +41,21 @@ struct Line // TODO: MOVE THIS STRUCT TO DATA STRUCTURE
 };
 
 char *commandsNames[COMMANDS_NUMBER] = {
-    "mov", // 0
-    "cmp", // 1
-    "add", // 2
-    "sub", // 3
-    "not", // 4 - one var
-    "clr", // 5 - one var
-    "lea", // 6
-    "inc", // 7 - one var
-    "dec", // 8 - one var
-    "jmp", // 9 - one var
-    "bne", // 10 - one var
-    "red", // 11 - one var
-    "prn", // 12 - one var
-    "jsr", // 13 - one var
-    "rts", // 14 - 0 var
+    "mov",  // 0
+    "cmp",  // 1
+    "add",  // 2
+    "sub",  // 3
+    "not",  // 4 - one var
+    "clr",  // 5 - one var
+    "lea",  // 6
+    "inc",  // 7 - one var
+    "dec",  // 8 - one var
+    "jmp",  // 9 - one var
+    "bne",  // 10 - one var
+    "red",  // 11 - one var
+    "prn",  // 12 - one var
+    "jsr",  // 13 - one var
+    "rts",  // 14 - 0 var
     "stop", // 15 - 0 var
 };
 
@@ -158,7 +158,8 @@ int getCommandIndexByList(char command[], char *list[])
 */
 bool isRegisterName(char registerName[])
 {
-    if(strlen(registerName)<2) return false;
+    if (strlen(registerName) < 2)
+        return false;
     return registerName[0] == REGISTER_PREFIX && registerName[1] == 'r' && registerName[2] >= '0' && registerName[2] <= '7';
 }
 
@@ -204,30 +205,30 @@ void commandIdentifier(char command[], char *fileName)
         char *secondVar = command + getCharIndexBySeparatorIndex(command, 1); // TODO: rewrite this function
         switch (commandPrefix)
         {
-            case 0: // extern
-            {
-                addNewExtern(secondVar, fileName); // TODO: in dataService
-                return;
-            }
-            case 1: // entry
-            {
-                addNewEntry(secondVar, fileName); // TODO: in dataService
-                return;
-            }
-            case 2: // mcro
-            {
-                bool isSuccess = addNewMacro(secondVar, fileName); // TODO: splite between creating macro and insert new line to the macro
-                if (isSuccess)
-                    macroFlag = true;
-                return;
-            }
-            case 3: // endmcro
-            {
-                macroFlag = false;
-                return;
-            }
-            default: // useless
-                return;
+        case 0: // extern
+        {
+            addNewExtern(secondVar, fileName); // TODO: in dataService
+            return;
+        }
+        case 1: // entry
+        {
+            addNewEntry(secondVar, fileName); // TODO: in dataService
+            return;
+        }
+        case 2: // mcro
+        {
+            bool isSuccess = addNewMacro(secondVar, fileName); // TODO: splite between creating macro and insert new line to the macro
+            if (isSuccess)
+                macroFlag = true;
+            return;
+        }
+        case 3: // endmcro
+        {
+            macroFlag = false;
+            return;
+        }
+        default: // useless
+            return;
         }
     }
 
@@ -322,7 +323,7 @@ char *cutString(const char *str, int startIndex, int endIndex)
 
 void *commandParser(char *line, int commandIndex, char *label)
 {
-    struct Line *newLine = (struct Line*)malloc(sizeof(struct Line*));
+    struct Line *newLine = (struct Line *)malloc(sizeof(struct Line *));
 
     if (newLine == NULL)
     {
@@ -331,53 +332,53 @@ void *commandParser(char *line, int commandIndex, char *label)
         return;
     }
     strcpy(newLine->originalCommand, line);
-    if(commandIndex > 13)// 0 vars
+    if (commandIndex > 13) // 0 vars
     {
-        if(strlen(line)>0){
-            //TODO: handle error
+        if (strlen(line) > 0)
+        {
+            // TODO: handle error
         }
     }
-    else if(commandIndex < 14 && commandIndex > 3 && commandIndex != 6)// one var
+    else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) // one var
     {
-        if(isRegisterName(line)){
-
+        if (isRegisterName(line))
+        {
         }
-        else if(isLabelExist(line)){ //from data service
-
+        else if (isLabelExist(line))
+        { // from data service
         }
-        else{
+        else
+        {
             /// TODO: handle error - there is no option for command
         }
     }
     else // in this part we r in the case of 2 vars
     {
-        char* firstVar = getSubstringBySeperator(line, VAR_SEPERATOR);
+        char *firstVar = getSubstringBySeperator(line, VAR_SEPERATOR);
         int firstRegisterNumber = tryGetNumber(firstVar);
-        if(firstVar != NaN) // validate NaN is a known word in c
+        if (firstVar != NaN) // validate NaN is a known word in c
         {
-
-        } 
-        else if (isLabelExist(line))// check if the part after the command is register
-        {
-
         }
-        else{
+        else if (isLabelExist(line)) // check if the part after the command is register
+        {
+        }
+        else
+        {
             /// TODO: handle error unknown var
         }
-
     }
-
-
 
     return newLine;
 }
 
-double tryGetNumber(char* str) {
-    char* endptr;
+double tryGetNumber(char *str)
+{
+    char *endptr;
     double number = strtod(str, &endptr);
 
     // Check if conversion was successful and if the entire string was processed
-    if (*endptr == '\0') {
+    if (*endptr == '\0')
+    {
         return number;
     }
 
@@ -385,19 +386,21 @@ double tryGetNumber(char* str) {
     return 0.0 / 0.0;
 }
 
-char *getSubstringBySeperator(char* str, char seperator){
-    if (input == NULL) 
+char *getSubstringBySeperator(char *str, char seperator)
+{
+    if (input == NULL)
         return NULL;
 
     // find the index of the separator (if present)
-    const char* separator_ptr = strchr(input, separator);
+    const char *separator_ptr = strchr(input, separator);
 
     // calculate the length of the new substring
     size_t new_string_length = separator_ptr ? (size_t)(separator_ptr - input) : strlen(input);
 
     // allocate memory for the new substring
-    char* new_string = (char*)malloc((new_string_length + 1) * sizeof(char));
-    if (new_string == NULL) {
+    char *new_string = (char *)malloc((new_string_length + 1) * sizeof(char));
+    if (new_string == NULL)
+    {
         return NULL;
     }
 
@@ -408,54 +411,139 @@ char *getSubstringBySeperator(char* str, char seperator){
     return new_string;
 }
 
-
 // --------------------------------------------------------------------------------------------------
 
 static int linesCounter = 0;
-static char* currentMacro = NULL;
+static char *currentMacro = NULL;
 
-void startFirstRun(char command[], int lineNumber, char* fileName){
-    if(macroFlag)
+void startFirstRun(char command[], int lineNumber, char *fileName)
+{
+    if (macroFlag)
     {
         linesCounter++;
         return;
     }
     char *label = tryGetLabel(command);
-    
     int prefixIndex = getCommandIndexByList(command, commandsPrefix);
+
+    if (prefixIndex > 1 && label != "") // note in page 41
+    {
+        tryAddNewLabel(label); // regular label
+    }
+
     if (prefixIndex != -1)
     {
         char *secondVar = command + strlen(commandsPrefix[prefixIndex]) // in this part we have the label in the hand
-        switch (prefixIndex)
+                          switch (prefixIndex)
         {
-            case 0: // extern
+        case 0: // extern
+        {
+            /// TODO: add warning for the option that label != null  as note in page 41
+            addNewExtern(secondVar); // TODO: in dataService
+            return;
+        }
+        case 1: // entry
+        {
+            addNewEntry(secondVar); // TODO: in dataService
+            return;
+        }
+        case 2: // mcro
+        {
+            strcpy(secondVar, currentMacro);
+            addMacro(secondVar, lineNumber); // TODO: splite between creating macro and insert new line to the macro
+            macroFlag = true;
+            return;
+        }
+        case 3: // endmcro
+        {
+            updateLinesCount(linesCounter);
+
+            macroFlag = false;
+            currentMacro = NULL;
+            linesCounter = 0;
+            return;
+        }
+        default: // useless
+            return;
+        }
+    }
+}
+
+void *commandParser(char *command)
+{
+    char *label = tryGetLabel(command);
+    command += strlen(label);
+
+    if (isMacroName(command))
+    {
+        /// TODO: what should we do with label before macro?
+        sendMacro(command);
+        return;
+    }
+
+    int commandIndex;
+    commandIndex = getCommandIndexByList(command, commandsNames);
+    command = command + strlen(commandsNames[commandIndex]);
+    replaceMultipleSpaces(command);
+
+    strcpy(newLine->originalCommand, command);
+    if (commandIndex > 13) // 0 vars
+    {
+        if (strlen(command) > 0)
+        {
+            /// TODO: handle error
+        }
+        addNewLine5(label, commandIndex, -1, -1); /// Note: -1 means that there is no register in this operand slot
+    }
+    else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) // one var
+    {
+        if (isRegisterName(command))
+        { // if
+            if (strlen(command) == 3)
             {
-                addNewExtern(secondVar); // TODO: in dataService
-                return;
+                addNewLine5(label, commandIndex, command[2], -1);
             }
-            case 1: // entry
+            else
             {
-                addNewEntry(secondVar); // TODO: in dataService
-                return;
+                /// TODO: handle error for char
             }
-            case 2: // mcro
+        }
+        else if (isLabelExist(command))
+        { // from data service
+            addNewLine3(label, commandIndex, command, -1);
+        }
+        else
+        {
+            /// TODO: handle error - there is no option for command
+        }
+    }
+    else // in this part we r in the case of 2 vars
+    {
+        char *firstVar = getSubstringBySeperator(line, VAR_SEPERATOR);
+        command += strlen(firstVar) + 1; // +1 for seperator ,
+
+        if (firstVar[0] == '-' || isDigit(firstVar[0])) // validate NaN is a known word in c
+        {
+            int firstRegisterNumber = tryGetNumber(firstVar);
+            addNewLine1(label, commandIndex, firstRegisterNumber, command[2]);
+        }
+        else if (isLabelExist(firstVar)) // check if the part after the command is register
+        {
+            if (isRegisterName(command))
             {
-                strcpy(secondVar,currentMacro);
-                addMacro(secondVar, lineNumber); // TODO: splite between creating macro and insert new line to the macro                
-                macroFlag = true;
-                return;
+                addNewLine3(label, commandIndex, firstVar, command[2]);
             }
-            case 3: // endmcro
+        }
+        else if (isRegisterName(firstVar))
+        {
+            if (isRegisterName(command))
             {
-                updateLinesCount(linesCounter);
-                
-                macroFlag = false;
-                currentMacro = NULL;
-                linesCounter = 0;
-                return;
+                addNewLine3(label, commandIndex, firstVar, command);
             }
-            default: // useless
-                return;
+        }
+        else
+        {
+            /// TODO: handle error unknown var
         }
     }
 }
