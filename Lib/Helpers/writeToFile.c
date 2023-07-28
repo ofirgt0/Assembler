@@ -2,45 +2,39 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-/**
- * Write a string to a file.
- * If the file already exists, the string is written on a new line at the end of the file.
- * If the file doesn't exist, a new file is created with the given name and the string is written to it.
- * @param filename The name of the file to write to.
- * @param string   The string to be written to the file.
- */
-bool writeToFile(const char *filename, const char *string)
-{
+#define WORD_LENGTH 12
 
+/**
+ * Write an integer array as a string to a file on the last line.
+ * If the file already exists, the array is written on a new line at the end of the file.
+ * If the file doesn't exist, a new file is created with the given name,
+ * and the array is written to it as a string on the last line.
+ * @param filename The name of the file to write to.
+ * @param arr      The integer array to be written to the file.
+ * @param size     The size of the array.
+ * @return true if the write operation is successful, false otherwise.
+ */
+bool writeIntArrayToFile(const char *filename, const int arr[])
+{
     /* Open the file in "append" mode */
     FILE *file = fopen(filename, "a");
 
     if (file != NULL)
     {
-        /* Write the string to a new line at the end of the file */
-        fprintf(file, "\n%s", string);
+        /* Write the array elements as a string on the last line */
+        fprintf(file, "\n");
+        for (int i = 0; i < WORD_LENGTH; i++)
+        {
+            fprintf(file, "%d", arr[i]);
+        }
         /* Close the file */
         fclose(file);
         return true;
     }
     else
     {
-        /* Open the file in "write" mode (create a new file) */
-        file = fopen(filename, "w");
-
-        if (file != NULL)
-        {
-            /* Write the string to the file */
-            fprintf(file, "%s", string);
-            /* Close the file */
-            fclose(file);
-            return true;
-        }
-        else
-        {
-            printf("Failed to open/create the file.\n");
-            return false;
-        }
+        printf("Failed to open/create the file.\n");
+        return false;
     }
 }
 
