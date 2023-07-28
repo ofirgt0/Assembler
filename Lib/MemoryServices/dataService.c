@@ -19,6 +19,44 @@
 
 #define MAX_LABEL_NAME_LENGTH 31
 
+/* Representing the types of labels. */
+typedef enum
+{
+    External,     /* Represents an external label. */
+    Entry,        /* Represents an entry label. */
+    NormalCommand /* Represents a normal command label. */
+} LabelType;
+
+/* Define the label structure */
+typedef struct Label
+{
+    LabelType type;
+    char name[MAX_LABEL_NAME_LENGTH]; /* Holds the label's name. */
+    int address;                      /* Holds the label's address. */
+} Label;
+
+typedef struct LabelNode
+{
+    Label *label;
+    LabelNode *next; /* Points to the next label in the linked list. */
+} LabelNode;
+
+/* Representing the data label structure. */
+typedef struct DataLabel
+{
+    Label *label;
+    int *data;
+    DataLabel *next;
+} DataLabel;
+
+/* Representing the string label structure. */
+typedef struct StringLabel
+{
+    Label *label;
+    char *string;
+    StringLabel *next;
+} StringLabel;
+
 /* Initialize the label lists. */
 static LabelNode *externalLabelList = NULL;
 static LabelNode *entryLabelList = NULL;
