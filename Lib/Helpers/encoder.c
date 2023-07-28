@@ -5,7 +5,7 @@
 #include "writeToFile.h"
 #include "errorHandler.h"
 #include "commandsIdentifier.h"
-#include "stringConverter.h"
+#include <math.h>
 
 #define WORD_SIZE 12
 #define MEMORY_SIZE 1024
@@ -29,31 +29,7 @@ typedef enum
 } OperandCount;
 
 // Each memory cell is an array of 12 bits
-int memory[MEMORY_SIZE][WORD_SIZE];
-
-/**
- *  * Function: convertCommandToOpcode
- * -----------------------------------
- * This function takes a command name and finds its corresponding opcode based on the
- * predefined list of command names.
- * The command opcode are from: 0-15 (in decimal base).
- * @param commandName The name of the command to be converted to opcode.
- * @return
- *      1. If the provided command name is recognized, it returns the opcode which is a 0-based index.
- *      2. If the command name is not recognized, the program prints an error message and exits with status code 1.
- */
-int convertCommandToOpcode(char *commandName)
-{
-    for (int i = 0; i < COMMANDS_NUMBER; i++)
-    {
-        if (strcmp(commandsNames[i], commandName) == 0)
-        {
-            return i;
-        }
-    }
-    printf("Error: Invalid command name\n");
-    exit(1);
-}
+static int memory[MEMORY_SIZE][WORD_SIZE]; // static ?
 
 /**
  * Function: convertOpCodeToBinary
@@ -67,10 +43,11 @@ int convertCommandToOpcode(char *commandName)
 const char *convertOpCodeToBinary(int opcode)
 {
     static char binaryString[5];
+    int i;
 
     binaryString[4] = '\0';
 
-    for (int i = 3; i >= 0; i--)
+    for (i = 3; i >= 0; i--)
     {
         binaryString[i] = (opcode % 2) + '0';
         opcode /= 2;
@@ -79,45 +56,56 @@ const char *convertOpCodeToBinary(int opcode)
     return binaryString;
 }
 
+/**
+ * Function: wordToBase64
+ * ---------------------
+ * Converts a 12-bit word to its base64 representation.
+ * @param word The 12-bit word to convert.
+ * @param str The string to store the base64 representation (must be at least 3 characters long).
+ */
+void wordToBase64(unsigned short word, char *str)
+{
+    const char *base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    str[0] = base64Chars[(word >> 6) & 0x3F];
+    str[1] = base64Chars[word & 0x3F];
+    str[2] = '\0';
+}
+
 //
 /**
  * * Function: encodeInstructionByDirectAddressing
  * -------------------------------------------------
  * This function encodes an instruction, using the Direct Addressing method.
- * @param commandName The name of the command.
+ * @param command: The command to be encoded.
  * @param ARE The encoding method.
  * @param srcRegister The source register.
  * @param dstRegister The destination register.
  * @param operandCount The number of operands.
+ * @param filename The name of the file to write to.
  */
-void encodeInstructionByDirectAddressing(char *commandName, int ARE, int srcRegister, int dstRegister, OperandCount operandCount)
+void encodeInstructionByDirectAddressing(char *command, int ARE, int srcRegister, int dstRegister, OperandCount operandCount, char *filename)
 {
+    int opcode;
+    const char *binaryOpcode;
+    int instructionBits[WORD_SIZE] = {0}; // Initialize an array to store the instruction bits
+
     // if there is an error, return
     if (getErrorsCounter() > 0)
     {
         return;
     }
 
-    // Validate if the command is suitable for the number of operands
-    if (!isValidCommandForOperandCount(commandName, operandCount))
-    {
-        printf("Error: Invalid command for %d operand instruction\n", operandCount);
-        exit(1);
-    }
-
     // Convert the command name to opcode
-    int opcode = convertCommandToOpcode(commandName);
+    opcode = getCommandIndexByList(command, commandsNames);
 
     // Convert opcode to binary string
-    const char *binaryOpcode = convertOpCodeToBinary(opcode);
-
-    // Initialize an array to store the instruction bits
-    int instructionBits[WORD_SIZE] = {0};
+    binaryOpcode = convertOpCodeToBinary(opcode);
 
     // Encode the ARE and opcode into the instruction bits
     instructionBits[0] = (ARE >> 1) & 1;
     instructionBits[1] = ARE & 1;
-    for (int i = 0; i < 4; i++)
+    int i;
+    for (i = 0; i < 4; i++)
     {
         instructionBits[i + 5] = binaryOpcode[i] - '0'; // Convert char to int and store in instructionBits.
     }
@@ -175,41 +163,46 @@ void encodeInstructionByDirectAddressing(char *commandName, int ARE, int srcRegi
         }
         break;
     }
+    // Convert the instructionBits to base64 and write to the file
+    char str[3];
+    wordToBase64(instructionBits[0] << 6 | instructionBits[1] << 5 | instructionBits[2] << 4 | instructionBits[3] << 3 |
+                     instructionBits[4] << 2 | instructionBits[5] << 1 | instructionBits[6] | instructionBits[7] << 11 |
+                     instructionBits[8] << 10 | instructionBits[9] << 9 | instructionBits[10] << 8 | instructionBits[11] << 7,
+                 str);
+    char fullFilename[256];
+    sprintf(fullFilename, "%s.ob", filename);
+    writeToFile(fullFilename, str);
 }
 
 /**
  * * Function: encodeInstructionByImmediateAddressing
  * -------------------------------------------------
  * This function encodes an instruction using the Immediate Addressing method.
- * @param commandName The name of the command.
+ * @param command The name of the command.
  * @param ARE The encoding method.
  * @param srcRegister The source register.
  * @param dstRegister The destination register.
  * @param operandCount The number of operands.
+ * @param fileName - The name of the file to write to.
  */
-void encodeInstructionByImmediateAddressing(char *commandName, int ARE, int srcRegister, int dstRegister, OperandCount operandCount)
+* /
+    void encodeInstructionByImmediateAddressing(char *command, int ARE, int srcRegister, int dstRegister, OperandCount operandCount, char *filename)
 {
+    int opcode;
+    const char *binaryOpcode;
+    int instructionBits[WORD_SIZE] = {0}; // Initialize an array to store the instruction bits
+
     // if there is an error, return
     if (getErrorsCounter() > 0)
     {
         return;
     }
 
-    // Validate if the command is suitable for the number of operands
-    if (!isValidCommandForOperandCount(commandName, operandCount))
-    {
-        printf("Error: Invalid command for %d operand instruction\n", operandCount);
-        exit(1);
-    }
-
     // Convert the command name to opcode
-    int opcode = convertCommandToOpcode(commandName);
+    opcode = getCommandIndexByList(command, commandsNames);
 
     // Convert opcode to binary string
-    const char *binaryOpcode = convertOpCodeToBinary(opcode);
-
-    // Initialize an array to store the instruction bits
-    int instructionBits[WORD_SIZE] = {0};
+    binaryOpcode = convertOpCodeToBinary(opcode);
 
     // Encode the ARE and opcode into the instruction bits
     instructionBits[0] = (ARE >> 1) & 1;
@@ -262,38 +255,45 @@ void encodeInstructionByImmediateAddressing(char *commandName, int ARE, int srcR
         }
         break;
     }
+
+    char str[3];
+    wordToBase64(instructionBits[0] << 6 | instructionBits[1] << 5 | instructionBits[2] << 4 | instructionBits[3] << 3 |
+                     instructionBits[4] << 2 | instructionBits[5] << 1 | instructionBits[6] | instructionBits[7] << 11 |
+                     instructionBits[8] << 10 | instructionBits[9] << 9 | instructionBits[10] << 8 | instructionBits[11] << 7,
+                 str);
+    char fullFilename[256];
+    sprintf(fullFilename, "%s.ob", fileName);
+    writeToFile(fullFilename, str);
 }
 
 /**
  * * Function: encodeInstructionByDirectRegisterAddressing
  * --------------------------------------------------------
  * This function encodes an instruction using Direct Register Addressing method.
- * @param commandName The name of the command.
+ * @param command The name of the command.
  * @param ARE The encoding method.
  * @param srcRegister The source register.
  * @param dstRegister The destination register.
  * @param operandCount The number of operands.
+ * @param filename The name of the file to write to.
  */
-void encodeInstructionByDirectRegisterAddressing(char *commandName, int ARE, int srcRegister, int dstRegister, OperandCount operandCount)
+void encodeInstructionByDirectRegisterAddressing(char *command, int ARE, int srcRegister, int dstRegister, OperandCount operandCount, char *filename)
 {
+    int opcode;
+    const char *binaryOpcode;
+    int instructionBits[WORD_SIZE] = {0}; // Initialize an array to store the instruction bits
+
     // if there is an error, return
     if (getErrorsCounter() > 0)
     {
         return;
     }
 
-    // Validate if the command is suitable for the number of operands
-    if (!isValidCommandForOperandCount(commandName, operandCount))
-    {
-        printf("Error: Invalid command for %d operand instruction\n", operandCount);
-        exit(1);
-    }
-
     // Convert the command name to opcode
-    int opcode = convertCommandToOpcode(commandName);
+    opcode = getCommandIndexByList(command, commandsNames);
 
     // Convert opcode to binary string
-    const char *binaryOpcode = convertOpCodeToBinary(opcode);
+    binaryOpcode = convertOpCodeToBinary(opcode);
 
     // Initialize an array to store the instruction bits
     int instructionBits[WORD_SIZE] = {0};
@@ -349,4 +349,13 @@ void encodeInstructionByDirectRegisterAddressing(char *commandName, int ARE, int
         }
         break;
     }
+
+    char str[3];
+    wordToBase64(instructionBits[0] << 6 | instructionBits[1] << 5 | instructionBits[2] << 4 | instructionBits[3] << 3 |
+                     instructionBits[4] << 2 | instructionBits[5] << 1 | instructionBits[6] | instructionBits[7] << 11 |
+                     instructionBits[8] << 10 | instructionBits[9] << 9 | instructionBits[10] << 8 | instructionBits[11] << 7,
+                 str);
+    char fullFilename[256];
+    sprintf(fullFilename, "%s.ob", fileName);
+    writeToFile(fullFilename, str);
 }
