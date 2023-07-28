@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "commandsIdentifier.h"
 #include "writeToFile.h"
-// #include "errorHandler.h"
-#include "commandsIdentifier.h"
-#include "stringConverter.h"
+#include "errorHandler.h"
 
 void encodLabelOperand(char* fileName, char AREcode, int address);
 void encodImmidiate(char* fileName, int immidiate);
