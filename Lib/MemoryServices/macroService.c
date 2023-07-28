@@ -75,22 +75,7 @@ void addNewMacro(char *macroName, char *fileName, struct Line line)
     }
 }
 
-/**
- * Retrieves a macro based on its name.
- * @param macroName The name of the macro.
- * @return The macro structure if found, or NULL if not found.
- */
-struct Macro *getMacro(char *macroName)
-{
-    struct Macro *macro = macroHead;
-    while (macro != NULL)
-    {
-        if (strcmp(macro->macroName, macroName) == 0)
-            return macro;
-        macro = macro->next;
-    }
-    return NULL;
-}
+
 
 /**
  * Checks if a given macro name exists.
@@ -144,22 +129,6 @@ void setExistMacro(char *macroName, struct Line line)
     printf("Last line of macro '%s' has been set.\n", macroName);
 }
 
-void sendMacro(char *macroName)
-{
-    struct Macro *macro = getMacro(macroName);
-    if (macro == NULL)
-    {
-        // Error: Macro not found
-        printf("Error: Macro not found\n");
-        return;
-    }
-    struct Line *currentLine = macro->lines;
-    while (currentLine != NULL)
-    {
-        // TODO: Process the lines of the macro
-        currentLine = currentLine->next;
-    }
-}
 
 
 // -----------------------------------------------------------------------------------------------
@@ -171,6 +140,36 @@ typedef struct macroDataNode
     int linesCount;
     struct macroDataNode* next;
 };
+
+/**
+ * Retrieves a macro based on its name.
+ * @param macroName The name of the macro.
+ * @return The macro structure if found, or NULL if not found.
+ */
+struct macroDataNode *getMacro(char *macroName)
+{
+    struct macroDataNode *macro = macroHead;
+    while (macro != NULL)
+    {
+        if (strcmp(macro->macroName, macroName) == 0)
+            return macro;
+        macro = macro->next;
+    }
+    return NULL;
+}
+
+void sendMacro(char *macroName, char *fileName)
+{
+    struct macroDataNode *macro = getMacro(macroName);
+    if (macro == NULL)
+    {
+        // Error: Macro not found
+        printf("Error: Macro not found\n");
+        return;
+    }
+    getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
+    
+}
 
 static struct linkedList* head = NULL;
 

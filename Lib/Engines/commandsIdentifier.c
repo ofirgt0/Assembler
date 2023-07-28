@@ -418,17 +418,27 @@ static char *currentMacro = NULL;
 
 void startFirstRun(char command[], int lineNumber, char *fileName)
 {
-    if (macroFlag)
+    if (macroFlag) // if we r in macro, count the lines
     {
         linesCounter++;
         return;
     }
-    char *label = tryGetLabel(command);
+    // liron: LabelName: .entry WOW
+    char *label = tryGetLabel(command); // if label exist - we will get the label name and remove it from the command
+    // liron    .entry WOW
+    /// TODO: check if we need to remove PREFIX SPACES
     int prefixIndex = getCommandIndexByList(command, commandsPrefix);
 
-    if (prefixIndex > 1 && label != "") // note in page 41
+    if (label != "") // note in page 41
     {
-        tryAddNewLabel(label); // regular label
+        if (prefixIndex < 2)
+        {
+            /// TODO: warning
+        }
+        else
+        {
+            tryAddNewLabel(label); // regular label
+        }
     }
 
     if (prefixIndex != -1)
@@ -436,48 +446,53 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         char *secondVar = command + strlen(commandsPrefix[prefixIndex]); // in this part we have the label in the hand
         switch (prefixIndex)
         {
-            case 0: // extern
-            {
-                /// TODO: add warning for the option that label != null  as note in page 41
-                addNewExtern(secondVar); // TODO: in dataService
-                return;
-            }
-            case 1: // entry
-            {
-                addNewEntry(secondVar); // TODO: in dataService
-                return;
-            }
-            case 2: // mcro
-            {
-                strcpy(secondVar, currentMacro);
-                addMacro(secondVar, lineNumber); // TODO: splite between creating macro and insert new line to the macro
-                macroFlag = true;
-                return;
-            }
-            case 3: // endmcro
-            {
-                updateLinesCount(linesCounter);
+        case 0: // extern
+        {
+            /// TODO: add warning for the option that label != null  as note in page 41
+            addNewExtern(secondVar); // TODO: in dataService
+            return;
+        }
+        case 1: // entry
+        {
+            addNewEntry(secondVar); // TODO: in dataService
+            return;
+        }
+        case 2: // mcro
+        {
+            strcpy(secondVar, currentMacro);
+            addMacro(secondVar, lineNumber); // TODO: splite between creating macro and insert new line to the macro
+            macroFlag = true;
+            return;
+        }
+        case 3: // endmcro
+        {
+            updateLinesCount(linesCounter);
 
-                macroFlag = false;
-                currentMacro = NULL;
-                linesCounter = 0;
-                return;
-            }
-            default: // useless
-                return;
+            macroFlag = false;
+            currentMacro = NULL;
+            linesCounter = 0;
+            return;
+        }
+        default: // useless
+            return;
         }
     }
 }
 
-void *commandParser(char *command)
+// second run
+void *commandParser(char *command, char *fileName)
 {
     char *label = tryGetLabel(command);
     command += strlen(label);
+    /// TODO: check if we need to remove PREFIX SPACES
+    int prefixIndex = getCommandIndexByList(command, commandsPrefix);
+    if (prefixIndex != -1)
+        return; // we handle this commands in the first run
 
     if (isMacroName(command))
     {
         /// TODO: what should we do with label before macro?
-        sendMacro(command);
+        sendMacro(command, fileName);
         return;
     }
 
@@ -485,22 +500,22 @@ void *commandParser(char *command)
     commandIndex = getCommandIndexByList(command, commandsNames);
     command = command + strlen(commandsNames[commandIndex]);
     replaceMultipleSpaces(command);
-
+    //@r1,@r2
     if (commandIndex > 13) // 0 vars
     {
         if (strlen(command) > 0)
         {
             /// TODO: handle error
         }
-        addNewLine5(label, commandIndex, -1, -1); /// Note: -1 means that there is no register in this operand slot
+        addNewLine(commandIndex, -1, -1, NULL, NULL, 0, 0); /// Note: -1 means that there is no register in this operand slot
     }
     else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) // one var
     {
         if (isRegisterName(command))
-        { // if
+        {
             if (strlen(command) == 3)
             {
-                addNewLine5(label, commandIndex, command[2], -1);
+                addNewLine(commandIndex, command[2] - '0', -1, NULL, NULL, 0, 0); /// Note: -1 means that there is no register in this operand slot
             }
             else
             {
@@ -508,8 +523,12 @@ void *commandParser(char *command)
             }
         }
         else if (isLabelExist(command))
-        { // from data service
-            addNewLine3(label, commandIndex, command, -1);
+        {
+            addNewLine(commandIndex, -1, -1, command, NULL, 0, 0);
+        }
+        else if (isdigit(command[0]) || command[0] == '-') /// TODO: check if this option exist
+        {
+            addNewLine(commandIndex, -1, -1, NULL, NULL, tryGetNumber(command), 0);
         }
         else
         {
@@ -518,32 +537,33 @@ void *commandParser(char *command)
     }
     else // in this part we r in the case of 2 vars
     {
+        double immidiate1 = 0.5, immidiate2 = 0.5;
+        char *label1 = NULL, *label2 = NULL;
+        int register1 = -1, register2 = -1;
+        
         char *firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
-        command += strlen(firstVar) + 1; // +1 for seperator ,
+        command += strlen(firstVar) + 1; // + 1 for seperator ,
+       
+        if (firstVar[0] == '+' || firstVar[0] == '-' || isDigit(firstVar[0])) // validate NaN is a known word in c
+            immidiate1 = tryGetNumber(firstVar);
 
-        if (firstVar[0] == '-' || isDigit(firstVar[0])) // validate NaN is a known word in c
-        {
-            int firstRegisterNumber = tryGetNumber(firstVar);
-            addNewLine1(label, commandIndex, firstRegisterNumber, command[2]);
-        }
-        else if (isLabelExist(firstVar)) // check if the part after the command is register
-        {
-            if (isRegisterName(command))
-            {
-                addNewLine3(label, commandIndex, firstVar, command[2]);
-            }
-        }
+        else if (isLabelExist(firstVar))
+            label1 = firstVar;
+
         else if (isRegisterName(firstVar))
-        {
-            if (isRegisterName(command))
-            {
-                addNewLine3(label, commandIndex, firstVar, command);
-                addNewLine(commandIndex, firstVar, command, NULL, NULL, 0, 0);
-            }
-        }
-        else
-        {
-            /// TODO: handle error unknown var
-        }
+            register1 = firstVar[2] - '0';
+
+        if (command[0] == '-' || isDigit(command[0])) // validate NaN is a known word in c
+            immidiate2 = tryGetNumber(command);
+
+        else if (isLabelExist(command))
+            label2 = command;
+
+        else if (isRegisterName(command))
+            register2 = command[2] - '0';
+
+        /// TODO: handle error unknown var
+
+        addNewLine(commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
     }
 }
