@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "commandsIdentifier.h"
+#include "errorsHandler.h"
+#include "filesReader.h"
 
 #define VAR_SEPARATOR ','
 #define LABEL_SEPERATOR ':'
@@ -540,10 +542,10 @@ void *commandParser(char *command, char *fileName)
         double immidiate1 = 0.5, immidiate2 = 0.5;
         char *label1 = NULL, *label2 = NULL;
         int register1 = -1, register2 = -1;
-        
+
         char *firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; // + 1 for seperator ,
-       
+
         if (firstVar[0] == '+' || firstVar[0] == '-' || isDigit(firstVar[0])) // validate NaN is a known word in c
             immidiate1 = tryGetNumber(firstVar);
 

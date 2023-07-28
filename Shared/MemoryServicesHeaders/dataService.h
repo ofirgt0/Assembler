@@ -38,32 +38,95 @@ bool isLabelExist(char *labelName);
  */
 LabelType determineLabelType(char *labelType);
 
-/**
- * Tries to add a new label by its type.
- * @param type The type string of the label.
- * @param labelName The name of the label.
- * @return True if the label was added successfully, false otherwise.
- */
-bool tryAddNewLabel(char *type, char *labelName);
+/*
+    Function: addNewLine1
+    -------------------
+    Adds a new line of code to the program with a specific opcode, immediate value, and register.
 
-/**
- *
- */
+    prefixLabel: The prefix label for the line.
+    opcode: The opcode for the instruction.
+    immediate1: The immediate value to be used.
+    register2: The register to be used, or -1 if not used.
+
+    Inputs:
+    - prefixLabel: A pointer to a string representing the prefix label.
+    - opcode: An integer representing the opcode for the instruction.
+    - immediate1: An integer representing the immediate value.
+    - register2: An integer representing the register (or -1 if not used).
+
+    Outputs:
+    None.
+*/
 void addNewLine1(char *prefixLabel, int opcode, int immidiate1, int register2);
 
-/**
- *
- */
+/*
+    Function: addNewLine3
+    -------------------
+    Adds a new line of code to the program with a specific opcode, label, and register.
+
+    prefixLabel: The prefix label for the line.
+    opcode: The opcode for the instruction.
+    label1: The label to be used, or -1 if not used.
+    register2: The register to be used, or -1 if not used.
+
+    Inputs:
+    - prefixLabel: A pointer to a string representing the prefix label.
+    - opcode: An integer representing the opcode for the instruction.
+    - label1: An integer representing the label (or -1 if not used).
+    - register2: An integer representing the register (or -1 if not used).
+
+    Outputs:
+    None.
+*/
 void addNewLine3(char *prefixLabel, int opcode, int label1, int register2);
 
-/**
- *
- */
+/*
+    Function: addNewLine5
+    -------------------
+    Adds a new line of code to the program with a specific opcode and two registers.
+
+    prefixLabel: The prefix label for the line.
+    opcode: The opcode for the instruction.
+    register1: The first register to be used, or -1 if not used.
+    register2: The second register to be used, or -1 if not used.
+
+    Inputs:
+    - prefixLabel: A pointer to a string representing the prefix label.
+    - opcode: An integer representing the opcode for the instruction.
+    - register1: An integer representing the first register (or -1 if not used).
+    - register2: An integer representing the second register (or -1 if not used).
+
+    Outputs:
+    None.
+*/
 void addNewLine5(char *prefixLabel, int opcode, int register1, int register2);
 
-/**
- *
- */
+/*
+    Function: addNewLine
+    -------------------
+    Adds a new line of code to the program, determining the addressing methods
+    for the source and destination, validating the opcode, and encoding the operands.
+
+    opcode: The opcode for the instruction.
+    register1: The first register to be used, or -1 if not used.
+    register2: The second register to be used, or -1 if not used.
+    label1: The first label to be used, or NULL if not used.
+    label2: The second label to be used, or NULL if not used.
+    immediate1: The first immediate value to be used, or 0.5 if not used.
+    immediate2: The second immediate value to be used, or 0.5 if not used.
+
+    Inputs:
+    - opcode: An integer representing the opcode for the instruction.
+    - register1: An integer representing the first register (or -1 if not used).
+    - register2: An integer representing the second register (or -1 if not used).
+    - label1: A pointer to a string representing the first label (or NULL if not used).
+    - label2: A pointer to a string representing the second label (or NULL if not used).
+    - immediate1: A double representing the first immediate value (or 0.5 if not used).
+    - immediate2: A double representing the second immediate value (or 0.5 if not used).
+
+    Outputs:
+    None.
+*/
 void addNewLine(int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
 
 /**

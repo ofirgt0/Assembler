@@ -6,45 +6,12 @@
 #include <stdbool.h>
 
 /**
- * Structure for a line in the macro.
- */
-struct Line
-{
-    int commandIndex;
-    char code;
-    int opcode;
-    int dstRegister;
-    int srcRegister;
-    int address;
-    char *label;
-    char *originalCommand;
-    struct Line *next;
-};
-
-/**
- * Structure for a macro.
- */
-struct Macro
-{
-    char macroName[50];
-    struct Line *lines;
-    struct Macro *next;
-};
-
-/**
- * Add a new macro to the list of macros.
- * @param macroName The name of the macro to add.
- * @param fileName  The name of the file associated with the macro.
- * @param line      The line to add to the macro.
+ * Adds a new macro to the list of macros.
+ * @param macroName The name of the macro.
+ * @param fileName The name of the file associated with the macro.
+ * @param line The line structure representing the macro line to be added.
  */
 void addNewMacro(char *macroName, char *fileName, struct Line line);
-
-/**
- * Get a macro by its name.
- * @param macroName The name of the macro to retrieve.
- * @return Pointer to the Macro struct if found, NULL otherwise.
- */
-struct Macro *getMacro(char *macroName);
 
 /**
  * Check if a macro with the given name exists.
@@ -61,31 +28,49 @@ bool isMacroName(char *macroName);
  * @return true if the macro with the line exists, false otherwise.
  */
 void setExistMacro(char *macroName, struct Line line)
-    /**
-     * Send a macro with the given name for processing.
-     * @param macroName The name of the macro to send.
-     */
-    void sendMacro(char *macroName);
 
 #endif // MACRO_SERVICE_H
 
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
-struct macroData
-{
-    char *macroName;
-    int lineNumber;
-    int linesCount;
-    struct macroData *next;
-};
+    /*void addNode(struct linkedList *list, const char *macroName, int lineNumber, int linesCount);*/
 
-struct linkedList
-{
-    struct macroData *head;
-};
+    /**
+     * Get a macro by its name.
+     * @param macroName The name of the macro to retrieve.
+     * @return Pointer to the Macro struct if found, NULL otherwise.
+     */
+    struct Macro *getMacro(char *macroName);
 
-void addNode(struct linkedList *list, const char *macroName, int lineNumber, int linesCount);
-struct macroData *searchNode(struct linkedList *list, const char *macroName);
+/**
+ * Sends the bulk of lines corresponding to a macro to a specified file.
+ *
+ * @param macroName The name of the macro to send the lines of.
+ * @param fileName The name of the file to write the lines to.
+ */
+void sendMacro(char *macroName, char *fileName);
+
+/**
+ * Adds a new macro node to the linked list.
+ *
+ * @param macroName The name of the macro to be added.
+ * @param lineNumber The line number where the macro is defined.
+ */
+void addMacro(const char *macroName, int lineNumber);
+
+/**
+ * Searches for a macro node with the given macroName.
+ * @param macroName The name of the macro to search for.
+ * @return A pointer to the macro structure if found, or NULL if not found.
+ */
+struct Macro *searchNode(const char *macroName);
+
+/**
+ * Updates the linesCount property of the specified macro.
+ * @param macroName The name of the macro whose linesCount to update.
+ * @param newLinesCount The new value of the linesCount property.
+ */
+void updateLinesCount(const char *macroName, int newLinesCount);
 
 #endif /* LINKEDLIST_H */

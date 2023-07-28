@@ -1,12 +1,13 @@
 #include <stdio.h>
+#include "filesReader.h"
 
 void logNewLine(const char *line)
-{ // TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER
+{ /* TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER */
     printf("Processing line: %s\n", line);
 }
 
-// Function to read and process a file
-// Input: filename - the name of the file to be read and processed
+/* Function to read and process a file */
+/* Input: filename - the name of the file to be read and processed */
 void fileReader(const char *fileName)
 {
     FILE *file = fopen(fileName, "r");
@@ -18,7 +19,7 @@ void fileReader(const char *fileName)
 
     char line[256];
 
-    // first run - save label, macro. entry, extern, data and string
+    /* first run - save label, macro. entry, extern, data and string */
     while (fgets(line, sizeof(line), file) != NULL)
     {
         if (line == '\0')
@@ -57,7 +58,8 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
     while (currentLine < lineNumber && fgets(line, sizeof(line), file))
         currentLine++;
 
-    while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file)) {
+    while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
+    {
         logNewLine(line);
         parseCommand(line, fileName);
         currentLine++;
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Iterate through each command-line argument (file name)
+    /* Iterate through each command-line argument (file name) */
     for (i = 1; i < argc; i++)
         fileReader(argv[i]);
 

@@ -4,7 +4,6 @@
 #include <string.h>
 #include "errorsHandler.h"
 #include "dataService.h"
-#include "writeToFile.h"
 
 // TODO: validate if we need to move the define to the header file or should it stay here
 #define EXTERN_LABEL_TYPE "extern"
