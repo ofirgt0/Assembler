@@ -1,23 +1,20 @@
 CC = gcc
-CFLAGS = -Wall -ansi -pedantic 
+CFLAGS = -Wall -ansi -pedantic -std=c90
 
 # List of directories containing header files
 INCLUDE_DIRS = \
-    Assembler/Shared/DataStructures \
     Assembler/Shared/ExecutersHeaders \
     Assembler/HelpersHeaders \
     Assembler/MemoryServiceHeaders
 
 # List of source files
 SRCS = \
-    Assembler/Lib/Engines/commandsExecuter.c \
     Assembler/Lib/Engines/commandsIdentifier.c \
+    Assembler/Lib/Helpers/encoder.c \
     Assembler/Lib/Helpers/errorHandler.c \
-    Assembler/Lib/Helpers/stringConverter.c \
     Assembler/Lib/Helpers/writeToFile.c \
     Assembler/Lib/MemoryService/dataService.c \
     Assembler/Lib/MemoryService/macroService.c \
-    Assembler/Shared/DataStructures/data.c
 
 # Generate object file names from source file names
 OBJS = $(SRCS:.c=.o)

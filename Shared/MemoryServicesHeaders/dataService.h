@@ -3,71 +3,142 @@
 #include <stdbool.h>
 #include "errorsHandler.h"
 
-/* Extern declarations for global variables */
-extern int IC;         /* Instruction counter. */
-extern int DC;         /* Data counter. */
-extern int *codeImage; /* Holds all the instruction words. */
-extern int *dataImage; /* Holds all the data words. */
-
-/* Initialize the label lists. */
-extern static LabelNode *externalLabelList;
-extern static LabelNode *entryLabelList;
-extern static LabelNode *normalCommandLabelList;
-extern static DataLabel *dataLabelList;
-extern static StringLabel *stringLabelList;
-
-/* Representing the types of labels. */
-typedef enum
-{
-    External,     /* Represents an external label. */
-    Entry,        /* Represents an entry label. */
-    NormalCommand /* Represents a normal command label. */
-} LabelType;
-
-/* Define the label structure */
-typedef struct Label
-{
-    LabelType type;
-    char name[MAX_LABEL_NAME_LENGTH]; /* Holds the label's name. */
-    int address;                      /* Holds the label's address. */
-} Label;
-
-typedef struct LabelNode
-{
-    Label *label;
-    LabelNode *next;               /* Points to the next label in the linked list. */
-} LabelNode;
-
-/* Representing the data label structure. */
-typedef struct DataLabel
-{
-    Label *label;
-    int *data;
-    DataLabel *next;
-} DataLabel;
-
-/* Representing the string label structure. */
-typedef struct StringLabel
-{
-    Label *label;
-    char *string;
-    StringLabel *next;  
-} StringLabel;
-
-/* Function to search for a label in all linked lists.
- * @param labelName: The name of the label to search for.
+/**
+ * Searches for a label in all linked lists.
+ * @param labelName The name of the label to search for.
  * @return The found label or NULL if the label was not found.
  */
-Label *getLabel(const char *labelName);
+LabelNode *tryGetLabel(const char *labelName);
 
 /**
- * Function to add a new label by its type.
- * @param type: The type of the label.
- * @param address: The address of the label.
- * @param name: The name of the label.
- * @param additionalData: The additional data for the label (if any).
+ * Searches for a data label in the list.
+ * @param labelName The name of the label to search for.
+ * @return The found data label or NULL if the label was not found.
+ */
+DataLabel *tryGetDataLabel(char *labelName);
+
+/**
+ * Searches for a string label in the list.
+ * @param labelName The name of the label to search for.
+ * @return The found string label or NULL if the label was not found.
+ */
+StringLabel *tryGetStringLabel(char *labelName);
+
+/**
+ * Checks if a label exists in any of the lists.
+ * @param labelName The name of the label to check for.
+ * @return True if the label exists, false otherwise.
+ */
+bool isLabelExist(char *labelName);
+
+/**
+ * Determines the type of a label.
+ * @param labelType The type string of the label.
+ * @return The LabelType enum value corresponding to the type string.
+ */
+LabelType determineLabelType(char *labelType);
+
+/**
+ * Tries to add a new label by its type.
+ * @param type The type string of the label.
+ * @param labelName The name of the label.
  * @return True if the label was added successfully, false otherwise.
  */
-bool addNewLabelByType(LabelType type, int address, const char *name, void *additionalData);
+bool tryAddNewLabel(char *type, char *labelName);
 
-#endif /* DATASERVICE_H */
+/**
+ *
+ */
+void addNewLine1(char *prefixLabel, int opcode, int immidiate1, int register2);
+
+/**
+ *
+ */
+void addNewLine3(char *prefixLabel, int opcode, int label1, int register2);
+
+/**
+ *
+ */
+void addNewLine5(char *prefixLabel, int opcode, int register1, int register2);
+
+/**
+ *
+ */
+void addNewLine(int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
+
+/**
+ * Validates if an opcode matches the addressing method.
+ * @param opcode The opcode to validate.
+ * @param srcAddressing The source addressing method.
+ * @param dstAddressing The destination addressing method.
+ * @return True if the opcode matches the addressing method, false otherwise.
+ */
+bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstAddressing);
+
+/**
+ * Adds a new extern label.
+ * @param externName The name of the extern label.
+ * @return True if the label was added successfully, false otherwise.
+ */
+bool addNewExtern(char *externName);
+
+/**
+ * Adds a new entry label.
+ * @param entryName The name of the entry label.
+ * @return True if the label was added successfully, false otherwise.
+ */
+bool addNewEntry(char *entryName);
+
+/**
+ * Adds a new data label.
+ * @param data The data array.
+ * @param labelName The name of the data label.
+ * @return True if the label was added successfully, false otherwise.
+ */
+bool addData(int data[], char *labelName);
+
+/**
+ * Adds a new string label.
+ * @param string The string.
+ * @param labelName The name of the string label.
+ * @return True if the label was added successfully, false otherwise.
+ */
+bool addString(char *string, char *labelName);
+
+/**
+ * Adds a new label.
+ * @return True if the label was added successfully, false otherwise.
+ */
+bool addNewLabel();
+
+/**
+ * Searches for an extern label.
+ * @param externName The name of the extern label to search for.
+ * @return The address of the extern label if found, -1 otherwise.
+ */
+int searchExternLabel(char *externName);
+
+/**
+ * Searches for an entry label.
+ * @param entryName The name of the entry label to search for.
+ * @return The address of the entry label if found, -1 otherwise.
+ */
+int searchEntry(char *entryName);
+
+/**
+ * Searches for a data label.
+ * @param data The data array.
+ * @param labelName The name of the data label to search for.
+ * @return The address of the data label if found, -1 otherwise.
+ */
+int searchDataLabel(int data[], char *labelName);
+
+/**
+ * Searches for a string label.
+ * @param string The string.
+ * @param labelName The name of the string label to search for.
+ * @return The address of the string label if found, -1 otherwise.
+ */
+int searchStringLabel(char *string, char *labelName);
+
+#endif /* DATA_SERVICE_H */

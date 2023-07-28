@@ -69,23 +69,23 @@ void setExistMacro(char *macroName, struct Line line)
 
 #endif // MACRO_SERVICE_H
 
-
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
-struct macroData {
-    char* macroName;
+struct macroData
+{
+    char *macroName;
     int lineNumber;
     int linesCount;
-    struct macroData* next;
+    struct macroData *next;
 };
 
-struct linkedList {
-    struct macroData* head;
+struct linkedList
+{
+    struct macroData *head;
 };
 
-void addNode(struct linkedList* list, const char* macroName, int lineNumber, int linesCount);
-struct macroData* searchNode(struct linkedList* list, const char* macroName);
+void addNode(struct linkedList *list, const char *macroName, int lineNumber, int linesCount);
+struct macroData *searchNode(struct linkedList *list, const char *macroName);
 
 #endif /* LINKEDLIST_H */
-
