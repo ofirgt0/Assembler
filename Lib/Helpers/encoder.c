@@ -350,3 +350,6 @@ void encodeInstructionByDirectRegisterAddressing(char *commandName, int ARE, int
         break;
     }
 }
+
+// -------------------------------------------------
+

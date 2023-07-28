@@ -6,10 +6,14 @@
 #include "dataService.h"
 #include "writeToFile.h"
 
-//TODO: validate if we need to move the define to the header file or should it stay here
+// TODO: validate if we need to move the define to the header file or should it stay here
 #define EXTERN_LABEL_TYPE "extern"
 #define ENTRY_LABEL_TYPE "entry"
 #define NORMAL_LABEL_TYPE ""
+
+#define ARE_CODE_A 0
+#define ARE_CODE_R 10
+#define ARE_CODE_E 1
 
 #define MAX_LABEL_NAME_LENGTH 31
 
@@ -57,7 +61,7 @@ DataLabel *tryGetDataLabel(char *labelName)
     return currentDataLabel;
 }
 
-//NOTE: we defenetly could use generics here but it isnt in the course scope :)
+// NOTE: we defenetly could use generics here but it isnt in the course scope :)
 StringLabel *tryGetStringLabel(char *labelName)
 {
     StringLabel *currentDataLabel = dataLabelList;
@@ -65,7 +69,7 @@ StringLabel *tryGetStringLabel(char *labelName)
     {
         if (strcmp(currentDataLabel->label->name, labelName) == 0)
             break;
-        
+
         currentDataLabel = currentDataLabel->next;
     }
     return currentDataLabel;
@@ -73,12 +77,12 @@ StringLabel *tryGetStringLabel(char *labelName)
 
 bool isLabelExist(char *labelName)
 {
-    return (tryGetDataLabel(labelName) || tryGetLabel(labelName) || tryGetStringLabel(labelName)); 
+    return (tryGetDataLabel(labelName) || tryGetLabel(labelName) || tryGetStringLabel(labelName));
 }
 
-LabelType determineLabelType(char *labelType){
-    return strcmp(EXTERN_LABEL_TYPE,labelType) ? External : 
-        (strcmp(ENTRY_LABEL_TYPE,labelType) ? Entry : NormalCommand);  
+LabelType determineLabelType(char *labelType)
+{
+    return strcmp(EXTERN_LABEL_TYPE, labelType) ? External : (strcmp(ENTRY_LABEL_TYPE, labelType) ? Entry : NormalCommand);
 }
 
 /*
@@ -93,7 +97,7 @@ LabelType determineLabelType(char *labelType){
 bool tryAddNewLabel(char *type, char *labelName)
 {
     /* Check if the label already exists */
-    //Label *existingLabel = tryGetLabel(name);
+    // Label *existingLabel = tryGetLabel(name);
     if (isLabelExist(labelName))
     {
         /* If the label already exists, report an error - By reference from the "errorsHandler" file. */
@@ -104,8 +108,7 @@ bool tryAddNewLabel(char *type, char *labelName)
     LabelNode *newLabel = NULL;
     newLabel = (LabelNode *)malloc(sizeof(LabelNode));
 
-    LabelNode *relevantList =  strcmp(EXTERN_LABEL_TYPE, type) ? externalLabelList : 
-        (strcmp(ENTRY_LABEL_TYPE, type) ? entryLabelList : normalCommandLabelList);
+    LabelNode *relevantList = strcmp(EXTERN_LABEL_TYPE, type) ? externalLabelList : (strcmp(ENTRY_LABEL_TYPE, type) ? entryLabelList : normalCommandLabelList);
 
     newLabel->next = relevantList;
     relevantList = newLabel;
@@ -113,21 +116,21 @@ bool tryAddNewLabel(char *type, char *labelName)
 
     switch (determineLabelType(type))
     {
-        case External:
-            codeImage[IC] = address; /* Update the Code Image. */
-            break;
-        case Entry:
-            newLabel->next = entryLabelList;
-            entryLabelList = newLabel;
-            IC += sizeof(int);
-            codeImage[IC] = address; /* Update the Code Image. */
-            break;
-        case NormalCommand:
-            newLabel->next = normalCommandLabelList;
-            normalCommandLabelList = newLabel;
-            IC += sizeof(int);
-            codeImage[IC] = address; /* Update the Code Image. */
-            break;
+    case External:
+        codeImage[IC] = address; /* Update the Code Image. */
+        break;
+    case Entry:
+        newLabel->next = entryLabelList;
+        entryLabelList = newLabel;
+        IC += sizeof(int);
+        codeImage[IC] = address; /* Update the Code Image. */
+        break;
+    case NormalCommand:
+        newLabel->next = normalCommandLabelList;
+        normalCommandLabelList = newLabel;
+        IC += sizeof(int);
+        codeImage[IC] = address; /* Update the Code Image. */
+        break;
     }
 
     if (newLabel == NULL)
@@ -139,20 +142,124 @@ bool tryAddNewLabel(char *type, char *labelName)
     return true;
 }
 
-void addNewLine1(char* prefixLabel, int opcode, int immidiate1, int register2){}
+void addNewLine1(char *prefixLabel, int opcode, int immidiate1, int register2) {}
 
-void addNewLine3(char* prefixLabel, int opcode, int label1, int register2){}
+void addNewLine3(char *prefixLabel, int opcode, int label1, int register2)
+{
+    IC++; // for the base command
+    int dstAddressing = register2 == -1 ? 5 : 0;
+    int srcAddressing = label1 == -1 ? 3 : 0;
+    encodeInstructionCode(ARE_CODE_A, srcAddressing, opcode, dstAddressing); // in the encoder: (ARE, dstAddressing, opcode, srcAddressing)
 
-void addNewLine5(char* prefixLabel, int opcode, int register1, int register2){
-    IC++;
-    encode() // in the encoder
+    if (label1 == -1)
+        return;
+
+    IC++;                                                         // for another word
+    encodeRegisterInstructionCode(ARE_CODE_R, label1, register2); // in the encoder: (ARE, register1, 0, 0)
 }
 
+void addNewLine5(char *prefixLabel, int opcode, int register1, int register2)
+{
+    IC++; // for the base command
+    int dstAddressing = register2 == -1 ? 5 : 0;
+    int srcAddressing = register1 == -1 ? 5 : 0;
+    encodeInstructionCode(ARE_CODE_A, srcAddressing, opcode, dstAddressing); // in the encoder: (ARE, dstAddressing, opcode, srcAddressing)
+
+    if (register1 == -1)
+        return;
+
+    IC++;                                                            // for another word
+    encodeRegisterInstructionCode(ARE_CODE_A, register1, register2); // in the encoder: (ARE, register1, 0, 0)
+}
+
+//-------------------------------------------------------------
+
+void addNewLine(int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2)
+{
+    IC++; // for the base command
+
+    int dstAddressing = register2 == -1 ? 5 : (label2 != NULL ? 3 : (immidiate2 != 0.5 ? 1 : 0));
+    int srcAddressing = register1 == -1 ? 5 : (label1 != NULL ? 3 : (immidiate1 != 0.5 ? 1 : 0)); // 0.5 means null for int
+    /// TODO: move method addressing code 1 3 5 to enum
+
+    encodeInstructionCode(ARE_CODE_A, srcAddressing, opcode, dstAddressing);
+
+    // if dstAddressing is 0 do it means that its command with 1 opperand, 
+    // then we need to consider the srcAddressing as dstAddressing
+    bool commandValidation = (dstAddressing == 0) ? 
+        validateOpcodeMatchAddressingMethod(opcode, dstAddressing, srcAddressing):
+        validateOpcodeMatchAddressingMethod(opcode, srcAddressing, dstAddressing);
+
+    if (!commandValidation){
+        /// TODO: handle error
+    }
+
+    if (opcode > 13) // only 1 line for stop and rts
+        return;
+
+    if (register1 != -1)
+    {
+        IC++;
+        if (register2 != -1)
+        {
+            encodeRegistersOperands(ARE_CODE_A, register1, register2);
+            return;
+        }
+        else
+        {
+            encodeRegistersOperands(ARE_CODE_A, register1, 0);
+        }
+    }
+    else if (label1 != NULL)
+    {
+        IC++;
+        int address = tryGetLabel(label1)->label->address; /// TODO: we need to check if the label is external or entry to set the ARE code as well
+        encodeLabelOperand(ARE_CODE_R, label1, address);
+    }
+    else if (immidiate1 != 0.5)
+    {
+        IC++;
+        encodeImmidiateOperands(ARE_CODE_R, (int)immidiate1);
+    }
+
+    if (register2 != -1)
+    {
+        IC++;
+        encodeRegistersOperands(ARE_CODE_A, 0, register2);
+        return;
+    }
+    else if (label2 != NULL)
+    {
+        IC++;
+        int address = tryGetLabel(label2)->label->address; /// TODO: we need to check if the label is external or entry to set the ARE code as well
+        encodeLabelOperand(ARE_CODE_R, label2, address);
+    }
+    else if (immidiate2 != 0.5)
+    {
+        IC++;
+        encodeImmidiateOperands(ARE_CODE_A, (int)immidiate2);
+    }
+}
+
+bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstAddressing) // validate as page 48
+{
+    bool validateSrcAddressing = (opcode < 4 || (opcode == 6 && srcAddressing == 3)) || srcAddressing == 0;
+    bool validateDstAddressing = (opcode > 13 && dstAddressing == 0) ||
+                                 (opcode < 14 && (dstAddressing == 3 || dstAddressing == 5 || (dstAddressing == 1 && (opcode == 1 || opcode == 12))));
+    return validateSrcAddressing && validateDstAddressing;
+}
 
 /// TODO: (liron u can do it) create insert label for each type
+// foreach function return true if success else false
+bool addNewExtern(char *externName);
+bool addNewEntry(char *entryName);
+bool addData(int data[], char *labelName);
+bool addString(char *string, char *labelName);
+bool addNewLabel();
 
-void addNewExtern(char* externName);
-void addNewEntry(char* externName);
-void addData(int data[], char* labelName);
-void addString(char* string, char* labelName);
-void addNewLabel();
+// return address if exist, else return -1
+int searchExternLabel(char *externName);
+int searchEntry(char *externName);
+int searchDataLabel(int data[], char *labelName);
+int searchStringLabel(char *string, char *labelName);
+int searchLabel();

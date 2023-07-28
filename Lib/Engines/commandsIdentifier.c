@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include "commandsIdentifier.h"
 
-#define VAR_SEPERATOR ','
+#define VAR_SEPARATOR ','
 #define LABEL_SEPERATOR ':'
 #define COMMANDS_NUMBER 16
 #define REGISTER_PREFIX '@'
@@ -137,7 +137,7 @@ int getCommandIndexByList(char command[], char *list[])
     int commandLength = 0;
     int commandIndex = 0;
 
-    while (command[commandLength] != ' ' && command[commandLength] != '\t' && command[commandLength] != VAR_SEPERATOR && command[commandLength] != '\0')
+    while (command[commandLength] != ' ' && command[commandLength] != '\t' && command[commandLength] != VAR_SEPARATOR && command[commandLength] != '\0')
         commandLength++;
 
     for (commandIndex = 0; commandIndex < COMMANDS_NUMBER; commandIndex++) // TODO: change to real list length
@@ -354,7 +354,7 @@ void *commandParser(char *line, int commandIndex, char *label)
     }
     else // in this part we r in the case of 2 vars
     {
-        char *firstVar = getSubstringBySeperator(line, VAR_SEPERATOR);
+        char *firstVar = getSubstringBySeperator(line, VAR_SEPARATOR);
         int firstRegisterNumber = tryGetNumber(firstVar);
         if (firstVar != NaN) // validate NaN is a known word in c
         {
@@ -386,16 +386,16 @@ double tryGetNumber(char *str)
     return 0.0 / 0.0;
 }
 
-char *getSubstringBySeperator(char *str, char seperator)
+char *getSubstringBySeparator(char *str, char separator)
 {
-    if (input == NULL)
+    if (str == NULL)
         return NULL;
 
     // find the index of the separator (if present)
-    const char *separator_ptr = strchr(input, separator);
+    const char *separator_ptr = strchr(str, separator);
 
     // calculate the length of the new substring
-    size_t new_string_length = separator_ptr ? (size_t)(separator_ptr - input) : strlen(input);
+    size_t new_string_length = separator_ptr ? (size_t)(separator_ptr - str) : strlen(str);
 
     // allocate memory for the new substring
     char *new_string = (char *)malloc((new_string_length + 1) * sizeof(char));
@@ -405,7 +405,7 @@ char *getSubstringBySeperator(char *str, char seperator)
     }
 
     // copy characters from the input string to the new substring
-    strncpy(new_string, input, new_string_length);
+    strncpy(new_string, str, new_string_length);
     new_string[new_string_length] = '\0'; // null terminate the new substring
 
     return new_string;
@@ -433,38 +433,38 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 
     if (prefixIndex != -1)
     {
-        char *secondVar = command + strlen(commandsPrefix[prefixIndex]) // in this part we have the label in the hand
-                          switch (prefixIndex)
+        char *secondVar = command + strlen(commandsPrefix[prefixIndex]); // in this part we have the label in the hand
+        switch (prefixIndex)
         {
-        case 0: // extern
-        {
-            /// TODO: add warning for the option that label != null  as note in page 41
-            addNewExtern(secondVar); // TODO: in dataService
-            return;
-        }
-        case 1: // entry
-        {
-            addNewEntry(secondVar); // TODO: in dataService
-            return;
-        }
-        case 2: // mcro
-        {
-            strcpy(secondVar, currentMacro);
-            addMacro(secondVar, lineNumber); // TODO: splite between creating macro and insert new line to the macro
-            macroFlag = true;
-            return;
-        }
-        case 3: // endmcro
-        {
-            updateLinesCount(linesCounter);
+            case 0: // extern
+            {
+                /// TODO: add warning for the option that label != null  as note in page 41
+                addNewExtern(secondVar); // TODO: in dataService
+                return;
+            }
+            case 1: // entry
+            {
+                addNewEntry(secondVar); // TODO: in dataService
+                return;
+            }
+            case 2: // mcro
+            {
+                strcpy(secondVar, currentMacro);
+                addMacro(secondVar, lineNumber); // TODO: splite between creating macro and insert new line to the macro
+                macroFlag = true;
+                return;
+            }
+            case 3: // endmcro
+            {
+                updateLinesCount(linesCounter);
 
-            macroFlag = false;
-            currentMacro = NULL;
-            linesCounter = 0;
-            return;
-        }
-        default: // useless
-            return;
+                macroFlag = false;
+                currentMacro = NULL;
+                linesCounter = 0;
+                return;
+            }
+            default: // useless
+                return;
         }
     }
 }
@@ -486,7 +486,6 @@ void *commandParser(char *command)
     command = command + strlen(commandsNames[commandIndex]);
     replaceMultipleSpaces(command);
 
-    strcpy(newLine->originalCommand, command);
     if (commandIndex > 13) // 0 vars
     {
         if (strlen(command) > 0)
@@ -519,7 +518,7 @@ void *commandParser(char *command)
     }
     else // in this part we r in the case of 2 vars
     {
-        char *firstVar = getSubstringBySeperator(line, VAR_SEPERATOR);
+        char *firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; // +1 for seperator ,
 
         if (firstVar[0] == '-' || isDigit(firstVar[0])) // validate NaN is a known word in c
@@ -539,6 +538,7 @@ void *commandParser(char *command)
             if (isRegisterName(command))
             {
                 addNewLine3(label, commandIndex, firstVar, command);
+                addNewLine(commandIndex, firstVar, command, NULL, NULL, 0, 0);
             }
         }
         else
