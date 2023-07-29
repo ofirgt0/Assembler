@@ -2,43 +2,40 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
 #include "errorsHandler.h"
 #include "dataService.h"
 #include "writeToFile.h"
 
-/*TODO: validate if we need to move the define to the header file or should it stay here*/
-#define EXTERN_LABEL_TYPE "extern"
-#define ENTRY_LABEL_TYPE "entry"
-#define NORMAL_LABEL_TYPE ""
-#define DATA_LABEL_TYPE "data"
-#define STRING_LABEL_TYPE "string"
-
-#define ARE_CODE_A 'A'
-#define ARE_CODE_R 'R'
-#define ARE_CODE_E 'E'
-
-#define MAX_LABEL_NAME_LENGTH 31
-
 /* Representing the types of labels. */
 typedef enum
 {
-    External,     /* Represents an external label. */
-    Entry,        /* Represents an entry label. */
-    NormalCommand /* Represents a normal command label. */
+    External,
+    Entry,
+    NormalCommand
 } LabelType;
+
+/* AddressingMethod defines types of operand addressing: None (Code 0), ImmediateAddressing method (Code 1), DirectAddressing method (Code 3), and RegisterDirectAddressing method (Code 5). */
+typedef enum
+{
+    None = 0,
+    Immediate = 1,
+    Direct = 3,
+    RegisterDirect = 5
+} AddressingMethod;
 
 /* Define the label structure */
 typedef struct Label
 {
     LabelType type;
-    char name[MAX_LABEL_NAME_LENGTH]; /* Holds the label's name. */
-    int address;                      /* Holds the label's address. */
+    char name[MAX_LABEL_NAME_LENGTH];
+    int address;
 } Label;
 
 typedef struct LabelNode
 {
     Label *label;
-    LabelNode *next; /* Points to the next label in the linked list. */
+    LabelNode *next;
 } LabelNode;
 
 /* Representing the data label structure. */
@@ -68,19 +65,25 @@ static StringLabel *stringLabelList = NULL;
 static int IC = 100; /* Instruction counter. */
 static int DC = 0;   /* Data counter. */
 
+/**
+ * The addNewLine function is responsible for adding new lines of machine code
+ * to the program image. It accepts the opcode, registers, labels, and immediates
+ * as arguments and adds them to the binary code. This function also handles encoding
+ * of the operands based on the type of addressing and increments the IC (Instruction Counter).
+ * Note: -1 is used to indicate an empty register slot.
+ */
 void addNewLine(int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2)
 {
 
-    int dstAddressing = register2 != -1 ? 5 : (label2 != NULL ? 3 : (immidiate2 != 0.5 ? 1 : 0));
-    int srcAddressing = register1 != -1 ? 5 : (label1 != NULL ? 3 : (immidiate1 != 0.5 ? 1 : 0)); /*0.5 means null for int*/
-    /*TODO: move method addressing code 1 3 5 to enum*/
+    AddressingMethod dstAddressing = register2 != -1 ? RegisterDirect : (label2 != NULL ? Direct : (immidiate2 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
+    AddressingMethod srcAddressing = register1 != -1 ? RegisterDirect : (label1 != NULL ? Direct : (immidiate1 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
 
     IC++; /*for the base command*/
     encodeInstructionCode(ARE_CODE_A, srcAddressing, opcode, dstAddressing);
 
     /*if dstAddressing is 0 do it means that its command with 1 opperand,*/
     /*then we need to consider the srcAddressing as dstAddressing*/
-    bool commandValidation = (dstAddressing == 0) ? validateOpcodeMatchAddressingMethod(opcode, dstAddressing, srcAddressing) : validateOpcodeMatchAddressingMethod(opcode, srcAddressing, dstAddressing);
+    bool commandValidation = (dstAddressing == None) ? validateOpcodeMatchAddressingMethod(opcode, dstAddressing, srcAddressing) : validateOpcodeMatchAddressingMethod(opcode, srcAddressing, dstAddressing);
 
     if (!commandValidation)
     {
@@ -134,6 +137,12 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
     }
 }
 
+/**
+ * The validateOpcodeMatchAddressingMethod function checks if the opcode matches
+ * the addressing methods. It accepts the opcode, source addressing, and destination
+ * addressing as arguments and checks if they are valid according to the assembly
+ * language rules. It returns true if the validation is successful and false otherwise.
+ */
 bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstAddressing) /*validate as page 48*/
 {
     bool validateSrcAddressing = (opcode < 4 || (opcode == 6 && srcAddressing == 3)) || srcAddressing == 0;
@@ -142,6 +151,13 @@ bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstA
     return validateSrcAddressing && validateDstAddressing;
 }
 
+/**
+ * The addNewExtern function is used to add a new external label to the label list.
+ * It accepts the name of the external label as an argument. This function creates
+ * a new Label instance, sets the label type to External, sets the label name, and
+ * appends it to the externalLabelList. It returns true if the operation is successful
+ * and false otherwise (e.g., if memory allocation fails).
+ */
 bool addNewExtern(char *externName)
 {
     Label *label = (Label *)malloc(sizeof(Label));
@@ -170,6 +186,13 @@ bool addNewExtern(char *externName)
     return true;
 }
 
+/**
+ * The addNewEntry function is used to add a new entry label to the label list.
+ * It accepts the name of the entry label as an argument. This function creates
+ * a new Label instance, sets the label type to Entry, sets the label name, and
+ * appends it to the entryLabelList. It returns true if the operation is successful
+ * and false otherwise (e.g., if memory allocation fails).
+ */
 bool addNewEntry(char *entryName)
 {
     Label *label = (Label *)malloc(sizeof(Label));
@@ -198,6 +221,14 @@ bool addNewEntry(char *entryName)
     return true;
 }
 
+/**
+ * The addData function is used to add a new data label to the data label list.
+ * It accepts an array of data and the name of the label as arguments. This function
+ * creates a new Label and DataLabel instances, sets the label type to Data, sets
+ * the label name and data, and appends it to the dataLabelList. It also increments
+ * the DC (Data Counter) accordingly. It returns true if the operation is successful
+ * and false otherwise (e.g., if memory allocation fails).
+ */
 bool addData(int data[], char *labelName)
 {
     DC++;
@@ -230,6 +261,14 @@ bool addData(int data[], char *labelName)
     return true;
 }
 
+/**
+ * The addString function is used to add a new string label to the string label list.
+ * It accepts a string and the name of the label as arguments. This function creates
+ * a new Label and StringLabel instances, sets the label type to String, sets the label
+ * name and string, and appends it to the stringLabelList. It also increments the DC (Data Counter)
+ * by the length of the string. It returns true if the operation is successful
+ * and false otherwise (e.g., if memory allocation fails).
+ */
 bool addString(char *string, char *labelName)
 {
     DC++;
@@ -262,6 +301,13 @@ bool addString(char *string, char *labelName)
     return true;
 }
 
+/**
+ * The addNewLabel function is used to add a new label to the normal command label list.
+ * It accepts the name of the label as an argument. This function creates a new Label
+ * instance, sets the label type to NormalCommand, sets the label name and address (which is the current IC),
+ * and appends it to the normalCommandLabelList. It returns true if the operation is successful
+ * and false otherwise (e.g., if memory allocation fails).
+ */
 bool addNewLabel(char *labelName)
 {
     Label *label = (Label *)malloc(sizeof(Label));
@@ -291,11 +337,20 @@ bool addNewLabel(char *labelName)
     return true;
 }
 
+/**
+ * The increaseIC function is used to increment the IC (Instruction Counter) by a given value.
+ * This function is typically used after a machine instruction or directive has been processed.
+ */
 void increaseIC(int value)
 {
     IC += value;
 }
 
+/**
+ * The searchExternLabel function searches for an external label in the label list by its name.
+ * It traverses the externalLabelList and compares each label's name with the given name.
+ * If it finds a match, it returns the address of the label. If it doesn't find a match, it returns -1.
+ */
 int searchExternLabel(char *externName)
 {
     LabelNode *current = externalLabelList;
@@ -310,6 +365,11 @@ int searchExternLabel(char *externName)
     return -1; /*Label was not found*/
 }
 
+/**
+ * The searchEntry function searches for an entry label in the label list by its name.
+ * It traverses the entryLabelList and compares each label's name with the given name.
+ * If it finds a match, it returns the address of the label. If it doesn't find a match, it returns -1.
+ */
 int searchEntry(char *entryName)
 {
     LabelNode *current = entryLabelList;
@@ -324,6 +384,12 @@ int searchEntry(char *entryName)
     return -1; /*Label was not found*/
 }
 
+/**
+ * The searchDataLabel function searches for a data label in the data label list by its name.
+ * It traverses the dataLabelList and compares each label's name with the given name.
+ * If it finds a match, it returns the address of the label (adjusted by the current IC).
+ * If it doesn't find a match, it returns -1.
+ */
 int searchDataLabel(int data[], char *labelName)
 {
     DataLabel *current = dataLabelList;
@@ -338,6 +404,12 @@ int searchDataLabel(int data[], char *labelName)
     return -1; /*Label was not found*/
 }
 
+/**
+ * The searchStringLabel function searches for a string label in the string label list by its name.
+ * It traverses the stringLabelList and compares each label's name and string with the given name and string.
+ * If it finds a match, it returns the address of the label (adjusted by the current IC).
+ * If it doesn't find a match, it returns -1.
+ */
 int searchStringLabel(char *string, char *labelName)
 {
     StringLabel *current = stringLabelList;

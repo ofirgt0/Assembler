@@ -1,8 +1,8 @@
-#include "macroService.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "macroService.h"
 
 /**
  * Checks if a given macro name exists.
@@ -13,14 +13,6 @@ bool isMacroName(char *macroName)
 {
     return getMacro(macroName) != NULL;
 }
-
-typedef struct macroDataNode
-{
-    char *macroName;
-    int lineNumber;
-    int linesCount;
-    struct macroDataNode *next;
-};
 
 /**
  * Retrieves a macro based on its name.

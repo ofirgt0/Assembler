@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "writeToFile.h"
-#include "errorHandler.h"
+#include "errorsHandler.h"
 
 void encodLabelOperand(char *fileName, char AREcode, int address);
 void encodImmidiate(char *fileName, int immidiate);

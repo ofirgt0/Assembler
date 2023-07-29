@@ -1,13 +1,20 @@
 #ifndef ERRORSHANDLER_H
 #define ERRORSHANDLER_H
-#include <stdio.h>
-#include <stdlib.h>
+
+#define ERROR_MISSING_COMMA "Illegal comma\n"
+#define ERROR_MISSING_PARAMETER "Missing parameter\n"
+#define ERROR_INVALID_COMMAND "Undefined command name\n"
+#define ERROR_UNDEFINED_COMPLEX_VAR "Undefined complex variable\n"
+#define ERROR_EXTRANEOUS_TEXT "Extraneous text after end of command\n"
+#define ERROR_MULTIPLE_CONSECUTIVE_COMMAS "Multiple consecutive commas\n"
+#define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
+#define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
 
 /* Prints the error log prefix.
  * @param fileName The name of the file where the error occurred.
  * @param address The address at which the error occurred.
  */
-void printLogPrefix(const char *fileName, int address);
+void printLogPrefix(char *fileName, int address);
 
 /* Retrieves the total count of errors.
  * @return The count of errors.

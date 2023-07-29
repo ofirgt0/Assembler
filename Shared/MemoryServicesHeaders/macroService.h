@@ -1,10 +1,14 @@
 #ifndef MACROSERVICE_H
 #define MACROSERVICE_H
 
-#include <stdbool.h>
-
 /* Forward declaration of the opaque struct. */
-typedef struct macroDataNode macroDataNode;
+typedef struct macroDataNode
+{
+    char *macroName;
+    int lineNumber;
+    int linesCount;
+    struct macroDataNode *next;
+};
 
 /**
  * Checks if a given macro name exists.
@@ -18,7 +22,7 @@ bool isMacroName(char *macroName);
  * @param macroName The name of the macro.
  * @return The macro structure if found, or NULL if not found.
  */
-macroDataNode *getMacro(char *macroName);
+struct macroDataNode *getMacro(char *macroName);
 
 /**
  * Sends a macro to a file.
@@ -39,7 +43,7 @@ void addMacro(const char *macroName, int lineNumber);
  * @param macroName The name of the macro.
  * @return The macro data node if found, or NULL if not found.
  */
-macroDataNode *searchNode(const char *macroName);
+struct macroDataNode *searchNode(const char *macroName);
 
 /**
  * Updates the lines count of a macro.

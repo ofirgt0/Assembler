@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include "filesReader.h"
 
 /*void logNewLine(const char *line)
-{ TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER
+{
     printf("Processing line: %s\n", line);
 }*/
+/*TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER*/
 
 /**
  *  This function reads and processes a given file.
@@ -53,14 +55,15 @@ void fileReader(const char *fileName)
  */
 void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 {
+    char line[256];
+    int currentLine;
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
         printf("Failed to open file: %s\n", fileName);
         return;
     }
-    int currentLine = 1;
-    char line[256];
+    currentLine = 1;
 
     while (currentLine < lineNumber && fgets(line, sizeof(line), file))
         currentLine++;
@@ -82,17 +85,17 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 void removePrefixSpaces(char *command)
 {
     int i, j;
-    for (i = 0, j = 0; command[i]; i++)
+
+    for (i = 0; command[i] == ' ' || command[i] == '\n' || command[i] == '\t'; i++)
     {
-        if (command[i] == ' ' || command[i] == '\n' || command[i] == '\t')
-        {
-            command++;
-        }
-        else
-        {
-            return;
-        }
     }
+
+    for (j = 0; command[i]; j++, i++)
+    {
+        command[j] = command[i];
+    }
+
+    command[j] = '\0';
 }
 
 /**

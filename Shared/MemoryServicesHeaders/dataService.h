@@ -1,14 +1,19 @@
 #ifndef DATASERVICE_H
 #define DATASERVICE_H
 
-#include <stdbool.h>
 #include "errorsHandler.h"
 
-/* Forward declaration of the opaque structs. */
-typedef struct Label Label;
-typedef struct LabelNode LabelNode;
-typedef struct DataLabel DataLabel;
-typedef struct StringLabel StringLabel;
+#define EXTERN_LABEL_TYPE "extern"
+#define ENTRY_LABEL_TYPE "entry"
+#define NORMAL_LABEL_TYPE ""
+#define DATA_LABEL_TYPE "data"
+#define STRING_LABEL_TYPE "string"
+
+#define ARE_CODE_A 'A'
+#define ARE_CODE_R 'R'
+#define ARE_CODE_E 'E'
+
+#define MAX_LABEL_NAME_LENGTH 31
 
 /**
  * Add a new line with the given parameters.

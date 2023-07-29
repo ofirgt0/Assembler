@@ -1,9 +1,19 @@
 #ifndef COMMANDS_IDENTIFIER_H
 #define COMMANDS_IDENTIFIER_H
 
-#include <stdbool.h>
-
-/* extern char *commandsNames[]; -- ?? */
+#define VAR_SEPARATOR ','
+#define LABEL_SEPERATOR ':'
+#define COMMANDS_NUMBER 16
+#define REGISTER_PREFIX '@'
+#define FLOAT_NUMBER_DOT '.'
+#define MAX_COMMAND_LENGTH 100
+#define COMMANDS_PREFIX_NUMBER 6
+#define MACRO_COMMAND "mcro"
+#define END_MACRO_COMMAND "endmcro"
+#define DEFAULT_ADDRESS 0
+#define ABSOLUTE_A_R_E_DECIMAL_CODE 0
+#define EXTERNAL_A_R_E_DECIMAL_CODE 1
+#define RELOCATABLE_A_R_E_DECIMAL_CODE 2
 
 /* Forward declaration of the opaque struct. */
 typedef struct commandsIdentifier commandsIdentifier;
@@ -14,6 +24,15 @@ typedef struct Line Line; /*Added this line*/
  * @param str the input string.
  */
 void replaceMultipleSpaces(char *str);
+
+/**
+ * This function removes leading white space characters from a given string.
+ * The function iterates over the string, identifies the leading spaces, and then
+ * shifts the remaining characters to the start of the string, effectively removing the spaces.
+ * The string is then null-terminated at the end to ensure it's still a valid C-string.
+ * @param command The input string from which leading spaces will be removed. This string is modified in-place.
+ */
+void removePrefixSpaces(char *command);
 
 /**
  * Get the index of a command in the commandsNames array.
@@ -88,6 +107,6 @@ int determineLinesNumber(char *command);
  * @param command the command string.
  * @param fileName the name of the input file.
  */
-void *commandParser(char *command, char *fileName);
+void commandParser(char *command, char *fileName);
 
 #endif /* COMMANDSIDENTIFIER_H */

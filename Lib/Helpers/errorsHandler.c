@@ -1,6 +1,6 @@
-#include "errorsHandler.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "errorsHandler.h"
 
 /* Variable to store the count of errors */
 static int errorsCounter = 0;

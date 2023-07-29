@@ -1,8 +1,6 @@
-#include "writeToFile.h"
 #include <stdio.h>
 #include <stdbool.h>
-
-#define WORD_LENGTH 12
+#include "writeToFile.h"
 
 /**
  * Write an integer array as a string to a file on the last line.
