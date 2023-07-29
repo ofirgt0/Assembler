@@ -248,7 +248,7 @@ void updateLinesCount(const char *macroName, int newLinesCount)
         if (strcmp(current->macroName, macroName) == 0)
         {
             current->linesCount = newLinesCount;
-            /* Update the linesCount property * / 
+            /* Update the linesCount property */
             return;
         }
         current = current->next;

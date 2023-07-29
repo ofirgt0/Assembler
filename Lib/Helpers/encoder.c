@@ -22,14 +22,14 @@ void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int o
     setBinaryCodeInRange(3, 6, opcode, code);
     setBinaryCodeInRange(7, 9, dstAddressing, code);
     setARE(AREcode, code);
-} // in the encoder: (ARE, dstAddressing, opcode, srcAddressing)
+} /*in the encoder: (ARE, dstAddressing, opcode, srcAddressing)*/
 
 void encodLabelOperand(char *fileName, char AREcode, int address)
 {
     int code[12] = {0};
     setBinaryCodeInRange(0, 9, address, code);
     setARE(AREcode, code);
-    // printCommandToFile(fileName, code); // Implement printCommandToFile function
+    /*printCommandToFile(fileName, code); // Implement printCommandToFile function*/
 }
 
 void encodImmidiate(char *fileName, int immediate)
@@ -37,7 +37,7 @@ void encodImmidiate(char *fileName, int immediate)
     int code[12] = {0};
     setBinaryArray(code, immediate);
     setARE('A', code);
-    // printCommandToFile(fileName, code); // Implement printCommandToFile function
+    /*printCommandToFile(fileName, code); // Implement printCommandToFile function*/
 }
 
 void encodeRegister(char *fileName, int register1, int register2)
@@ -46,13 +46,13 @@ void encodeRegister(char *fileName, int register1, int register2)
     setBinaryCodeInRange(0, 4, register1, code);
     setBinaryCodeInRange(5, 9, register2, code);
     setARE('A', code);
-    // printCommandToFile(fileName, code); // Implement printCommandToFile function
+    /*printCommandToFile(fileName, code); // Implement printCommandToFile function*/
 }
 
 void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])
 {
     for (int i = endCell; i >= startCell; i--)
-    { /// TODO: make sure its work correctly
+    { /*TODO: make sure its work correctly*/
         arr[i] = number % 2;
         number /= 2;
     }
@@ -80,7 +80,7 @@ void setARE(char AREcode, int *commandCode)
     }
 }
 
-void setBinaryArray(int arr[], int decimalNumber) // ?
+void setBinaryArray(int arr[], int decimalNumber) /*? - TODO: to check if this was the meaning of the function goal*/
 {
     int i;
 

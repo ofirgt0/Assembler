@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -c -Wall -ansi -pedantic
 
 # Define any directories containing header files 
-INCLUDES = -I./Assembler/Shared/ExecutersHeaders -I./Assembler/Shared/HelpersHeaders -I./Assembler/Shared/MemoryServicesHeaders
+INCLUDES = -I./Assembler/Shared/PassesParserHeader -I./Assembler/Shared/HelpersHeaders -I./Assembler/Shared/MemoryServicesHeaders
 
 # Define any libraries to link into executable:
 LIBS = -lm
@@ -27,7 +27,7 @@ $(MAIN): $(OBJS)
 filesReader.o: Assembler/Lib/Helpers/filesReader.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-commandsIdentifier.o: Assembler/Lib/PassesParsers/commandsIdentifier.c
+commandsIdentifier.o: Assembler/Lib/PassesParser/commandsIdentifier.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 macroServices.o: Assembler/Lib/MemoryServices/macroServices.c

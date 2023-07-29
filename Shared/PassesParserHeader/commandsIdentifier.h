@@ -3,14 +3,6 @@
 
 #include <stdbool.h>
 
-/* Forward declaration of Label * /
-    struct Label;
-
-/* Forward declaration of Line */
-struct Line;
-
-extern char *commandsNames[]; // because the using by the encoder ?
-
 /**
  * Check if the given command is a known macro.
  * @param command The command to check.
@@ -94,6 +86,14 @@ void commandIdentifier(char command[], char *fileName);
 int getCharIndexBySeparatorIndex(const char *str, int sepIndex);
 
 /**
+ * Returns the index of the first occurrence of a specified separator in a string.
+ * @param str The string to search.
+ * @param separator The separator character to find.
+ * @return The index of the first occurrence of the separator in the string, or 0 if not found.
+ */
+int getCharIndexBySeparator(char *str, char separator);
+
+/**
  * Function: tryGetLabel
  * ---------------------
  *   Tries to get a label from a command string.
@@ -112,17 +112,6 @@ char *tryGetLabel(char *command);
  *   @returns: A pointer to the new string. The caller is responsible for freeing this string.
  */
 char *cutString(const char *str, int startIndex, int endIndex);
-
-/**
- * Function: commandParser
- * -----------------------
- *   Parses a line of command.
- *   @param line: The line to parse.
- *   @param commandIndex: The index of the command in the commandsNames array.
- *   @param label: The label associated with the command.
- *   @returns: A pointer to a Line structure representing the parsed line.
- */
-struct Line *commandParser(char *line, int commandIndex, char *label);
 
 /**
  * Function: tryGetNumber
@@ -153,5 +142,14 @@ char *getSubstringBySeparator(char *str, char separator);
  *   @returns: void
  */
 void startFirstRun(char command[], int lineNumber, char *fileName);
+
+/**
+ * Parses a command line.
+ * @param line The command line to parse.
+ * @param commandIndex The index of the command in the list of known commands.
+ * @param label The label associated with the command, if any.
+ * @return A pointer to a Line structure representing the parsed command line.
+ */
+void *commandParser(char *line, int commandIndex, char *label);
 
 #endif /* COMMANDSIDENTIFIER_H */

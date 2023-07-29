@@ -6,6 +6,12 @@
 #include <stdbool.h>
 
 /**
+ * Forward declaration of the struct Line.
+ * Usage: struct Line* pointer_variable_name;
+ */
+struct Line;
+
+/**
  * Adds a new macro to the list of macros.
  * @param macroName The name of the macro.
  * @param fileName The name of the file associated with the macro.
