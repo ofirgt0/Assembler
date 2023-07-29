@@ -1,91 +1,48 @@
-#ifndef MACRO_SERVICE_H
-#define MACRO_SERVICE_H
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef MACROSERVICE_H
+#define MACROSERVICE_H
+
 #include <stdbool.h>
 
 /**
- * Structure for a line in the macro.
+ * Checks if a given macro name exists.
+ * @param macroName The name of the macro.
+ * @return true if the macro name exists, false otherwise.
  */
-struct Line
-{
-    int commandIndex;
-    char code;
-    int opcode;
-    int dstRegister;
-    int srcRegister;
-    int address;
-    char *label;
-    char *originalCommand;
-    struct Line *next;
-};
+bool isMacroName(char* macroName);
 
 /**
- * Structure for a macro.
+ * Retrieves a macro based on its name.
+ * @param macroName The name of the macro.
+ * @return The macro structure if found, or NULL if not found.
  */
-struct Macro
-{
-    char macroName[50];
-    struct Line *lines;
-    struct Macro *next;
-};
+struct macroDataNode* getMacro(char* macroName);
 
 /**
- * Add a new macro to the list of macros.
- * @param macroName The name of the macro to add.
- * @param fileName  The name of the file associated with the macro.
- * @param line      The line to add to the macro.
+ * Sends the macro data to a given file.
+ * @param macroName The name of the macro.
+ * @param fileName The name of the output file.
  */
-void addNewMacro(char *macroName, char *fileName, struct Line line);
+void sendMacro(char* macroName, char* fileName);
 
 /**
- * Get a macro by its name.
- * @param macroName The name of the macro to retrieve.
- * @return Pointer to the Macro struct if found, NULL otherwise.
+ * Adds a new macro to the list of macros.
+ * @param macroName The name of the macro to be added.
+ * @param lineNumber The line number where the macro is defined.
  */
-struct Macro *getMacro(char *macroName);
+void addMacro(const char* macroName, int lineNumber);
 
 /**
- * Check if a macro with the given name exists.
- * @param macroName The name of the macro to check.
- * @return true if the macro exists, false otherwise.
+ * Searches for a macro node with the given macro name.
+ * @param macroName The name of the macro to search for.
+ * @return The macro node if found, or NULL if not found.
  */
-bool isMacroName(char *macroName);
+struct macroDataNode* searchNode(const char* macroName);
 
 /**
- * Check if a macro with the given name and line exists.
- * @param macroName The name of the macro to check.
- * @param fileName  The name of the file associated with the macro.
- * @param line      The line to check.
- * @return true if the macro with the line exists, false otherwise.
+ * Updates the line count of a macro in the list of macros.
+ * @param macroName The name of the macro to update.
+ * @param newLinesCount The new line count for the macro.
  */
-void setExistMacro(char *macroName, struct Line line)
-    /**
-     * Send a macro with the given name for processing.
-     * @param macroName The name of the macro to send.
-     */
-    void sendMacro(char *macroName);
+void updateLinesCount(const char* macroName, int newLinesCount);
 
-#endif // MACRO_SERVICE_H
-
-#ifndef LINKEDLIST_H
-#define LINKEDLIST_H
-
-struct macroData
-{
-    char *macroName;
-    int lineNumber;
-    int linesCount;
-    struct macroData *next;
-};
-
-struct linkedList
-{
-    struct macroData *head;
-};
-
-void addNode(struct linkedList *list, const char *macroName, int lineNumber, int linesCount);
-struct macroData *searchNode(struct linkedList *list, const char *macroName);
-
-#endif /* LINKEDLIST_H */
+#endif /* MACROSERVICE_H */
