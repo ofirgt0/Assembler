@@ -74,3 +74,46 @@ void setARE(char AREcode, int *commandCode)
             exit(1);
     }
 }
+
+
+// Base64 character table
+const char base64Chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+// Function to encode a binary array to Base64
+char* encodeToBase64(const int* binaryArray, size_t length) {
+    size_t base64Len = 4 * ((length + 2) / 3); // Calculate the length of Base64 string
+
+    char* base64String = (char*)malloc(base64Len + 1);
+    if (!base64String) {
+        printf("Memory allocation failed.\n");
+        return NULL;
+    }
+
+    size_t i = 0, j = 0;
+    while (i < length) {
+        unsigned int buffer = 0;
+        int bitsRemaining = 24;
+
+        // Collect 3 bytes (24 bits) from the binary array
+        while (bitsRemaining && i < length) {
+            buffer = (buffer << 8) | binaryArray[i];
+            bitsRemaining -= 8;
+            i++;
+        }
+
+        // Append the Base64 characters to the result string
+        int shift = 18;
+        while (j < base64Len) {
+            base64String[j++] = base64Chars[(buffer >> shift) & 0x3F];
+            shift -= 6;
+        }
+    }
+
+    // Add padding characters if needed
+    while (j % 4 != 0) {
+        base64String[j++] = '=';
+    }
+
+    base64String[j] = '\0';
+    return base64String;
+}
