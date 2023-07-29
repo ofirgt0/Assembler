@@ -1,38 +1,61 @@
+# Define the C compiler to use
 CC = gcc
-CFLAGS = -Wall -ansi -pedantic -std=c90
 
-# List of directories containing header files
-INCLUDE_DIRS = \
-    Assembler/Shared/ExecutersHeaders \
-    Assembler/HelpersHeaders \
-    Assembler/MemoryServiceHeaders
+# Define any compile-time flags
+CFLAGS = -c -Wall -ansi -pedantic
 
-# List of source files
-SRCS = \
-    Assembler/Lib/Engines/commandsIdentifier.c \
-    Assembler/Lib/Helpers/encoder.c \
-    Assembler/Lib/Helpers/errorHandler.c \
-    Assembler/Lib/Helpers/writeToFile.c \
-    Assembler/Lib/MemoryService/dataService.c \
-    Assembler/Lib/MemoryService/macroService.c \
+# Define any directories containing header files 
+INCLUDES = -I./Assembler/Shared/PassesParserHeader -I./Assembler/Shared/HelpersHeaders -I./Assembler/Shared/MemoryServicesHeaders
 
-# Generate object file names from source file names
-OBJS = $(SRCS:.c=.o)
+# Define any libraries to link into executable:
+LIBS = -lm
 
-# Name of the executable
-EXEC = program
+# Define the executable file 
+MAIN = Assembler
 
-# Default target
-all: $(EXEC)
+# Define the object files
+OBJS = filesReader.o commandsIdentifier.o macroServices.o dataServices.o errorsHandler.o writeToFile.o encoder.o
 
-# Rule to compile C source files into object files
-%.o: %.c
-	$(CC) $(CFLAGS) -I$(INCLUDE_DIRS) -c $< -o $@
+.PHONY: all clean
 
-# Rule to link object files into an executable
-$(EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $@
+all: $(MAIN)
+	@echo  Assembler has been compiled
+
+$(MAIN): $(OBJS)
+	$(CC) -Wall -ansi -pedantic -o $(MAIN) $^ $(LIBS)
+
+filesReader.o: Assembler/Lib/Helpers/filesReader.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+commandsIdentifier.o: Assembler/Lib/PassesParser/commandsIdentifier.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+macroServices.o: Assembler/Lib/MemoryServices/macroServices.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+dataServices.o: Assembler/Lib/MemoryServices/dataServices.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+errorsHandler.o: Assembler/Lib/Helpers/errorsHandler.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+writeToFile.o: Assembler/Lib/Helpers/writeToFile.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+encoder.o: Assembler/Lib/Helpers/encoder.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 # Clean target to remove object files and the executable
 clean:
-	rm -f $(OBJS) $(EXEC)
+	$(RM) *.o *~ $(MAIN)
+
+
+
+
+
+
+
+
+
+
+

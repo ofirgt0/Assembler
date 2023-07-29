@@ -3,24 +3,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/**
- * Prints the error log prefix.
- * @param fileName The name of the file.
- * @param address  The address of the error.
+/* Prints the error log prefix.
+ * @param fileName The name of the file where the error occurred.
+ * @param address The address at which the error occurred.
  */
 void printLogPrefix(const char *fileName, int address);
 
-/**
- * Gets the count of errors.
+/* Retrieves the total count of errors.
  * @return The count of errors.
  */
 int getErrorsCounter();
 
-/* Macros for common errors */
-/**
- * Macro for reporting an extraneous text error.
- * @param fileName The name of the file.
- * @param address  The address of the error.
+/* Macro for reporting an error when there is extraneous text after the end of a command.
+ * @param fileName The name of the file where the error occurred.
+ * @param address The address at which the error occurred.
  */
 #define EXTRANEOUS_TEXT(fileName, address)                \
     do                                                    \
@@ -31,10 +27,9 @@ int getErrorsCounter();
         return;                                           \
     } while (0)
 
-/**
- * Macro for reporting a missing parameter error.
- * @param fileName The name of the file.
- * @param address  The address of the error.
+/* Macro for reporting an error when a parameter is missing.
+ * @param fileName The name of the file where the error occurred.
+ * @param address The address at which the error occurred.
  */
 #define MISSING_PARAMETER(fileName, address) \
     do                                       \
@@ -45,10 +40,9 @@ int getErrorsCounter();
         return;                              \
     } while (0)
 
-/**
- * Macro for reporting a missing comma error.
- * @param fileName The name of the file.
- * @param address  The address of the error.
+/* Macro for reporting an error when a comma is missing.
+ * @param fileName The name of the file where the error occurred.
+ * @param address The address at which the error occurred.
  */
 #define MISSING_COMMA(fileName, address)   \
     do                                     \
@@ -59,10 +53,9 @@ int getErrorsCounter();
         return;                            \
     } while (0)
 
-/**
- * Macro for reporting multiple consecutive commas error.
- * @param fileName The name of the file.
- * @param address  The address of the error.
+/* Macro for reporting an error when there are multiple consecutive commas.
+ * @param fileName The name of the file where the error occurred.
+ * @param address The address at which the error occurred.
  */
 #define MULTIPLE_CONSECUTIVE_COMMAS(fileName, address) \
     do                                                 \
@@ -73,9 +66,10 @@ int getErrorsCounter();
         return;                                        \
     } while (0)
 
-/**
- * Macro for reporting an existing label error.
+/* Macro for reporting an error when a label already exists.
  * @param labelName The name of the existing label.
+ * @param fileName The name of the file where the error occurred.
+ * @param address The address at which the error occurred.
  */
 #define EXISTING_LABEL(labelName, fileName, address)      \
     do                                                    \

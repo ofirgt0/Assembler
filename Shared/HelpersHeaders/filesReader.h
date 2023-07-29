@@ -4,8 +4,8 @@
 /*
  * Logs a new line of text.
  * @param line The line of text to be logged.
- */
-void logNewLine(const char *line);
+ *
+void logNewLine(const char *line);*/
 
 /*
  * Reads a file and processes its contents.

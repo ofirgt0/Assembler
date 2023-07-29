@@ -1,12 +1,15 @@
 #include <stdio.h>
 
-void logNewLine(const char *line)
-{ // TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER
+/*void logNewLine(const char *line)
+{ TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER
     printf("Processing line: %s\n", line);
-}
+}*/
 
-// Function to read and process a file
-// Input: filename - the name of the file to be read and processed
+/**
+ *  This function reads and processes a given file.
+ *  In the first run, it saves labels, macros, entries, externs, data, and strings.
+ *  In the second run, it processes each line and parses the commands.
+ */
 void fileReader(const char *fileName)
 {
     FILE *file = fopen(fileName, "r");
@@ -18,7 +21,7 @@ void fileReader(const char *fileName)
 
     char line[256];
 
-    // first run - save label, macro. entry, extern, data and string
+    /*First run - save the label, macro. entry, extern, data and string*/
     while (fgets(line, sizeof(line), file) != NULL)
     {
         if (line == '\0')
@@ -29,6 +32,7 @@ void fileReader(const char *fileName)
         startFirstRun(line);
     }
 
+    /* Second run */
     while (fgets(line, sizeof(line), file) != NULL)
     {
 
@@ -43,6 +47,10 @@ void fileReader(const char *fileName)
     fclose(file);
 }
 
+/**
+ *  This function retrieves a block of lines from a file and processes them.
+ *  It starts reading from a specified line number and reads a specified number of lines.
+ */
 void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 {
     FILE *file = fopen(fileName, "r");
@@ -57,7 +65,8 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
     while (currentLine < lineNumber && fgets(line, sizeof(line), file))
         currentLine++;
 
-    while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file)) {
+    while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
+    {
         logNewLine(line);
         parseCommand(line, fileName);
         currentLine++;
@@ -66,6 +75,10 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
     fclose(file);
 }
 
+/**
+ *  This function removes spaces at the beginning of a command.
+ *  It shifts the command string to the right until it encounters a non-space character.
+ */
 void removePrefixSpaces(char *command)
 {
     int i, j;
@@ -82,6 +95,11 @@ void removePrefixSpaces(char *command)
     }
 }
 
+/**
+ *  The main function reads and processes multiple files provided as command-line arguments.
+ *  It iterates through each command-line argument, treating each as a file name.
+ *  It then calls the fileReader function on each file.
+ */
 int main(int argc, char *argv[])
 {
     int i;
@@ -91,7 +109,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Iterate through each command-line argument (file name)
+    /*Iterate through each command-line argument (file name)*/
     for (i = 1; i < argc; i++)
         fileReader(argv[i]);
 

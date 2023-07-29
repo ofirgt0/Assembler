@@ -1,144 +1,107 @@
 #ifndef DATASERVICE_H
 #define DATASERVICE_H
+
 #include <stdbool.h>
 #include "errorsHandler.h"
 
-/**
- * Searches for a label in all linked lists.
- * @param labelName The name of the label to search for.
- * @return The found label or NULL if the label was not found.
- */
-LabelNode *tryGetLabel(const char *labelName);
+/* Forward declaration of the opaque structs. */
+typedef struct Label Label;
+typedef struct LabelNode LabelNode;
+typedef struct DataLabel DataLabel;
+typedef struct StringLabel StringLabel;
 
 /**
- * Searches for a data label in the list.
- * @param labelName The name of the label to search for.
- * @return The found data label or NULL if the label was not found.
- */
-DataLabel *tryGetDataLabel(char *labelName);
-
-/**
- * Searches for a string label in the list.
- * @param labelName The name of the label to search for.
- * @return The found string label or NULL if the label was not found.
- */
-StringLabel *tryGetStringLabel(char *labelName);
-
-/**
- * Checks if a label exists in any of the lists.
- * @param labelName The name of the label to check for.
- * @return True if the label exists, false otherwise.
- */
-bool isLabelExist(char *labelName);
-
-/**
- * Determines the type of a label.
- * @param labelType The type string of the label.
- * @return The LabelType enum value corresponding to the type string.
- */
-LabelType determineLabelType(char *labelType);
-
-/**
- * Tries to add a new label by its type.
- * @param type The type string of the label.
- * @param labelName The name of the label.
- * @return True if the label was added successfully, false otherwise.
- */
-bool tryAddNewLabel(char *type, char *labelName);
-
-/**
- *
- */
-void addNewLine1(char *prefixLabel, int opcode, int immidiate1, int register2);
-
-/**
- *
- */
-void addNewLine3(char *prefixLabel, int opcode, int label1, int register2);
-
-/**
- *
- */
-void addNewLine5(char *prefixLabel, int opcode, int register1, int register2);
-
-/**
- *
+ * Add a new line with the given parameters.
+ * @param opcode the opcode.
+ * @param register1 the register1.
+ * @param register2 the register2.
+ * @param label1 the label1.
+ * @param label2 the label2.
+ * @param immidiate1 the immidiate1.
+ * @param immidiate2 the immidiate2.
  */
 void addNewLine(int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
 
 /**
- * Validates if an opcode matches the addressing method.
- * @param opcode The opcode to validate.
- * @param srcAddressing The source addressing method.
- * @param dstAddressing The destination addressing method.
- * @return True if the opcode matches the addressing method, false otherwise.
+ * Validate if opcode matches addressing method.
+ * @param opcode the opcode.
+ * @param srcAddressing the source addressing.
+ * @param dstAddressing the destination addressing.
+ * @return true if validation is successful, false otherwise.
  */
 bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstAddressing);
 
 /**
- * Adds a new extern label.
- * @param externName The name of the extern label.
- * @return True if the label was added successfully, false otherwise.
+ * Add a new external label.
+ * @param externName the name of the external label.
+ * @return true if adding is successful, false otherwise.
  */
 bool addNewExtern(char *externName);
 
 /**
- * Adds a new entry label.
- * @param entryName The name of the entry label.
- * @return True if the label was added successfully, false otherwise.
+ * Add a new entry label.
+ * @param entryName the name of the entry label.
+ * @return true if adding is successful, false otherwise.
  */
 bool addNewEntry(char *entryName);
 
 /**
- * Adds a new data label.
- * @param data The data array.
- * @param labelName The name of the data label.
- * @return True if the label was added successfully, false otherwise.
+ * Add data to a label.
+ * @param data the data.
+ * @param labelName the name of the label.
+ * @return true if adding is successful, false otherwise.
  */
 bool addData(int data[], char *labelName);
 
 /**
- * Adds a new string label.
- * @param string The string.
- * @param labelName The name of the string label.
- * @return True if the label was added successfully, false otherwise.
+ * Add a string to a label.
+ * @param string the string.
+ * @param labelName the name of the label.
+ * @return true if adding is successful, false otherwise.
  */
 bool addString(char *string, char *labelName);
 
 /**
- * Adds a new label.
- * @return True if the label was added successfully, false otherwise.
+ * Add a new label.
+ * @param labelName the name of the label.
+ * @return true if adding is successful, false otherwise.
  */
-bool addNewLabel();
+bool addNewLabel(char *labelName);
 
 /**
- * Searches for an extern label.
- * @param externName The name of the extern label to search for.
- * @return The address of the extern label if found, -1 otherwise.
+ * Increase IC by the given value.
+ * @param value the value to increase IC by.
+ */
+void increaseIC(int value);
+
+/**
+ * Search for an external label by name.
+ * @param externName the name of the external label.
+ * @return the address of the external label if found, -1 otherwise.
  */
 int searchExternLabel(char *externName);
 
 /**
- * Searches for an entry label.
- * @param entryName The name of the entry label to search for.
- * @return The address of the entry label if found, -1 otherwise.
+ * Search for an entry label by name.
+ * @param entryName the name of the entry label.
+ * @return the address of the entry label if found, -1 otherwise.
  */
 int searchEntry(char *entryName);
 
 /**
- * Searches for a data label.
- * @param data The data array.
- * @param labelName The name of the data label to search for.
- * @return The address of the data label if found, -1 otherwise.
+ * Search for a data label by name.
+ * @param data the data.
+ * @param labelName the name of the label.
+ * @return the address of the data label if found, -1 otherwise.
  */
 int searchDataLabel(int data[], char *labelName);
 
 /**
- * Searches for a string label.
- * @param string The string.
- * @param labelName The name of the string label to search for.
- * @return The address of the string label if found, -1 otherwise.
+ * Search for a string label by name.
+ * @param string the string.
+ * @param labelName the name of the label.
+ * @return the address of the string label if found, -1 otherwise.
  */
 int searchStringLabel(char *string, char *labelName);
 
-#endif /* DATA_SERVICE_H */
+#endif /* DATASERVICE_H */

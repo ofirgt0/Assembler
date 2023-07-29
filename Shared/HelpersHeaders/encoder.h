@@ -1,135 +1,65 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-/*
-    Function: encodExternLabel
-    -------------------------
-    Encodes an extern label into its machine code representation.
+/* Encodes a label operand.
+ * @param fileName the name of the file.
+ * @param AREcode the code representing the Addressing, Relocatable, and External attributes of the operand.
+ * @param address the address of the label.
+ */
+void encodLabelOperand(char *fileName, char AREcode, int address);
 
-    fileName: The name of the output file.
+/* Encodes an immediate operand.
+ * @param fileName the name of the file.
+ * @param immidiate the immediate value.
+ */
+void encodImmidiate(char *fileName, int immidiate);
 
-    Inputs:
-    - fileName: A pointer to a string containing the name of the output file.
-
-    Outputs:
-    None.
-*/
-void encodExternLabel(char* fileName);
-
-/*
-    Function: encodInstructionCode
-    ------------------------------
-    Encodes an instruction command into its machine code representation.
-
-    fileName: The name of the output file.
-    AREcode: The ARE (Addressing-Relative-External) code for the command.
-    srcAddressing: The addressing mode for the source operand.
-    opcode: The opcode representing the instruction.
-    dstAddressing: The addressing mode for the destination operand.
-
-    Inputs:
-    - fileName: A pointer to a string containing the name of the output file.
-    - AREcode: A character representing the ARE (Addressing-Relative-External) code ('A', 'R', or 'E').
-    - srcAddressing: An integer representing the addressing mode for the source operand.
-    - opcode: An integer representing the opcode for the instruction.
-    - dstAddressing: An integer representing the addressing mode for the destination operand.
-
-    Outputs:
-    None.
-*/
-void encodInstructionCode(char* fileName, char AREcode, int srcAddressing, int opcode, int dstAddressing);
-
-/*
-    Function: encodLabelOperand
-    ---------------------------
-    Encodes a label operand into its machine code representation.
-
-    fileName: The name of the output file.
-    AREcode: The ARE (Addressing-Relative-External) code for the operand.
-    address: The address of the label.
-
-    Inputs:
-    - fileName: A pointer to a string containing the name of the output file.
-    - AREcode: A character representing the ARE (Addressing-Relative-External) code ('A', 'R', or 'E').
-    - address: An integer representing the address of the label.
-
-    Outputs:
-    None.
-*/
-void encodLabelOperand(char* fileName, char AREcode, int address);
-
-/*
-    Function: encodImmidiate
-    ------------------------
-    Encodes an immediate value into its machine code representation.
-
-    fileName: The name of the output file.
-    immediate: The immediate value to be encoded.
-
-    Inputs:
-    - fileName: A pointer to a string containing the name of the output file.
-    - immediate: An integer representing the immediate value.
-
-    Outputs:
-    None.
-*/
-void encodImmidiate(char* fileName, int immediate);
-
-/*
-    Function: encodeRegister
-    ------------------------
-    Encodes two registers into their machine code representation.
-
-    fileName: The name of the output file.
-    register1: The first register value to be encoded.
-    register2: The second register value to be encoded.
-
-    Inputs:
-    - fileName: A pointer to a string containing the name of the output file.
-    - register1: An integer representing the first register value.
-    - register2: An integer representing the second register value.
-
-    Outputs:
-    None.
-*/
-void encodeRegister(char* fileName, int register1, int register2);
-
-/*
-    Function: setBinaryCodeInRange
-    ------------------------------
-    Sets the binary representation of a number in a specified range of an array.
-
-    startCell: The starting index of the range.
-    endCell: The ending index of the range.
-    number: The number to be converted to binary.
-    arr: The array in which the binary representation will be stored.
-
-    Inputs:
-    - startCell: An integer representing the starting index of the range.
-    - endCell: An integer representing the ending index of the range.
-    - number: An integer representing the number to be converted to binary.
-    - arr: A pointer to an integer array in which the binary representation will be stored.
-
-    Outputs:
-    None.
-*/
-void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[]);
-
-/*
-    Function: setARE
-    ----------------
-    Sets the ARE (Addressing-Relative-External) code in the machine code array.
-
-    AREcode: The ARE code to be set.
-    commandCode: The machine code array.
-
-    Inputs:
-    - AREcode: A character representing the ARE (Addressing-Relative-External) code ('A', 'R', or 'E').
-    - commandCode: A pointer to an integer array representing the machine code.
-
-    Outputs:
-    None.
-*/
+/* Sets the A, R, E bits of a command code.
+ * @param AREcode the code representing the Addressing, Relocatable, and External attributes.
+ * @param commandCode the command code.
+ */
 void setARE(char AREcode, int *commandCode);
 
-#endif // ENCODER_H
+/* Converts a decimal number to a binary array.
+ * @param arr the binary array.
+ * @param decimalNumber the decimal number.
+ */
+void setBinaryArray(int arr[], int decimalNumber);
+
+/* Encodes an external label.
+ * @param fileName the name of the file.
+ */
+void encodExternLabel(char *fileName);
+
+/* Encodes an instruction code.
+ * @param fileName the name of the file.
+ * @param AREcode the code representing the Addressing, Relocatable, and External attributes of the instruction.
+ * @param srcAddressing the source addressing mode.
+ * @param opcode the opcode of the instruction.
+ * @param dstAddressing the destination addressing mode.
+ */
+void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int opcode, int dstAddressing);
+
+/* Encodes a register operand.
+ * @param fileName the name of the file.
+ * @param register1 the first register.
+ * @param register2 the second register.
+ */
+void encodeRegister(char *fileName, int register1, int register2);
+
+/* Sets a range of cells in a binary code array to represent a given number.
+ * @param startCell the start index of the range.
+ * @param endCell the end index of the range.
+ * @param number the number to represent.
+ * @param arr the binary code array.
+ */
+void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[]);
+
+/* Encodes a binary array to a Base64 string.
+ * @param binaryArray the binary array.
+ * @param length the length of the binary array.
+ * @return the Base64 string.
+ */
+char *encodeToBase64(const int *binaryArray, size_t length);
+
+#endif /*ENCODER_H*/
