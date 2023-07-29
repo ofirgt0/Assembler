@@ -65,7 +65,7 @@ static DataLabel *dataLabelList = NULL;
 static StringLabel *stringLabelList = NULL;
 
 /* Initialize the global counters. */
-static int IC = 0; /* Instruction counter. */
+static int IC = 100; /* Instruction counter. */
 static int DC = 0; /* Data counter. */
 
 /*
@@ -289,6 +289,7 @@ bool addNewEntry(char *entryName)
 
 bool addData(int data[], char *labelName)
 {
+    DC++;
     Label *label = (Label *)malloc(sizeof(Label));
     if (label == NULL)
     {
@@ -298,7 +299,7 @@ bool addData(int data[], char *labelName)
 
     label->type = DATA_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->address = -1; // The address will be set later when data is linked to the code.
+    label->address = DC; // The address will be set later when data is linked to the code.
 
     DataLabel *newNode = (DataLabel *)malloc(sizeof(DataLabel));
     if (newNode == NULL)
@@ -313,11 +314,14 @@ bool addData(int data[], char *labelName)
     newNode->next = dataLabelList;
     dataLabelList = newNode;
 
+    DC+= sizeof(data) / sizeof(data[0])-1;
+
     return true;
 }
 
 bool addString(char *string, char *labelName)
 {
+    DC++;
     Label *label = (Label *)malloc(sizeof(Label));
     if (label == NULL)
     {
@@ -327,7 +331,7 @@ bool addString(char *string, char *labelName)
 
     label->type = STRING_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->address = -1; // The address will be set later when the string is linked to the code.
+    label->address = DC; // The address will be set later when the string is linked to the code.
 
     StringLabel *newNode = (StringLabel *)malloc(sizeof(StringLabel));
     if (newNode == NULL)
@@ -342,10 +346,12 @@ bool addString(char *string, char *labelName)
     newNode->next = stringLabelList;
     stringLabelList = newNode;
 
+    DC += strlen(string); // +1 FOR /0
+
     return true;
 }
 
-bool addNewLabel()
+bool addNewLabel(char *labelName)
 {
     Label *label = (Label *)malloc(sizeof(Label));
     if (label == NULL)
@@ -356,8 +362,8 @@ bool addNewLabel()
 
     // Set appropriate label type and name as per your requirement
     label->type = NORMAL_LABEL_TYPE;
-    label->name[0] = '\0'; // Empty name for now
-    label->address = -1;   // The address will be set later when the label is linked to the code.
+    strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
+    label->address = IC;   // due to page 30
 
     LabelNode *newNode = (LabelNode *)malloc(sizeof(LabelNode));
     if (newNode == NULL)
@@ -372,6 +378,11 @@ bool addNewLabel()
     normalCommandLabelList = newNode;
 
     return true;
+}
+
+void increaseIC(int value)
+{
+    IC += value;
 }
 
 int searchExternLabel(char *externName)
@@ -409,7 +420,7 @@ int searchDataLabel(int data[], char *labelName)
     {
         if (strcmp(current->label->name, labelName) == 0)
         {
-            return current->label->address;
+            return current->label->address + IC;
         }
         current = current->next;
     }
@@ -425,7 +436,7 @@ int searchStringLabel(char *string, char *labelName)
         {
             if (strcmp(current->string, string) == 0)
             {
-                return current->label->address;
+                return current->label->address + IC;
             }
         }
         current = current->next;
