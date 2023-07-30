@@ -4,62 +4,16 @@
 #include <string.h>
 
 #include "errorsHandler.h"
-#include "dataService.h"
+#include "../../Shared/MemoryServicesHeaders/dataService.h"
+#include "../../Shared/HelpersHeaders/encoder.h"
 #include "writeToFile.h"
 
-/* Representing the types of labels. */
-typedef enum
-{
-    External,
-    Entry,
-    NormalCommand
-} LabelType;
-
-/* AddressingMethod defines types of operand addressing: None (Code 0), ImmediateAddressing method (Code 1), DirectAddressing method (Code 3), and RegisterDirectAddressing method (Code 5). */
-typedef enum
-{
-    None = 0,
-    Immediate = 1,
-    Direct = 3,
-    RegisterDirect = 5
-} AddressingMethod;
-
-/* Define the label structure */
-typedef struct Label
-{
-    LabelType type;
-    char name[MAX_LABEL_NAME_LENGTH];
-    int address;
-} Label;
-
-typedef struct LabelNode
-{
-    Label *label;
-    LabelNode *next;
-} LabelNode;
-
-/* Representing the data label structure. */
-typedef struct DataLabel
-{
-    Label *label;
-    int *data;
-    DataLabel *next;
-} DataLabel;
-
-/* Representing the string label structure. */
-typedef struct StringLabel
-{
-    Label *label;
-    char *string;
-    StringLabel *next;
-} StringLabel;
-
 /* Initialize the label lists. */
-static LabelNode *externalLabelList = NULL;
-static LabelNode *entryLabelList = NULL;
-static LabelNode *normalCommandLabelList = NULL;
-static DataLabel *dataLabelList = NULL;
-static StringLabel *stringLabelList = NULL;
+static struct LabelNode *externalLabelList = NULL;
+static struct LabelNode *entryLabelList = NULL;
+static struct LabelNode *normalCommandLabelList = NULL;
+static struct DataLabel *dataLabelList = NULL;
+static struct StringLabel *stringLabelList = NULL;
 
 /* Initialize the global counters. */
 static int IC = 100; /* Instruction counter. */
@@ -79,7 +33,7 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
     AddressingMethod srcAddressing = register1 != -1 ? RegisterDirect : (label1 != NULL ? Direct : (immidiate1 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
     int address = 0;
     IC++; /*for the base command*/
-    encodeInstructionCode(ARE_CODE_A, srcAddressing, opcode, dstAddressing);
+    encodInstructionCode("TODOsetFileName", ARE_CODE_A, srcAddressing, opcode, dstAddressing);
 
     /*if dstAddressing is 0 do it means that its command with 1 opperand,*/
     /*then we need to consider the srcAddressing as dstAddressing*/
@@ -98,12 +52,12 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
         IC++;
         if (register2 != -1)
         {
-            encodeRegistersOperands(ARE_CODE_A, register1, register2);
+            encodeRegister(ARE_CODE_A, register1, register2);
             return;
         }
         else
         {
-            encodeRegistersOperands(ARE_CODE_A, register1, 0);
+            encodeRegister(ARE_CODE_A, register1, 0);
         }
     }
     else if (label1 != NULL)
@@ -113,20 +67,20 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
         address = searchExternLabel(label1); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
         if (address != -1)
         {
-            encodeLabelOperand(ARE_CODE_E, label1, address);
+            encodLabelOperand(ARE_CODE_E, label1, address);
             return;
         }
 
         address = searchEntry(label1);
         if (address != -1)
         {
-            encodeLabelOperand(ARE_CODE_R, label1, address);
+            encodLabelOperand(ARE_CODE_R, label1, address);
             return;
         }
 
         address = searchLabel(label1);
         if (address != -1){
-            encodeLabelOperand(ARE_CODE_R, label1, address);
+            encodLabelOperand(ARE_CODE_R, label1, address);
             return;
         }
         /* TODO: handle error label not found*/
@@ -134,13 +88,13 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
     else if (immidiate1 != 0.5)
     {
         IC++;
-        encodeImmidiateOperands(ARE_CODE_R, (int)immidiate1);
+        encodImmidiate(ARE_CODE_R, (int)immidiate1);
     }
 
     if (register2 != -1)
     {
         IC++;
-        encodeRegistersOperands(ARE_CODE_A, 0, register2);
+        encodeRegister(ARE_CODE_A, 0, register2);
         return;
     }
     else if (label2 != NULL)
@@ -149,27 +103,27 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
         address = searchExternLabel(label2); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
         if (address != -1)
         {
-            encodeLabelOperand(ARE_CODE_E, label2, address);
+            encodLabelOperand(ARE_CODE_E, label2, address);
             return;
         }
 
         address = searchEntry(label2);
         if (address != -1)
         {
-            encodeLabelOperand(ARE_CODE_R, label2, address);
+            encodLabelOperand(ARE_CODE_R, label2, address);
             return;
         }
 
         address = searchLabel(label2);
         if (address != -1){
-            encodeLabelOperand(ARE_CODE_R, label2, address);
+            encodLabelOperand(ARE_CODE_R, label2, address);
             return;
         }
     }
     else if (immidiate2 != 0.5)
     {
         IC++;
-        encodeImmidiateOperands(ARE_CODE_A, (int)immidiate2);
+        encodImmidiate(ARE_CODE_A, (int)immidiate2);
     }
 }
 
@@ -196,7 +150,7 @@ bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstA
  */
 bool addNewExtern(char *externName)
 {
-    Label *label = (Label *)malloc(sizeof(Label));
+    struct Label *label = (struct Label *)malloc(sizeof(struct Label*));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -207,7 +161,7 @@ bool addNewExtern(char *externName)
     strncpy(label->name, externName, MAX_LABEL_NAME_LENGTH);
     label->address = -1; /*Assuming -1 represents an external label address.*/
 
-    LabelNode *newNode = (LabelNode *)malloc(sizeof(LabelNode));
+    struct LabelNode *newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode*));
     if (newNode == NULL)
     {
         /*Memory allocation failed*/
@@ -231,7 +185,7 @@ bool addNewExtern(char *externName)
  */
 bool addNewEntry(char *entryName)
 {
-    Label *label = (Label *)malloc(sizeof(Label));
+    struct Label *label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -242,7 +196,7 @@ bool addNewEntry(char *entryName)
     strncpy(label->name, entryName, MAX_LABEL_NAME_LENGTH);
     label->address = -1; /*The address will be set later when the entry is resolved.*/
 
-    LabelNode *newNode = (LabelNode *)malloc(sizeof(LabelNode));
+    struct LabelNode *newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
     {
         /*Memory allocation failed*/
@@ -268,7 +222,7 @@ bool addNewEntry(char *entryName)
 bool addData(int data[], char *labelName)
 {
     DC++;
-    Label *label = (Label *)malloc(sizeof(Label));
+    struct Label *label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -279,7 +233,7 @@ bool addData(int data[], char *labelName)
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
     label->address = DC; /*The address will be set later when data is linked to the code.*/
 
-    DataLabel *newNode = (DataLabel *)malloc(sizeof(DataLabel));
+    struct DataLabel *newNode = (struct DataLabel *)malloc(sizeof(struct DataLabel));
     if (newNode == NULL)
     {
         /*Memory allocation failed*/
@@ -308,7 +262,7 @@ bool addData(int data[], char *labelName)
 bool addString(char *string, char *labelName)
 {
     DC++;
-    Label *label = (Label *)malloc(sizeof(Label));
+    struct Label *label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -319,7 +273,7 @@ bool addString(char *string, char *labelName)
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
     label->address = DC; /*The address will be set later when the string is linked to the code.*/
 
-    StringLabel *newNode = (StringLabel *)malloc(sizeof(StringLabel));
+    struct StringLabel *newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
     if (newNode == NULL)
     {
         /*Memory allocation failed*/
@@ -346,7 +300,7 @@ bool addString(char *string, char *labelName)
  */
 bool addNewLabel(char *labelName)
 {
-    Label *label = (Label *)malloc(sizeof(Label));
+    struct Label *label = (struct Label *)malloc(sizeof(struct Label*));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -356,9 +310,9 @@ bool addNewLabel(char *labelName)
     /*Set appropriate label type and name as per your requirement*/
     label->type = NORMAL_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->address = IC; // due to page 30
+    label->address = IC; /* due to page 30*/
 
-    LabelNode *newNode = (LabelNode *)malloc(sizeof(LabelNode));
+    struct LabelNode *newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode*));
     if (newNode == NULL)
     {
         /*Memory allocation failed*/
@@ -382,6 +336,10 @@ void increaseIC(int value)
     IC += value;
 }
 
+bool isLabelExist(char* label){
+    return searchExternLabel(label) != 0 || searchEntry(label) != 0 || searchLabel(label)!= 0 || searchDataLabel(label) != 0 || searchStringLabel(label) != 0;
+}
+
 /**
  * The searchExternLabel function searches for an external label in the label list by its name.
  * It traverses the externalLabelList and compares each label's name with the given name.
@@ -389,7 +347,7 @@ void increaseIC(int value)
  */
 int searchExternLabel(char *externName)
 {
-    LabelNode *current = externalLabelList;
+    struct LabelNode *current = externalLabelList;
     while (current != NULL)
     {
         if (strcmp(current->label->name, externName) == 0)
@@ -408,7 +366,7 @@ int searchExternLabel(char *externName)
  */
 int searchEntry(char *entryName)
 {
-    LabelNode *current = entryLabelList;
+    struct LabelNode *current = entryLabelList;
     while (current != NULL)
     {
         if (strcmp(current->label->name, entryName) == 0)
@@ -422,7 +380,7 @@ int searchEntry(char *entryName)
 
 int searchLabel(char *labelName)
 {
-    LabelNode *current = entryLabelList;
+    struct LabelNode *current = entryLabelList;
     while (current != NULL)
     {
         if (strcmp(current->label->name, labelName) == 0)
@@ -440,9 +398,9 @@ int searchLabel(char *labelName)
  * If it finds a match, it returns the address of the label (adjusted by the current IC).
  * If it doesn't find a match, it returns -1.
  */
-int searchDataLabel(int data[], char *labelName)
+int searchDataLabel(char *labelName)
 {
-    DataLabel *current = dataLabelList;
+    struct DataLabel *current = dataLabelList;
     while (current != NULL)
     {
         if (strcmp(current->label->name, labelName) == 0)
@@ -460,17 +418,14 @@ int searchDataLabel(int data[], char *labelName)
  * If it finds a match, it returns the address of the label (adjusted by the current IC).
  * If it doesn't find a match, it returns -1.
  */
-int searchStringLabel(char *string, char *labelName)
+int searchStringLabel(char *labelName)
 {
-    StringLabel *current = stringLabelList;
+    struct StringLabel *current = stringLabelList;
     while (current != NULL)
     {
         if (strcmp(current->label->name, labelName) == 0)
         {
-            if (strcmp(current->string, string) == 0)
-            {
-                return current->label->address + IC;
-            }
+             return current->label->address + IC;   
         }
         current = current->next;
     }

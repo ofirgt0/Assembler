@@ -15,6 +15,53 @@
 
 #define MAX_LABEL_NAME_LENGTH 31
 
+/* Representing the types of labels. */
+typedef enum
+{
+    External,
+    Entry,
+    NormalCommand
+} LabelType;
+
+/* AddressingMethod defines types of operand addressing: None (Code 0), ImmediateAddressing method (Code 1), DirectAddressing method (Code 3), and RegisterDirectAddressing method (Code 5). */
+typedef enum
+{
+    None = 0,
+    Immediate = 1,
+    Direct = 3,
+    RegisterDirect = 5
+} AddressingMethod;
+
+/* Define the label structure */
+struct Label
+{
+    char type;
+    char name[MAX_LABEL_NAME_LENGTH];
+    int address;
+};
+
+struct LabelNode
+{
+    struct Label *label;
+    struct LabelNode *next;
+};
+
+/* Representing the data label structure. */
+struct DataLabel
+{
+    struct Label *label;
+    int *data;
+    struct DataLabel *next;
+};
+
+/* Representing the string label structure. */
+struct StringLabel
+{
+    struct Label *label;
+    char *string;
+    struct StringLabel *next;
+};
+
 /**
  * Add a new line with the given parameters.
  * @param opcode the opcode.
@@ -99,7 +146,7 @@ int searchEntry(char *entryName);
  * @param labelName the name of the label.
  * @return the address of the data label if found, -1 otherwise.
  */
-int searchDataLabel(int data[], char *labelName);
+int searchDataLabel(char *labelName);
 
 /**
  * Search for a string label by name.
@@ -107,6 +154,6 @@ int searchDataLabel(int data[], char *labelName);
  * @param labelName the name of the label.
  * @return the address of the string label if found, -1 otherwise.
  */
-int searchStringLabel(char *string, char *labelName);
+int searchStringLabel(char *labelName);
 
 #endif /* DATASERVICE_H */

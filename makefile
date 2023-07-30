@@ -11,7 +11,7 @@ INCLUDES = -I./Assembler/Shared/PassesParserHeader -I./Assembler/Shared/HelpersH
 LIBS = -lm
 
 # Define the executable file 
-MAIN = Assembler
+MAIN = asm
 
 # Define the object files
 OBJS = filesReader.o commandsIdentifier.o macroServices.o dataServices.o errorsHandler.o writeToFile.o encoder.o
@@ -48,7 +48,6 @@ encoder.o: Assembler/Lib/Helpers/encoder.c
 # Clean target to remove object files and the executable
 clean:
 	$(RM) *.o *~ $(MAIN)
-
 
 
 

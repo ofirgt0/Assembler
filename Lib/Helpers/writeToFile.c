@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "writeToFile.h"
+#include <stdbool.h>
 
 /**
  * Write an integer array as a string to a file on the last line.
@@ -16,12 +17,13 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
 {
     /* Open the file in "append" mode */
     FILE *file = fopen(filename, "a");
+    int i;
 
     if (file != NULL)
     {
         /* Write the array elements as a string on the last line */
         fprintf(file, "\n");
-        for (int i = 0; i < WORD_LENGTH; i++)
+        for (i = 0; i < WORD_LENGTH; i++)
         {
             fprintf(file, "%d", arr[i]);
         }
@@ -44,7 +46,7 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
  * @param filename The name of the file to write to.
  * @param label    The label to be written to the file.
  * @return true if the operation is successful or if the file does not need to be created, otherwise - false.
- */
+
 bool writeLabelToFile(const char *filename, Label *label)
 {
     if ((label->type == Ext || label->type == Entry) && !isFileExist(filename))
@@ -55,7 +57,7 @@ bool writeLabelToFile(const char *filename, Label *label)
     char labelText[256];
     sprintf(labelText, "%s %d %d", label->name, label->address, label->type);
     return writeToFile(filename, labelText);
-}
+} */
 
 /**
  * Check if a file exists.

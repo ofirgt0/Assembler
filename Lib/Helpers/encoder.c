@@ -51,7 +51,8 @@ void encodeRegister(char *fileName, int register1, int register2)
 
 void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])
 {
-    for (int i = endCell; i >= startCell; i--)
+    int i;
+    for (i = endCell; i >= startCell; i--)
     { /*TODO: make sure its work correctly*/
         arr[i] = number % 2;
         number /= 2;

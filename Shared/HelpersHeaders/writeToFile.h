@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #ifndef WRITE_TO_FILE_H
 #define WRITE_TO_FILE_H
 
@@ -25,8 +27,8 @@ bool writeIntArrayToFile(const char *filename, const int arr[]);
  * @param label    The label to be written to the file.
  * @return true if the operation is successful or if the file does not need to be created, otherwise - false.
  */
-bool writeLabelToFile(const char *filename, Label *label);
-
+/*bool writeLabelToFile(const char *filename, Label *label);
+*/
 /**
  * Checks if a file exists.
  * -------------------------

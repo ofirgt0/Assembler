@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include "filesReader.h"
 
-/*void logNewLine(const char *line)
+void logNewLine(const char *line)
 {
     printf("Processing line: %s\n", line);
-}*/
-/*TODO: DELETE THIS FUNCTION AND IMPLEMENT IN THE EXECUTER*/
+}
 
 /**
  *  This function reads and processes a given file.
@@ -43,7 +42,7 @@ void fileReader(const char *fileName)
             continue;
 
         logNewLine(line);
-        parseCommand(line, fileName);
+        commandParser(line, fileName);
     }
 
     fclose(file);
@@ -71,7 +70,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
     while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
     {
         logNewLine(line);
-        parseCommand(line, fileName);
+        commandParser(line, fileName);
         currentLine++;
     }
 
@@ -81,7 +80,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 /**
  *  This function removes spaces at the beginning of a command.
  *  It shifts the command string to the right until it encounters a non-space character.
- */
+ 
 void removePrefixSpaces(char *command)
 {
     int i, j;

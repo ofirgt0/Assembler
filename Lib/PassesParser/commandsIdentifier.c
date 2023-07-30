@@ -290,7 +290,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             size_t length;
             int *data;
             data = parseIntArray(secondVar, &length);
-            addNewData(data, secondVar); /*in dataService*/ /*TODO: check with ofir if this line should be: addNewData(data, 'length') */
+            addData(data, secondVar); /*in dataService*/ /*TODO: check with ofir if this line should be: addNewData(data, 'length') */
             return;
         }
         case 5: /*string*/
