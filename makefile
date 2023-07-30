@@ -30,10 +30,10 @@ filesReader.o: Assembler/Lib/Helpers/filesReader.c
 commandsIdentifier.o: Assembler/Lib/PassesParser/commandsIdentifier.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-macroServices.o: Assembler/Lib/MemoryServices/macroServices.c
+macroServices.o: Assembler/Lib/MemoryServices/macroService.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-dataServices.o: Assembler/Lib/MemoryServices/dataServices.c
+dataServices.o: Assembler/Lib/MemoryServices/dataService.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 errorsHandler.o: Assembler/Lib/Helpers/errorsHandler.c
