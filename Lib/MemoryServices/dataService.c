@@ -77,7 +77,7 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
 
     AddressingMethod dstAddressing = register2 != -1 ? RegisterDirect : (label2 != NULL ? Direct : (immidiate2 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
     AddressingMethod srcAddressing = register1 != -1 ? RegisterDirect : (label1 != NULL ? Direct : (immidiate1 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
-
+    int address = 0;
     IC++; /*for the base command*/
     encodeInstructionCode(ARE_CODE_A, srcAddressing, opcode, dstAddressing);
 
@@ -109,8 +109,27 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
     else if (label1 != NULL)
     {
         IC++;
-        int address = tryGetLabel(label1)->label->address; /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
-        encodeLabelOperand(ARE_CODE_R, label1, address);
+
+        address = searchExternLabel(label1); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
+        if (address != -1)
+        {
+            encodeLabelOperand(ARE_CODE_E, label1, address);
+            return;
+        }
+
+        address = searchEntry(label1);
+        if (address != -1)
+        {
+            encodeLabelOperand(ARE_CODE_R, label1, address);
+            return;
+        }
+
+        address = searchLabel(label1);
+        if (address != -1){
+            encodeLabelOperand(ARE_CODE_R, label1, address);
+            return;
+        }
+        /* TODO: handle error label not found*/
     }
     else if (immidiate1 != 0.5)
     {
@@ -127,8 +146,25 @@ void addNewLine(int opcode, int register1, int register2, char *label1, char *la
     else if (label2 != NULL)
     {
         IC++;
-        int address = tryGetLabel(label2)->label->address; /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
-        encodeLabelOperand(ARE_CODE_R, label2, address);
+        address = searchExternLabel(label2); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
+        if (address != -1)
+        {
+            encodeLabelOperand(ARE_CODE_E, label2, address);
+            return;
+        }
+
+        address = searchEntry(label2);
+        if (address != -1)
+        {
+            encodeLabelOperand(ARE_CODE_R, label2, address);
+            return;
+        }
+
+        address = searchLabel(label2);
+        if (address != -1){
+            encodeLabelOperand(ARE_CODE_R, label2, address);
+            return;
+        }
     }
     else if (immidiate2 != 0.5)
     {
@@ -376,6 +412,20 @@ int searchEntry(char *entryName)
     while (current != NULL)
     {
         if (strcmp(current->label->name, entryName) == 0)
+        {
+            return current->label->address;
+        }
+        current = current->next;
+    }
+    return -1; /*Label was not found*/
+}
+
+int searchLabel(char *labelName)
+{
+    LabelNode *current = entryLabelList;
+    while (current != NULL)
+    {
+        if (strcmp(current->label->name, labelName) == 0)
         {
             return current->label->address;
         }
