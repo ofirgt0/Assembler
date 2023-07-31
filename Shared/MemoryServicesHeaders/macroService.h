@@ -52,4 +52,13 @@ struct macroDataNode *searchNode(const char *macroName);
  */
 void updateLinesCount(const char *macroName, int newLinesCount);
 
+/**
+ * Duplicates a string by creating a new copy in the heap.
+ * This function allocates memory for the new string, copies
+ * the original string into the new memory, and returns a pointer to it.
+ * @param s The string to be duplicated.
+ * @return A pointer to the newly duplicated string, or NULL if the operation fails.
+ */
+char *my_strdup(const char *s);
+
 #endif /* MACROSERVICE_H */

@@ -42,6 +42,39 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
 static bool macroFlag = false;
 
 /**
+ * A thread-safe version of strtok.
+ * This function works like the standard 'strtok' function but is reentrant and doesn't modify the delimiters string.
+ * It returns a pointer to the next token in 'str' that is delimited by a character from 'delim'.
+ * If there are no more tokens, it returns NULL.
+ */
+char *my_strtok_r(char *str, const char *delim, char **saveptr)
+{
+    char *token;
+    if (str == NULL)
+    {
+        str = *saveptr;
+    }
+    str += strspn(str, delim);
+    if (*str == '\0')
+    {
+        *saveptr = str;
+        return NULL;
+    }
+    token = str;
+    str = strpbrk(token, delim);
+    if (str == NULL)
+    {
+        *saveptr = (char *)strchr(token, '\0');
+    }
+    else
+    {
+        *str = '\0';
+        *saveptr = str + 1;
+    }
+    return token;
+}
+
+/**
  * Replaces multiple consecutive spaces with a single space in a string.
  * The function modifies the input string in-place.
  */
@@ -290,7 +323,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             size_t length;
             int *data;
             data = parseIntArray(secondVar, &length);
-            addData(data, secondVar); /*in dataService*/ /*TODO: check with ofir if this line should be: addNewData(data, 'length') */
+            addData(data, secondVar);
             return;
         }
         case 5: /*string*/

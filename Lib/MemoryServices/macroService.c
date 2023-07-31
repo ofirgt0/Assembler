@@ -3,6 +3,23 @@
 #include <stdbool.h>
 #include <string.h>
 #include "macroService.h"
+#include "filesReader.h"
+
+static struct macroDataNode *head = NULL;
+
+/**
+ * Duplicates a string by creating a new copy in the heap.
+ * This function allocates memory for the new string, copies
+ * the original string into the new memory, and returns a pointer to it.
+ */
+char *my_strdup(const char *s)
+{
+    char *new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
+    if (new == NULL)
+        return NULL;
+    strcpy(new, s);
+    return new;
+}
 
 /**
  * Checks if a given macro name exists.
@@ -33,7 +50,9 @@ struct macroDataNode *getMacro(char *macroName)
 
 void sendMacro(char *macroName, char *fileName)
 {
-    struct macroDataNode *macro = getMacro(macroName);
+    struct macroDataNode *macro = NULL;
+
+    macro = getMacro(macroName);
     if (macro == NULL)
     {
         /*Error: Macro was not found*/
@@ -43,12 +62,11 @@ void sendMacro(char *macroName, char *fileName)
     getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
 }
 
-static struct macroDataNode *head = NULL;
-
 void addMacro(const char *macroName, int lineNumber)
 {
     /*Create a new node*/
-    struct macroDataNode *newNode = (struct macroDataNode *)malloc(sizeof(struct macroDataNode));
+    struct macroDataNode *newNode = NULL;
+    newNode = (struct macroDataNode *)malloc(sizeof(struct macroDataNode));
     if (newNode == NULL)
     {
         printf("Error: Memory allocation failed.\n");
@@ -72,6 +90,7 @@ void addMacro(const char *macroName, int lineNumber)
 struct macroData *searchNode(const char *macroName)
 {
     struct macroDataNode *current = head;
+
     while (current != NULL)
     {
         if (strcmp(current->macroName, macroName) == 0)
@@ -86,6 +105,7 @@ struct macroData *searchNode(const char *macroName)
 void updateLinesCount(const char *macroName, int newLinesCount)
 {
     struct macroDataNode *current = head;
+
     while (current != NULL)
     {
         if (strcmp(current->macroName, macroName) == 0)

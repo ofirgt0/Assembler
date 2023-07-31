@@ -14,7 +14,7 @@ LIBS = -lm
 MAIN = asm
 
 # Define the object files
-OBJS = filesReader.o commandsIdentifier.o macroServices.o dataServices.o errorsHandler.o writeToFile.o encoder.o
+OBJS = filesReader.o commandsIdentifier.o macroService.o dataService.o errorsHandler.o writeToFile.o encoder.o
 
 .PHONY: all clean
 
@@ -30,10 +30,10 @@ filesReader.o: Assembler/Lib/Helpers/filesReader.c
 commandsIdentifier.o: Assembler/Lib/PassesParser/commandsIdentifier.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-macroServices.o: Assembler/Lib/MemoryServices/macroService.c
+macroService.o: Assembler/Lib/MemoryServices/macroService.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-dataServices.o: Assembler/Lib/MemoryServices/dataService.c
+dataService.o: Assembler/Lib/MemoryServices/dataService.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 errorsHandler.o: Assembler/Lib/Helpers/errorsHandler.c

@@ -20,6 +20,19 @@ typedef struct commandsIdentifier commandsIdentifier;
 typedef struct Line Line; /*Added this line*/
 
 /**
+ * A thread-safe version of strtok.
+ * This function works like the standard 'strtok' function but is reentrant and doesn't modify the delimiters string.
+ * It returns a pointer to the next token in 'str' that is delimited by a character from 'delim'.
+ * If there are no more tokens, it returns NULL.
+ * @param str The string to be tokenized. On subsequent calls to get the next token, this parameter should be NULL.
+ * @param delim A string containing the delimiter characters.
+ * @param saveptr A pointer to a char* variable that is used internally by strtok_r to maintain context between successive calls that parse the same string.
+ * @return If a token is found, a pointer to the beginning of the token. Otherwise, NULL.
+ * A null byte ('\0') is written to the end of each token.
+ */
+char *my_strtok_r(char *str, const char *delim, char **saveptr);
+
+/**
  * Replace multiple consecutive spaces in a string with a single space.
  * @param str the input string.
  */

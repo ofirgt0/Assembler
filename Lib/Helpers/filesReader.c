@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "filesReader.h"
+#include "commandsIdentifier.h"
 
 void logNewLine(const char *line)
 {
@@ -13,6 +15,8 @@ void logNewLine(const char *line)
  */
 void fileReader(const char *fileName)
 {
+    int lineNumber = 0;
+    char line[256];
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
@@ -20,29 +24,36 @@ void fileReader(const char *fileName)
         return;
     }
 
-    char line[256];
-
     /*First run - save the label, macro. entry, extern, data and string*/
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        if (line == '\0')
+
+        if (line[0] == '\0' || line[0] == '\n') /*Cheking for empty lines*/
+        {
+            lineNumber++;
             continue;
+        }
 
         removePrefixSpaces(line);
 
-        startFirstRun(line);
+        startFirstRun(line, lineNumber, fileName);
+        lineNumber++;
     }
 
     /* Second run */
+    rewind(file); /*Reset the file pointer to the beginning of the file*/
+    lineNumber = 0;
+
     while (fgets(line, sizeof(line), file) != NULL)
     {
 
         removePrefixSpaces(line);
-        if (line == '\0')
+        if (line[0] == '\0' || line[0] == '\n') /*Cheking for empty lines*/
             continue;
 
         logNewLine(line);
         commandParser(line, fileName);
+        lineNumber++;
     }
 
     fclose(file);
@@ -80,7 +91,8 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 /**
  *  This function removes spaces at the beginning of a command.
  *  It shifts the command string to the right until it encounters a non-space character.
- 
+ */
+
 void removePrefixSpaces(char *command)
 {
     int i, j;

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "writeToFile.h"
 #include "errorsHandler.h"
+#include "encoder.h"
 
 void encodLabelOperand(char *fileName, char AREcode, int address);
 void encodImmidiate(char *fileName, int immidiate);
@@ -87,6 +88,8 @@ const char base64Chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 /*Function to encode a binary array to Base64*/
 char *encodeToBase64(const int *binaryArray, size_t length)
 {
+    size_t i = 0, j = 0;
+    int shift;
     size_t base64Len = 4 * ((length + 2) / 3); /*Calculate the length of Base64 string*/
 
     char *base64String = (char *)malloc(base64Len + 1);
@@ -96,7 +99,6 @@ char *encodeToBase64(const int *binaryArray, size_t length)
         return NULL;
     }
 
-    size_t i = 0, j = 0;
     while (i < length)
     {
         unsigned int buffer = 0;
@@ -111,7 +113,7 @@ char *encodeToBase64(const int *binaryArray, size_t length)
         }
 
         /*Append the Base64 characters to the result string*/
-        int shift = 18;
+        shift = 18;
         while (j < base64Len)
         {
             base64String[j++] = base64Chars[(buffer >> shift) & 0x3F];
