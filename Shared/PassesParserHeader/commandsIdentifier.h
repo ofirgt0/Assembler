@@ -53,7 +53,7 @@ void removePrefixSpaces(char *command);
  * @param list the list to be searched.
  * @return The index of the command if found, otherwise -1.
  */
-int getCommandIndexByList(char command[], char *list[]);
+int getCommandIndexByList(char *command, char *list[], int listLength);
 
 /**
  * Check if a character represents a valid register name.
@@ -75,7 +75,7 @@ int getCharIndexBySeparator(char *str, char seperator);
  * @param command the command string.
  * @return a string of the label if found, NULL otherwise.
  */
-char *tryGetLabel(char *command);
+char *tryGetLabel(char **command);
 
 /**
  * Parse a string into a number.

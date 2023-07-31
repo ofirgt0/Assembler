@@ -42,39 +42,6 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
 static bool macroFlag = false;
 
 /**
- * A thread-safe version of strtok.
- * This function works like the standard 'strtok' function but is reentrant and doesn't modify the delimiters string.
- * It returns a pointer to the next token in 'str' that is delimited by a character from 'delim'.
- * If there are no more tokens, it returns NULL.
- */
-char *my_strtok_r(char *str, const char *delim, char **saveptr)
-{
-    char *token;
-    if (str == NULL)
-    {
-        str = *saveptr;
-    }
-    str += strspn(str, delim);
-    if (*str == '\0')
-    {
-        *saveptr = str;
-        return NULL;
-    }
-    token = str;
-    str = strpbrk(token, delim);
-    if (str == NULL)
-    {
-        *saveptr = (char *)strchr(token, '\0');
-    }
-    else
-    {
-        *str = '\0';
-        *saveptr = str + 1;
-    }
-    return token;
-}
-
-/**
  * Replaces multiple consecutive spaces with a single space in a string.
  * The function modifies the input string in-place.
  */
@@ -127,7 +94,7 @@ void removePrefixSpaces(char *command)
     Input: command - the command to search for.
     Output: The index of the command if found, otherwise -1.
 */
-int getCommandIndexByList(char command[], char *list[])
+int getCommandIndexByList(char *command, char *list[], int listLength)
 {
     int commandLength = 0;
     int commandIndex = 0;
@@ -135,7 +102,7 @@ int getCommandIndexByList(char command[], char *list[])
     while (command[commandLength] != ' ' && command[commandLength] != '\t' && command[commandLength] != VAR_SEPARATOR && command[commandLength] != '\0')
         commandLength++;
 
-    for (commandIndex = 0; commandIndex < COMMANDS_NUMBER; commandIndex++) /*TODO: change to real list length*/
+    for (commandIndex = 0; commandIndex < listLength; commandIndex++) /*TODO: change to real list length*/
     {
         /* Two-way inclusion check of the string*/
         if (strlen(list[commandIndex]) == commandLength && strncmp(list[commandIndex], command, commandLength) == 0)
@@ -162,37 +129,37 @@ bool isRegisterName(char registerName[])
  * Returns the index of the first occurrence of a separator character in a string.
  * If the separator character is not found, the function returns 0.
  */
-int getCharIndexBySeparator(char *str, char seperator)
+int getCharIndexBySeparator(char *str, char separator)
 {
     int i;
 
-    for (i = 0; str[i] != '\0'; i++)
+    for (i = 0; i < strlen(str); i++)
     {
-        if (strchr(seperator, str[i]) != NULL)
+        if (str[i] == separator)
             return i;
     }
 
-    return 0;
+    return -1; 
 }
 
 /**
  * Extracts the label from a command string.
  * If the label is found, it is removed from the command string.
  */
-char *tryGetLabel(char *command)
+char *tryGetLabel(char **command)
 {
     int index;
     char *label;
-    index = getCharIndexBySeparator(command, LABEL_SEPERATOR);
+
+    index = getCharIndexBySeparator(*command, LABEL_SEPERATOR);
 
     if (index == 0)
         return NULL;
 
     label = (char *)malloc((index + 1) * sizeof(char));
-    strncpy(label, command, index - 1); /*-1 because we dont need the seperator inside the label name*/
-    label[index + 1] = '\0';            /*Null-terminate the new string*/
-    command += index;                   /*We dont need the label anymore*/
-
+    strncpy(label, *command, index);
+    label[index+1] = '\0'; /* Null-terminate the new string */
+    *command += index + 1; /* Move the command pointer to skip the label and separator */
     return label;
 }
 
@@ -262,15 +229,16 @@ static char *currentMacro = NULL; /* Holds the name of the macro that is current
 void startFirstRun(char command[], int lineNumber, char *fileName)
 {
     char *label;
-    int prefixIndex; /*TODO: check if we need to remove PREFIX SPACES*/
-
+    int prefixIndex=0; /*TODO: check if we need to remove PREFIX SPACES*/
+    
     if (macroFlag) /*if we in a macro - > count the lines*/
     {
         linesCounter++;
         return;
     }
-    label = tryGetLabel(command); /*if label exist - we will get the label name and remove it from the command*/
-    prefixIndex = getCommandIndexByList(command, commandsPrefix);
+    label = tryGetLabel(&command); /*if label exist - we will get the label name and remove it from the command*/
+    removePrefixSpaces(command);
+    prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
 
     if (label != NULL && strcmp(label, "") != 0) /*note in page 41*/
     {
@@ -280,38 +248,39 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         }
         else
         {
-            addNewLabel(label); /*regular label*/
+            /*addNewLabel(label); /*regular label*/
         }
     }
 
     if (prefixIndex != -1)
     {
         char *secondVar;
-        secondVar = command + strlen(commandsPrefix[prefixIndex]); /*in this part we have the label in the hand*/
+	    char* commandPrefix = commandsPrefix[prefixIndex];
+        secondVar = command + strlen(commandPrefix); /*in this part we have the label in the hand*/
 
         switch (prefixIndex)
         {
         case 0: /*extern*/
         {
             /*TODO: add warning for the option that label != null  as note in page 41*/
-            addNewExtern(secondVar);
+            /*addNewExtern(secondVar);*/
             return;
         }
         case 1: /*entry*/
         {
-            addNewEntry(secondVar);
+            /*addNewEntry(secondVar);*/
             return;
         }
         case 2: /*mcro*/
         {
             strcpy(secondVar, currentMacro);
-            addMacro(secondVar, lineNumber);
+            /*addMacro(secondVar, lineNumber);*/
             macroFlag = true;
             return;
         }
         case 3: /*endmcro*/
         {
-            updateLinesCount(currentMacro, linesCounter);
+            /*updateLinesCount(currentMacro, linesCounter);*/
 
             macroFlag = false;
             currentMacro = NULL;
@@ -322,8 +291,8 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         {
             size_t length;
             int *data;
-            data = parseIntArray(secondVar, &length);
-            addData(data, secondVar);
+            /*data = parseIntArray(secondVar, &length);
+            addData(data, secondVar); /*in dataService*/ /*TODO: check with ofir if this line should be: addNewData(data, 'length') */
             return;
         }
         case 5: /*string*/
@@ -339,6 +308,8 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     {
         int linesNumber;
         linesNumber = determineLinesNumber(command);
+	    printf("aaaaaaaaaaaaaaa %d", linesNumber);
+        
         if (label != NULL)
             addNewLabel(label);
         increaseIC(linesNumber);
@@ -415,7 +386,7 @@ int determineLinesNumber(char *command)
     char *firstVar;
 
     int commandIndex;
-    commandIndex = getCommandIndexByList(command, commandsNames);
+    commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
 
     if (commandIndex > 13) /*0 vars*/
         return 1;
@@ -454,7 +425,7 @@ void commandParser(char *command, char *fileName)
     label = tryGetLabel(command);
     command += strlen(label);
     /*TODO: check if we need to remove PREFIX SPACES*/
-    prefixIndex = getCommandIndexByList(command, commandsPrefix);
+    prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
     if (prefixIndex != -1)
         return; /*we handle this commands in the first run*/
 
@@ -464,7 +435,7 @@ void commandParser(char *command, char *fileName)
         return;
     }
 
-    commandIndex = getCommandIndexByList(command, commandsNames);
+    commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
     command = command + strlen(commandsNames[commandIndex]);
     replaceMultipleSpaces(command);
 
