@@ -14,9 +14,19 @@ static struct macroDataNode *head = NULL;
  */
 char *my_strdup(const char *s)
 {
+    if (s == NULL)
+    {
+        printf("Error: Null pointer passed to my_strdup.\n");
+        return NULL;
+    }
+
     char *new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
     if (new == NULL)
+    {
+        printf("Error: Memory allocation failed in my_strdup.\n");
         return NULL;
+    }
+
     strcpy(new, s);
     return new;
 }
@@ -78,7 +88,7 @@ void addMacro(const char *macroName, int lineNumber)
     }
 
     /*Copy the macroName to the new node*/
-    newNode->macroName = strdup(macroName); /*Note: Remember to free this memory later*/
+    newNode->macroName = my_strdup(macroName); /*Note: Remember to free this memory later*/
     newNode->lineNumber = lineNumber;
     newNode->linesCount = 0;
 
