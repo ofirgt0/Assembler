@@ -13,7 +13,8 @@ void logNewLine(const char *line)
  */
 void fileReader(const char *fileName)
 {
-        
+    char line[256];
+
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
@@ -21,25 +22,24 @@ void fileReader(const char *fileName)
         return;
     }
 
-    char line[256];
-
     /*First run - save the label, macro. entry, extern, data and string*/
     while (fgets(line, sizeof(line), file) != NULL)
-    {        
+    {
         if (line == '\0')
             continue;
 
         removePrefixSpaces(line);
-	logNewLine(line);
+        logNewLine(line);
         startFirstRun(line);
     }
-    
+
     fseek(file, 0, SEEK_SET);
-    printf("------------------------------------------");
-    /* Second run */
+
+    printf("\n-------------S--E--C--O--N--D--R--U--N-------------\n\n");
+
+    /* Second pass on the code */
     while (fgets(line, sizeof(line), file) != NULL)
     {
-	printf("testt\n");
         removePrefixSpaces(line);
         if (line == '\0')
             continue;
@@ -59,6 +59,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 {
     char line[256];
     int currentLine;
+
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
@@ -83,7 +84,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 /**
  *  This function removes spaces at the beginning of a command.
  *  It shifts the command string to the right until it encounters a non-space character.
- 
+
 void removePrefixSpaces(char *command)
 {
     int i, j;
