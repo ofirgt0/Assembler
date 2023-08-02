@@ -278,7 +278,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         }
         case 2: /*mcro*/
         {
-            strcpy(secondVar, currentMacro);
+            /*strcpy(secondVar, currentMacro);*/
             addMacro(secondVar, lineNumber);
             macroFlag = true;
             return;
