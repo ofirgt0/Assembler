@@ -11,3 +11,7 @@ STR: .string “abcdef”
 LENGTH: .data 6,-9,15
 K: .data 22
 LOOP: jmp L1
+mcro m2
+    sub @r7, LENGTH
+    bne STR
+endmcro
