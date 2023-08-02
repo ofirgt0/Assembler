@@ -9,9 +9,9 @@
 #define DATA_LABEL_TYPE "data"
 #define STRING_LABEL_TYPE "string"
 
-#define ARE_CODE_A 'A'
-#define ARE_CODE_R 'R'
-#define ARE_CODE_E 'E'
+#define ARE_CODE_A "A"
+#define ARE_CODE_R "R"
+#define ARE_CODE_E "E"
 
 #define MAX_LABEL_NAME_LENGTH 31
 
@@ -35,7 +35,7 @@ typedef enum
 /* Define the label structure */
 struct Label
 {
-    char type;
+    char *type;
     char name[MAX_LABEL_NAME_LENGTH];
     int address;
 };

@@ -20,6 +20,7 @@ typedef struct commandsIdentifier commandsIdentifier;
 typedef struct Line Line; /*Added this line*/
 
 /**
+ * A thread-safe version of strtok.
  * This function works like the standard 'strtok' function but is reentrant and doesn't modify the delimiters string.
  * It returns a pointer to the next token in 'str' that is delimited by a character from 'delim'.
  * If there are no more tokens, it returns NULL.

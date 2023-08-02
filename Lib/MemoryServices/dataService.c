@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include "errorsHandler.h"
-#include "dataService.h"
-#include "encoder.h"
+#include "../../Shared/MemoryServicesHeaders/dataService.h"
+#include "../../Shared/HelpersHeaders/encoder.h"
 #include "writeToFile.h"
 
 /* Initialize the label lists. */
@@ -159,8 +159,7 @@ bool addNewExtern(char *externName)
     struct Label *label = NULL;
     struct LabelNode *newNode = NULL;
 
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
+    label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -169,8 +168,6 @@ bool addNewExtern(char *externName)
 
     label->type = EXTERN_LABEL_TYPE;
     strncpy(label->name, externName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0';
-
     label->address = -1; /*Assuming -1 represents an external label address.*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
@@ -200,8 +197,7 @@ bool addNewEntry(char *entryName)
     struct Label *label = NULL;
     struct LabelNode *newNode = NULL;
 
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
+    label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -210,8 +206,6 @@ bool addNewEntry(char *entryName)
 
     label->type = ENTRY_LABEL_TYPE;
     strncpy(label->name, entryName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination (because the use of 'strncpy') */
-
     label->address = -1; /*The address will be set later when the entry is resolved.*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
@@ -243,9 +237,7 @@ bool addData(int data[], char *labelName)
     struct DataLabel *newNode = NULL;
 
     DC++;
-
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
+    label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -254,8 +246,6 @@ bool addData(int data[], char *labelName)
 
     label->type = DATA_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
-
     label->address = DC; /*The address will be set later when data is linked to the code.*/
 
     newNode = (struct DataLabel *)malloc(sizeof(struct DataLabel));
@@ -283,19 +273,9 @@ bool addData(int data[], char *labelName)
  */
 char *my_strdup(const char *s)
 {
-    if (s == NULL)
-    {
-        printf("Error: Null pointer passed to my_strdup.\n");
-        return NULL;
-    }
-
     char *new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
     if (new == NULL)
-    {
-        printf("Error: Memory allocation failed in my_strdup.\n");
         return NULL;
-    }
-
     strcpy(new, s);
     return new;
 }
@@ -314,9 +294,7 @@ bool addString(char *string, char *labelName)
     struct StringLabel *newNode = NULL;
 
     DC++;
-
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
+    label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -325,8 +303,6 @@ bool addString(char *string, char *labelName)
 
     label->type = STRING_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination  */
-
     label->address = DC; /*The address will be set later when the string is linked to the code.*/
 
     newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
@@ -359,8 +335,7 @@ bool addNewLabel(char *labelName)
     struct Label *label = NULL;
     struct LabelNode *newNode = NULL;
 
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
+    label = (struct Label *)malloc(sizeof(struct Label));
     if (label == NULL)
     {
         /*Memory allocation failed*/
@@ -370,8 +345,7 @@ bool addNewLabel(char *labelName)
     /*Set appropriate label type and name as per your requirement*/
     label->type = NORMAL_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
-    label->address = IC;                           /* due to page 30*/
+    label->address = IC; /* due to page 30*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
