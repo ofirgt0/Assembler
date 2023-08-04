@@ -35,7 +35,18 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
 
     dstAddressing = register2 != -1 ? RegisterDirect : (label2 != NULL ? Direct : (immidiate2 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
     srcAddressing = register1 != -1 ? RegisterDirect : (label1 != NULL ? Direct : (immidiate1 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
-    IC++;                                                                                                                  /*for the base command*/
+
+    if (srcAddressing == None)
+    {
+        srcAddressing = dstAddressing;
+    }
+
+    printf("\nsrcAddressing = %d, dstAddressing = %d\n\n\n", srcAddressing, dstAddressing);
+
+    printf("label1: %s , register1: %d , immidiate1: %f", label1, register1, immidiate1);
+    printf("\n\n");
+
+    IC++; /*for the base command*/
     encodInstructionCode(fileName, ARE_CODE_A, srcAddressing, opcode, dstAddressing);
     printf("IC is %d\n", IC);
 
@@ -70,7 +81,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     {
         IC++;
         printf("IC is %d\n", IC);
-        printf("we r in the case that label1 != NULL");
+        printf("we r in the case that label1 != NULL\n");
 
         address = searchExternLabel(label1); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
         if (address != -1)
@@ -350,8 +361,30 @@ bool addString(char *string, char *labelName)
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination  */
 
     printf("DC BEFORE is %d\n", DC);
-    DC += strlen(string); /*+1 FOR /0*/
-    label->address = DC;  /*The address will be set later when the string is linked to the code.*/
+
+    /* Find the opening and closing quotation marks */
+    char *startQuote = strchr(string, '\"');
+    char *endQuote = strrchr(string, '\"');
+
+    /* Check that both an opening and a closing quotation mark were found */
+    if (startQuote == NULL || endQuote == NULL || startQuote >= endQuote)
+    {
+        printf("Error: String not properly enclosed in quotation marks.\n");
+        return;
+    }
+
+    /* Check that there are no unexpected characters after the closing quotation mark */
+    if (*(endQuote + 1) != '\0' && *(endQuote + 1) != '\n' && *(endQuote + 1) != ' ')
+    {
+        printf("Error: Unexpected characters after closing quotation mark.\n");
+        return;
+    }
+
+    /* Calculate the actual length of the string between the quotation marks */
+    int stringLength = endQuote - startQuote - 1;
+
+    DC += stringLength + 1; /*+1 FOR /0*/
+    label->address = DC;    /*The address will be set later when the string is linked to the code.*/
     printf("DC AFTER is %d\n", DC);
 
     newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
@@ -579,29 +612,30 @@ int searchStringLabel(char *labelName)
     return -1; /*Label was not found*/
 }
 
-void printLabels(const char *filename){
-	struct StringLabel *current_StringLabel;
-	current_StringLabel = stringLabelList;
-	while (current_StringLabel != NULL)
-	{
-	    writeLabelToFile(concatenateStrings(filename, "_string.txt"), current_StringLabel->label->name, current_StringLabel->label->address);
-	    current_StringLabel = current_StringLabel->next;
-	}
+void printLabels(const char *filename)
+{
+    struct StringLabel *current_StringLabel;
+    current_StringLabel = stringLabelList;
+    while (current_StringLabel != NULL)
+    {
+        writeLabelToFile(concatenateStrings(filename, "_string.txt"), current_StringLabel->label->name, current_StringLabel->label->address);
+        current_StringLabel = current_StringLabel->next;
+    }
 
-	struct LabelNode *current_LabelNode;
-	current_LabelNode = externalLabelList;
-	while (current_LabelNode != NULL)
-	{
-	    writeLabelToFile(concatenateStrings(filename, ".ext"), current_LabelNode->label->name, current_LabelNode->label->address);
-	    current_LabelNode = current_LabelNode->next;
-	}
-	
-	current_LabelNode = entryLabelList;
-	while (current_LabelNode != NULL)
-	{
-	    writeLabelToFile(concatenateStrings(filename, ".ent"), current_LabelNode->label->name, current_LabelNode->label->address);
-	    current_LabelNode = current_LabelNode->next;
-	}
+    struct LabelNode *current_LabelNode;
+    current_LabelNode = externalLabelList;
+    while (current_LabelNode != NULL)
+    {
+        writeLabelToFile(concatenateStrings(filename, ".ext"), current_LabelNode->label->name, current_LabelNode->label->address);
+        current_LabelNode = current_LabelNode->next;
+    }
+
+    current_LabelNode = entryLabelList;
+    while (current_LabelNode != NULL)
+    {
+        writeLabelToFile(concatenateStrings(filename, ".ent"), current_LabelNode->label->name, current_LabelNode->label->address);
+        current_LabelNode = current_LabelNode->next;
+    }
 }
 
 /*

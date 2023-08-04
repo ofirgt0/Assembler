@@ -41,10 +41,10 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
 /* Flag to indicate if we're currently processing a macro. */
 static bool macroFlag = false;
 
-void printLabel(const char *filename){
-	printLabels(*filename);
+void printLabel(const char *filename)
+{
+    printLabels(*filename);
 }
-
 
 /**
  * Replaces multiple consecutive spaces with a single space in a string.
@@ -204,7 +204,7 @@ double tryGetNumber(char *str)
     }
 
     /*If conversion failed or not the entire string was processed, return NaN (Not a Number)*/
-    return 0.0 / 0.0;
+    return 0.5;
 }
 
 /**
@@ -369,23 +369,25 @@ int *parseIntArray(char *input, size_t *length)
 {
     int *array = NULL;
     *length = 0;
-    
+
     char *token = strtok(input, ",");
-    while (token != NULL) {
+    while (token != NULL)
+    {
         (*length)++;
         int num = atoi(token);
         printf("%d \n", num);
         int *temp = realloc(array, (*length) * sizeof(int));
-        if (temp == NULL) {
+        if (temp == NULL)
+        {
             free(array);
             return NULL;
         }
         array = temp;
-        
+
         array[(*length) - 1] = num;
         token = strtok(NULL, ",");
     }
-    
+
     return array;
 }
 
@@ -438,7 +440,7 @@ void commandParser(char *command, char *fileName)
             isMacro = true;
         if (prefixIndex == 3)
             isMacro = false;
-	
+
         return; /*we handle this commands in the first run*/
     }
 
@@ -479,7 +481,7 @@ void commandParser(char *command, char *fileName)
         {
             if (strlen(command) == 3)
             {
-                addNewLine(fileName, commandIndex, command[2] - '0', -1, NULL, NULL, 0, 0); /*Note: -1 means that there is no register in this operand slot*/
+                addNewLine(fileName, commandIndex, command[2] - '0', -1, NULL, NULL, 0.5, 0); /*Note: -1 means that there is no register in this operand slot*/
             }
             else
             {
@@ -489,11 +491,11 @@ void commandParser(char *command, char *fileName)
         else if (isLabelExist(command))
         {
             printf("isLabelExist\n");
-            addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0, 0);
+            addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0);
         }
         else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
         {
-            addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command), 0);
+            addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command), 0.5);
         }
         else
         {
@@ -570,4 +572,3 @@ char *my_strtok_r(char *str, const char *delim, char **saveptr)
     }
     return token;
 }
-
