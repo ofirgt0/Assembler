@@ -9,9 +9,9 @@
 #define DATA_LABEL_TYPE "data"
 #define STRING_LABEL_TYPE "string"
 
-#define ARE_CODE_A "A"
-#define ARE_CODE_R "R"
-#define ARE_CODE_E "E"
+#define ARE_CODE_A 'A'
+#define ARE_CODE_R 'R'
+#define ARE_CODE_E 'E'
 
 #define MAX_LABEL_NAME_LENGTH 31
 
@@ -35,7 +35,7 @@ typedef enum
 /* Define the label structure */
 struct Label
 {
-    char *type;
+    char type;
     char name[MAX_LABEL_NAME_LENGTH];
     int address;
 };
@@ -72,7 +72,7 @@ struct StringLabel
  * @param immidiate1 the immidiate1.
  * @param immidiate2 the immidiate2.
  */
-void addNewLine(int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
+void addNewLine(char* fileName, int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
 
 /**
  * Validate if opcode matches addressing method.
@@ -103,16 +103,7 @@ bool addNewEntry(char *entryName);
  * @param labelName the name of the label.
  * @return true if adding is successful, false otherwise.
  */
-bool addData(int data[], char *labelName);
-
-/**
- * Duplicates a string by creating a new copy in the heap.
- * This function allocates memory for the new string, copies
- * the original string into the new memory, and returns a pointer to it.
- * @param s The string to be duplicated.
- * @return A pointer to the newly duplicated string, or NULL if the operation fails.
- */
-char *my_strdup(const char *s);
+bool addData(int data[], char *labelName, int length);
 
 /**
  * Add a string to a label.
@@ -164,5 +155,7 @@ int searchDataLabel(char *labelName);
  * @return the address of the string label if found, -1 otherwise.
  */
 int searchStringLabel(char *labelName);
+
+void printLabelList(struct LabelNode *head);
 
 #endif /* DATASERVICE_H */

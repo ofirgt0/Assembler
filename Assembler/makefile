@@ -11,10 +11,10 @@ INCLUDES = -I./Assembler/Shared/PassesParserHeader -I./Assembler/Shared/HelpersH
 LIBS = -lm
 
 # Define the executable file 
-MAIN = asm
+MAIN = Assembler
 
 # Define the object files
-OBJS = filesReader.o commandsIdentifier.o macroService.o dataService.o errorsHandler.o writeToFile.o encoder.o
+OBJS = filesReader.o commandsIdentifier.o macroServices.o dataServices.o errorsHandler.o writeToFile.o encoder.o
 
 .PHONY: all clean
 
@@ -30,10 +30,10 @@ filesReader.o: Assembler/Lib/Helpers/filesReader.c
 commandsIdentifier.o: Assembler/Lib/PassesParser/commandsIdentifier.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-macroService.o: Assembler/Lib/MemoryServices/macroService.c
+macroServices.o: Assembler/Lib/MemoryServices/macroServices.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
-dataService.o: Assembler/Lib/MemoryServices/dataService.c
+dataServices.o: Assembler/Lib/MemoryServices/dataServices.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 errorsHandler.o: Assembler/Lib/Helpers/errorsHandler.c
@@ -48,6 +48,7 @@ encoder.o: Assembler/Lib/Helpers/encoder.c
 # Clean target to remove object files and the executable
 clean:
 	$(RM) *.o *~ $(MAIN)
+
 
 
 

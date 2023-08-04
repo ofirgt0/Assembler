@@ -60,6 +60,6 @@ void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[]);
  * @param length the length of the binary array.
  * @return the Base64 string.
  */
-char *encodeToBase64(const int *binaryArray, size_t length);
+char* binaryArrayToBase64(int* inrArray, int length);
 
 #endif /*ENCODER_H*/

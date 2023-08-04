@@ -20,7 +20,6 @@ typedef struct commandsIdentifier commandsIdentifier;
 typedef struct Line Line; /*Added this line*/
 
 /**
- * A thread-safe version of strtok.
  * This function works like the standard 'strtok' function but is reentrant and doesn't modify the delimiters string.
  * It returns a pointer to the next token in 'str' that is delimited by a character from 'delim'.
  * If there are no more tokens, it returns NULL.
@@ -54,6 +53,8 @@ void removePrefixSpaces(char *command);
  * @return The index of the command if found, otherwise -1.
  */
 int getCommandIndexByList(char *command, char *list[], int listLength);
+
+void printLabel(const char *filename);
 
 /**
  * Check if a character represents a valid register name.
