@@ -317,6 +317,7 @@ bool addData(int data[], char *labelName, int length)
     newNode->label = label;
     newNode->data = data;
     newNode->next = dataLabelList;
+    newNode->size = length;
     dataLabelList = newNode;
 
     return true;
@@ -477,7 +478,11 @@ void initIC()
 
 bool isLabelExist(char *label)
 {
-    return searchExternLabel(label) != -1 || searchEntry(label) != -1 || searchLabel(label) != -1 || 
+    if(searchExternLabel(label) != -1){
+	
+    }
+
+    return searchEntry(label) != -1 || searchLabel(label) != -1 || 
 		searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
 }
 
@@ -630,23 +635,27 @@ struct StringLabel* searchStringLabel(char *labelName)
     return NULL; /*Label was not found*/
 }
 
-void sendStringValue(char* fileName, char* labelName){
-    printf("sendStringValue: %s %s\n",fileName, labelName);
+void sendStringValue(char *fileName, char *labelName)
+{
+    printf("sendStringValue: %s %s\n", fileName, labelName);
     struct StringLabel *current;
     current = searchStringLabel(labelName);
-    printf("sendStringValue: %s\n",current->label->name);
+    printf("sendStringValue: %s\n", current->label->name);
     int i;
-    for(i=0; current->string[i] != '\0'; i++){
-	printf("current->string[i]: %d\n",current->string[i]);
-	encodValue(fileName, current->string[i]);
+    for (i = 1; current->string[i] != '\0'; i++)
+    {
+        if (current->string[i] != 34)
+            encodValue(fileName, current->string[i]);
     }
+    encodValue(fileName, current->string[i]);
 }
 
 void sendDataValue(char* fileName, char* labelName){
     struct DataLabel *current;
     current = searchDataLabel(labelName);
     int i;
-    for(i=0; current->data[i] != '\0'; i++){
+    
+    for(i=0; i < current->size; i++){
 	encodValue(fileName, current->data[i]);
     }
 }
