@@ -684,4 +684,3 @@ static struct LabelNode *normalCommandLabelList = NULL;
 static struct DataLabel *dataLabelList = NULL;
 static struct StringLabel *stringLabelList = NULL;*/
 
-

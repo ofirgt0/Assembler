@@ -426,9 +426,16 @@ static bool isMacro = false;
 
 void commandParser(char *command, char *fileName, int lineNumber)
 {
-    char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL;
+    char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
     int prefixIndex, commandIndex, register1 = -1, register2 = -1;
     double immidiate1 = 0.5, immidiate2 = 0.5;
+
+    originalCommand = (char *)malloc(strlen(command) + 1);
+    if (originalCommand == NULL) {
+        perror("Memory allocation failed");
+        return 1;
+    }
+    strcpy(originalCommand, command);
 
     label = tryGetLabel(&command);
     removePrefixSpaces(command);
@@ -459,7 +466,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         sendMacro(command, fileName);
         return;
     }
-
+    appendStringToFile(fileName,originalCommand);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
 
     command = command + strlen(commandsNames[commandIndex]);

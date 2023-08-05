@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "stdio.h": "c",
-        "xmemory": "c",
-        "writetofile.h": "c",
-        "commandsidentifier.h": "c"
-    }
-}

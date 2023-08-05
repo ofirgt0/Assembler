@@ -23,8 +23,6 @@ void fileReader(const char *fileName)
         return;
     }
 
-    
-
     /*First run - save the label, macro. entry, extern, data and string*/
     for (i=0; fgets(line, sizeof(line), file) != NULL; i++)
     {        
@@ -38,16 +36,16 @@ void fileReader(const char *fileName)
     
     fseek(file, 0, SEEK_SET);
     initIC();
-    printf("\n################################ S--E--C--O--N--D--R--U--N ################################n\n");
+    printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
     /* Second run */
-    while (fgets(line, sizeof(line), file) != NULL)
+    for (i=0; fgets(line, sizeof(line), file) != NULL; i++)
     {
         removePrefixSpaces(line);
         if (line == '\0')
             continue;
 
         logNewLine(line,0);
-        commandParser(line, fileName);
+        commandParser(line, fileName,i);
     }
     printLabels(fileName);
     fclose(file);
