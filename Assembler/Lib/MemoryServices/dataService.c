@@ -381,9 +381,9 @@ bool addString(char *string, char *labelName)
     }
 
     /* Calculate the actual length of the string between the quotation marks */
-    int stringLength = endQuote - startQuote - 1;
+    int stringLength = endQuote - startQuote;
 
-    DC += stringLength + 1; /*+1 FOR /0*/
+    DC += stringLength; /*+1 FOR /0*/
     label->address = DC;    /*The address will be set later when the string is linked to the code.*/
     printf("DC AFTER is %d\n", DC);
 

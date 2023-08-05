@@ -56,11 +56,12 @@ void encodLabelOperand(char *fileName, char AREcode, int address)
 
 void encodImmidiate(char *fileName, int immediate)
 {
+   
     int code[12] = {0};
-    setBinaryArray(code, immediate);
+    (immediate < 0) ? setNegativeBinaryArray(code, immediate) : setBinaryArray(code, immediate);
     setARE('A', code);
     fileName = removeFileNameExtension(fileName);
-
+     printIntArray(code);
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
     /*printCommandToFile(fileName, code); // Implement printCommandToFile function*/
 }
@@ -135,16 +136,82 @@ char* binaryArrayToBase64(int* inrArray, int length) {
     free(binaryString);
     return base64String;
 }
-
-void setBinaryArray(int arr[], int decimalNumber) /* TODO: to check with ofir if this was the meaning of the function implementaion ? */
+/*
+void setBinaryArray(int arr[], int decimalNumber)
 {
+    
     int i;
-
     for (i = 0; decimalNumber > 0; i++)
     {
         arr[i] = decimalNumber % 2;
         decimalNumber = decimalNumber / 2;
     }
+}
+
+void setNegativeBinaryArray(int arr[], int decimalNumber)
+{
+    int i;
+    decimalNumber = -decimalNumber;
+    setBinaryArray(arr, decimalNumber);
+    for(i = 0; i<10; i++)
+    {
+	arr[i] = arr[i] == 1 ? 0 : 1;
+    }
+    printIntArray(arr);
+    addOneToBinaryArray(arr, 10);
+}
+
+void addOneToBinaryArray(int binaryArray[], int size) {
+    int carry = 1, i;
+
+    for (i = size - 1; i >= 0; i--) {
+        if (carry == 0) {
+            break;
+        }
+
+        int sum = binaryArray[i] + carry;
+        binaryArray[i] = sum % 2;
+        carry = sum / 2;
+    }
+}
+
+*/
+
+void setBinaryArray(int binaryArray[], int decimalNumber) {
+
+    int mask = 1 << 9;
+int i;
+
+    for (i = 0; i < 10; i++) {
+        binaryArray[i] = (decimalNumber & mask) ? 1 : 0;
+        mask >>= 1; 
+    }
+}
+
+void addOneToBinaryArray(int binaryArray[], int size) {
+    int carry = 1;
+    int i;
+    for (i = size - 1; i >= 0; i--) {
+        if (carry == 0) {
+            break;
+        }
+
+        int sum = binaryArray[i] + carry;
+        binaryArray[i] = sum % 2;
+        carry = sum / 2;
+    }
+}
+
+void setNegativeBinaryArray(int arr[], int decimalNumber) {
+    decimalNumber = -decimalNumber;
+    int i;
+    setBinaryArray(arr, decimalNumber);
+
+    for (i = 0; i < 10; i++) {
+        arr[i] = (arr[i] == 1) ? 0 : 1;
+    }
+
+    addOneToBinaryArray(arr, 10);
 }
 
 char *concatenateStrings(const char *str1, const char *str2) {
