@@ -32,23 +32,23 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     AddressingMethod srcAddressing;
     int address = 0;
     bool commandValidation;
-/*
-typedef enum
-{
-    None = 0,
-    Immediate = 1,
-    Direct = 3,
-    RegisterDirect = 5
-} AddressingMethod;
-*/
-	printf("immidiate2 = %f, label2 = \n", immidiate2);
+    /*
+    typedef enum
+    {
+        None = 0,
+        Immediate = 1,
+        Direct = 3,
+        RegisterDirect = 5
+    } AddressingMethod;
+    */
+    printf("immidiate2 = %f, label2 = \n", immidiate2);
     dstAddressing = register2 != -1 ? RegisterDirect : (label2 != NULL ? Direct : (immidiate2 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
     srcAddressing = register1 != -1 ? RegisterDirect : (label1 != NULL ? Direct : (immidiate1 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
 
     if (dstAddressing == None)
     {
         dstAddressing = srcAddressing;
-	srcAddressing = None;
+        srcAddressing = None;
     }
 
     printf("\nsrcAddressing = %d, dstAddressing = %d\n\n\n", srcAddressing, dstAddressing);
@@ -96,7 +96,7 @@ typedef enum
         address = searchExternLabel(label1); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
         if (address != -1)
         {
-	    printf("dataservice sent ARE CODE E\n");
+            printf("dataservice sent ARE CODE E\n");
             encodLabelOperand(fileName, ARE_CODE_E, address);
             return;
         }
@@ -395,8 +395,8 @@ bool addString(char *string, char *labelName)
     /* Calculate the actual length of the string between the quotation marks */
     int stringLength = endQuote - startQuote;
 
-    DC += stringLength; /*+1 FOR /0*/
-    label->address = DC;    /*The address will be set later when the string is linked to the code.*/
+    DC += stringLength;  /*+1 FOR /0*/
+    label->address = DC; /*The address will be set later when the string is linked to the code.*/
     printf("DC AFTER is %d\n", DC);
 
     newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
@@ -476,14 +476,16 @@ void initIC()
     IC = 100;
 }
 
-bool isLabelExist(char *label)
+bool isLabelExist(char *label, int lineNumber, char *fileName)
 {
-    if(searchExternLabel(label) != -1){
-	
+    if (searchExternLabel(label) != -1)
+    {
+        writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC +1);
+        return true;
     }
 
-    return searchEntry(label) != -1 || searchLabel(label) != -1 || 
-		searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
+    return searchEntry(label) != -1 || searchLabel(label) != -1 ||
+           searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
 }
 
 /**
@@ -493,15 +495,16 @@ bool isLabelExist(char *label)
  */
 int searchExternLabel(char *externName)
 {
-    printf("searchExternLabel got %s \n",externName);
+    printf("searchExternLabel got %s \n", externName);
     struct LabelNode *current;
     current = externalLabelList;
     while (current != NULL)
     {
-	printf("current->label->name: %d, externName: %d\n",
+        printf("current->label->name: %d, externName: %d\n",
                strlen(current->label->name), externName[2]);
-	 size_t nameLabelLength = strlen(current->label->name);
-        if (current->label->name[nameLabelLength - 1] == '\n') {
+        size_t nameLabelLength = strlen(current->label->name);
+        if (current->label->name[nameLabelLength - 1] == '\n')
+        {
             current->label->name[nameLabelLength - 1] = '\0';
         }
         if (strcmp(current->label->name, externName) == 0)
@@ -596,7 +599,7 @@ int searchLabel(char *labelName)
  * If it finds a match, it returns the address of the label (adjusted by the current IC).
  * If it doesn't find a match, it returns -1.
  */
-struct DataLabel* searchDataLabel(char *labelName)
+struct DataLabel *searchDataLabel(char *labelName)
 {
     struct DataLabel *current;
     current = dataLabelList;
@@ -617,17 +620,17 @@ struct DataLabel* searchDataLabel(char *labelName)
  * If it finds a match, it returns the address of the label (adjusted by the current IC).
  * If it doesn't find a match, it returns -1.
  */
-struct StringLabel* searchStringLabel(char *labelName)
+struct StringLabel *searchStringLabel(char *labelName)
 {
     printf("searchStringLabel: %s\n", labelName);
     struct StringLabel *current;
     current = stringLabelList;
     while (current != NULL)
     {
-	printf("current->label->name: %s\n", current->label->name);
+        printf("current->label->name: %s\n", current->label->name);
         if (strcmp(current->label->name, labelName) == 0)
         {
-		printf("current->label->address: %d\n", current->label->address);
+            printf("current->label->address: %d\n", current->label->address);
             return current;
         }
         current = current->next;
@@ -650,26 +653,22 @@ void sendStringValue(char *fileName, char *labelName)
     encodValue(fileName, current->string[i]);
 }
 
-void sendDataValue(char* fileName, char* labelName){
+void sendDataValue(char *fileName, char *labelName)
+{
     struct DataLabel *current;
     current = searchDataLabel(labelName);
     int i;
-    
-    for(i=0; i < current->size; i++){
-	encodValue(fileName, current->data[i]);
+
+    for (i = 0; i < current->size; i++)
+    {
+        encodValue(fileName, current->data[i]);
     }
 }
 
 void printLabels(const char *filename)
 {
     struct LabelNode *current_LabelNode;
-    current_LabelNode = externalLabelList;
-    while (current_LabelNode != NULL)
-    {
-        writeLabelToFile(concatenateStrings(filename, ".ext"), current_LabelNode->label->name, current_LabelNode->label->address);
-        current_LabelNode = current_LabelNode->next;
-    }
-
+    
     current_LabelNode = entryLabelList;
     while (current_LabelNode != NULL)
     {
