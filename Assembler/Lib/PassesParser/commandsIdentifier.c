@@ -41,6 +41,11 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
 /* Flag to indicate if we're currently processing a macro. */
 static bool macroFlag = false;
 
+void printLabel(const char *filename)
+{
+    printLabels(*filename);
+}
+
 /**
  * Replaces multiple consecutive spaces with a single space in a string.
  * The function modifies the input string in-place.
@@ -53,7 +58,7 @@ void replaceMultipleSpaces(char *str)
 
     for (i = 0, j = 0; i < len; i++)
     {
-        if (str[i] == ' ' || str[i] == '\t')
+        if (str[i] == ' ' || str[i] == '\t' || str[i] == '\n')
             whitespaceCount++;
         else
             whitespaceCount = 0;
@@ -89,6 +94,20 @@ void removePrefixSpaces(char *command)
     command[j] = '\0';
 }
 
+void remove_spaces(char *str)
+{
+    int len = strlen(str);
+    int j = 0, i;
+    for (i = 0; i < len; i++)
+    {
+        if (str[i] != ' ' && str[i] != '\n' && str[i] != '\t' && str[i] != 0)
+        {
+            str[j++] = str[i];
+        }
+    }
+    str[j] = '\0';
+}
+
 /*
     Gets the index of a command in the commandsNames array.
     Input: command - the command to search for.
@@ -99,8 +118,11 @@ int getCommandIndexByList(char *command, char *list[], int listLength)
     int commandLength = 0;
     int commandIndex = 0;
 
-    while (command[commandLength] != ' ' && command[commandLength] != '\t' && command[commandLength] != VAR_SEPARATOR && command[commandLength] != '\0')
+    while (command[commandLength] != ' ' && command[commandLength] != '\t' && command[commandLength] != VAR_SEPARATOR &&
+           command[commandLength] != '\0' && command[commandLength] != 0 && command[commandLength] != 10)
+    {
         commandLength++;
+    }
 
     for (commandIndex = 0; commandIndex < listLength; commandIndex++) /*TODO: change to real list length*/
     {
@@ -122,6 +144,7 @@ bool isRegisterName(char registerName[])
 {
     if (strlen(registerName) < 2)
         return false;
+
     return registerName[0] == REGISTER_PREFIX && registerName[1] == 'r' && registerName[2] >= '0' && registerName[2] <= '7';
 }
 
@@ -153,7 +176,7 @@ char *tryGetLabel(char **command)
 
     index = getCharIndexBySeparator(*command, LABEL_SEPERATOR);
 
-    if (index == 0)
+    if (index <= 0)
         return NULL;
 
     label = (char *)malloc((index + 1) * sizeof(char));
@@ -181,7 +204,7 @@ double tryGetNumber(char *str)
     }
 
     /*If conversion failed or not the entire string was processed, return NaN (Not a Number)*/
-    return 0.0 / 0.0;
+    return 0.5;
 }
 
 /**
@@ -231,21 +254,33 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     char *label;
     int prefixIndex = 0;
 
-    if (macroFlag) /*if we in a macro - > count the lines*/
-    {
-        linesCounter++;
-        return;
-    }
     label = tryGetLabel(&command); /*if label exist - we will get the label name and remove it from the command*/
-
-    printf("Command to validate: %s\n", command);  /* Test */
-    printf("Label: %s\n", label ? label : "None"); /* Test */
-    printf("Index: %d\n", prefixIndex);            /* Test */
 
     removePrefixSpaces(command);
     prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
 
-    if (label != NULL && strcmp(label, "") != 0) /*note in page 41*/
+    char *commandWithSpaces = (char *)malloc(strlen(command) + 1);
+    if (commandWithSpaces == NULL)
+    {
+        return NULL;
+    }
+    strcpy(commandWithSpaces, command);
+
+    remove_spaces(command);
+
+    if (isMacroName(command))
+    {
+        printf("macro found, will be handled in the second run");
+        return;
+    }
+
+    if (macroFlag && prefixIndex != 3) /*if we in a macro - > count the lines*/
+    {
+        linesCounter++;
+        return;
+    }
+
+    if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
     {
         if (prefixIndex < 2)
         {
@@ -278,18 +313,20 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         }
         case 2: /*mcro*/
         {
-            /*strcpy(secondVar, currentMacro);*/
+            if (currentMacro == NULL)
+                currentMacro = (char *)malloc(strlen(secondVar) + 1);
+            strcpy(currentMacro, secondVar);
             addMacro(secondVar, lineNumber);
             macroFlag = true;
             return;
         }
         case 3: /*endmcro*/
         {
-            /*updateLinesCount(currentMacro, linesCounter);
+            updateLinesCount(currentMacro, linesCounter);
 
             macroFlag = false;
             currentMacro = NULL;
-            linesCounter = 0;*/
+            linesCounter = 0;
             return;
         }
         case 4: /*data*/
@@ -297,12 +334,12 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             size_t length;
             int *data;
             data = parseIntArray(secondVar, &length);
-            addData(data, secondVar); /*in dataService*/
+            addData(data, label, length);
             return;
         }
         case 5: /*string*/
         {
-
+            addString(secondVar, label);
             return;
         }
         default: /*useless*/
@@ -312,8 +349,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     else
     {
         int linesNumber;
-        linesNumber = determineLinesNumber(command);
-
+        linesNumber = determineLinesNumber(commandWithSpaces);
         if (label != NULL)
             addNewLabel(label);
         increaseIC(linesNumber);
@@ -331,120 +367,40 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
  */
 int *parseIntArray(char *input, size_t *length)
 {
-    size_t count = 0;
-    int *result = NULL;
-    int *temp = NULL;
+    int *array = NULL;
+    *length = 0;
 
-    char *inputCopy = my_strdup(input);
-    char *token = NULL;
-    char *endptr = NULL;
-    int val;
-
-    char *rest = inputCopy;
-
-    /* Test: Print the initial input */
-    printf("Initial input: %s\n", input);
-
-    while ((token = my_strtok_r(rest, ",", &rest)))
+    char *token = strtok(input, ",");
+    while (token != NULL)
     {
-
-        /* Test: Print the current token */
-        printf("Current token: %s\n", token);
-
-        /*Handle consecutive commas*/
-        if (strlen(token) == 0)
+        (*length)++;
+        int num = atoi(token);
+        printf("%d \n", num);
+        int *temp = realloc(array, (*length) * sizeof(int));
+        if (temp == NULL)
         {
-            printf("Error: Invalid input format - consecutive commas\n");
-            printf("Problematic token: %s\n", token);
-            printf("Current count: %zu", count);
-
-            free(inputCopy);
-            free(result);
+            free(array);
             return NULL;
         }
+        array = temp;
 
-        val = strtol(token, &endptr, 10);
-
-        /* Print the parsed value */
-        printf("Parsed value: %d\n", val);
-
-        /*Handle non-integer characters*/
-        if (*endptr != '\0')
-        {
-            printf("Error: Invalid input format - non-integer characters\n");
-            printf("Problematic token: %s\n", token);
-            printf("Current count: %zu\n", count);
-
-            free(inputCopy);
-            free(result);
-            return NULL;
-        }
-
-        /*Reallocate memory for the result array*/
-        count++;
-        temp = (int *)realloc(result, count * sizeof(int));
-        if (!temp)
-        {
-            printf("Error: Memory allocation failed\n");
-            printf("Current count: %zu\n", count);
-
-            free(inputCopy);
-            free(result);
-            return NULL;
-        }
-        result = temp;
-
-        /*Store the parsed integer in the array*/
-        result[count - 1] = val;
+        array[(*length) - 1] = num;
+        token = strtok(NULL, ",");
     }
 
-    /* Test: Print the stored value */
-    printf("Stored value at index %zu: %d\n", count - 1, result[count - 1]);
-
-    free(inputCopy);
-    *length = count;
-
-    /* Test: Print the final array length */
-    printf("Final array length: %zu\n", *length);
-
-    /* Test: Print the final result array */
-    printf("Final result array: ");
-
-    size_t i;
-
-    for (i = 0; i < *length; i++)
-    {
-        printf("%d ", result[i]);
-    }
-    printf("\n");
-
-    return result;
+    return array;
 }
 
 /**
  * Determines the number of lines that a command will occupy in the machine code.
  * The function counts the number of operands and takes into account whether they are registers or not.
  */
-
 int determineLinesNumber(char *command)
 {
     char *firstVar;
     int commandIndex;
 
-    /*Added for now, until implementing the case of string (case '5') in the initial transition. */
-    size_t len = strlen(command);
-    if (command[len - 1] == '\n')
-    {
-        command[len - 1] = '\0';
-    }
-
-    /* Test: Print the initial command */
-    printf("Initial command: %s\n", command);
-
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
-
-    /* Test: Print the command index */
-    printf("Command index: %d\n", commandIndex);
 
     if (commandIndex > 13) /*0 vars*/
         return 1;
@@ -455,16 +411,10 @@ int determineLinesNumber(char *command)
     else /* in this part we r in the case of 2 vars*/
     {
         command = command + strlen(commandsNames[commandIndex]);
-        replaceMultipleSpaces(command);
-
-        /* Test: Print the command after removing the command name */
-        printf("Command after removing command name: %s\n", command);
+        remove_spaces(command);
 
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /* + 1 for seperator ','*/
-
-        /* Test: Print the first variable and the remaining command */
-        printf("First variable: %s, Remaining command: %s\n", firstVar, command);
 
         if (isRegisterName(firstVar) && isRegisterName(command))
             return 2;
@@ -472,95 +422,129 @@ int determineLinesNumber(char *command)
     }
 }
 
-void commandParser(char *command, char *fileName)
+static bool isMacro = false;
+
+void commandParser(char *command, char *fileName, int lineNumber)
 {
-    char *label = NULL;
-    int prefixIndex;
-    int commandIndex;
+    char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
+    int prefixIndex, commandIndex, register1 = -1, register2 = -1;
     double immidiate1 = 0.5, immidiate2 = 0.5;
-    char *label1 = NULL, *label2 = NULL;
-    int register1 = -1, register2 = -1;
-    char *firstVar = NULL;
 
-    /*label = tryGetLabel(&command);
-    command += strlen(label);
+    originalCommand = (char *)malloc(strlen(command) + 1);
+    if (originalCommand == NULL) {
+        perror("Memory allocation failed");
+        return 1;
+    }
+    strcpy(originalCommand, command);
+
+    label = tryGetLabel(&command);
     removePrefixSpaces(command);
-
     prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
-    if (prefixIndex != -1)
-        return; /*we handle this commands in the first run*/
 
-    /*if (isMacroName(command))
+    if (prefixIndex != -1)
+    {
+        if (prefixIndex == 2)
+            isMacro = true;
+        if (prefixIndex == 3)
+            isMacro = false;
+        if (prefixIndex == 4)
+            sendDataValue(fileName, label);
+        if (prefixIndex == 5)
+            sendStringValue(fileName, label);
+
+        return; /*we handle this commands in the first run*/
+    }
+
+    if (isMacro)
+    {
+        printf("command inside macro - continue\n");
+        return;
+    }
+
+    if (isMacroName(command))
     {
         sendMacro(command, fileName);
         return;
     }
-
+    appendStringToFile(fileName,originalCommand);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
+
     command = command + strlen(commandsNames[commandIndex]);
-    replaceMultipleSpaces(command);
+    remove_spaces(command);
+    if (commandIndex == -1)
+    {
+        printf("ERROR: unknown command *************************************************************");
+        return;
+    }
 
     if (commandIndex > 13) /*0 vars*/
-    /*{
+    {
         if (strlen(command) > 0)
         {
             /*TODO: handle error*/
-    /*}
-    addNewLine(commandIndex, -1, -1, NULL, NULL, 0, 0); /* Note: -1 means that there is no register in this operand slot*/
-    /* }
-     else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) /*one var*/
-    /*{
+        }
+        addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0.5, 0.5); /* Note: -1 means that there is no register in this operand slot*/
+    }
+    else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) /*one var*/
+    {
+        printf("one var %s\n", command);
         if (isRegisterName(command))
         {
             if (strlen(command) == 3)
             {
-                addNewLine(commandIndex, command[2] - '0', -1, NULL, NULL, 0, 0); /*Note: -1 means that there is no register in this operand slot*/
-    /* }
-     else
-     {
-         /*TODO: handle error for char*/
-    /*  }
-  }
-  else if (isLabelExist(command))
-  {
-      addNewLine(commandIndex, -1, -1, command, NULL, 0, 0);
-  }
-  else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
-    /*{
-        addNewLine(commandIndex, -1, -1, NULL, NULL, tryGetNumber(command), 0);
+                addNewLine(fileName, commandIndex, command[2] - '0', -1, NULL, NULL, 0.5, 0.5); /*Note: -1 means that there is no register in this operand slot*/
+            }
+            else
+            {
+                /*TODO: handle error for char*/
+            }
+        }
+        else if (isLabelExist(command, lineNumber, fileName))
+        {
+            printf("isLabelExist\n");
+            addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0.5);
+        }
+        else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
+        {
+            addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command), 0.5);
+        }
+        else
+        {
+
+            /*TODO: handle error - there is no option for command*/
+        }
     }
-    else
+    else /* in this part we r in the case of 2 vars*/
     {
-        /*TODO: handle error - there is no option for command*/
-    /* }
- }
- else /* in this part we r in the case of 2 vars*/
-    /*  {
-          firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
-          command += strlen(firstVar) + 1; /*+ 1 for seperator ','*/
+        firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
+        command += strlen(firstVar) + 1; /*+ 1 for seperator ','*/
 
-    /* if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0])) /* TODO: to check 'isdigit' should be ((unsigned char)firstVar[0])) ? */
-    /* immidiate1 = tryGetNumber(firstVar);
+        if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0])) /* TODO: to check 'isdigit' should be ((unsigned char)firstVar[0])) ? */
+            immidiate1 = tryGetNumber(firstVar);
 
- else if (isLabelExist(firstVar))
-     label1 = firstVar;
+        else if (isLabelExist(firstVar, lineNumber, fileName))
+        {
+            label1 = firstVar;
+        }
 
- else if (isRegisterName(firstVar))
-     register1 = firstVar[2] - '0';
+        else if (isRegisterName(firstVar))
+            register1 = firstVar[2] - '0';
 
- if (command[0] == '-' || isdigit(command[0])) /* TODO: to check 'isdigit' should be ((unsigned char)command[0]])) ? */
-    /*  immidiate2 = tryGetNumber(command);
+        if (command[0] == '-' || isdigit(command[0])) /* TODO: to check 'isdigit' should be ((unsigned char)command[0]])) ? */
+            immidiate2 = tryGetNumber(command);
 
-  else if (isLabelExist(command))
-      label2 = command;
+        else if (isLabelExist(command, lineNumber, fileName))
+        {
+            label2 = command;
+        }
 
-  else if (isRegisterName(command))
-      register2 = command[2] - '0';
+        else if (isRegisterName(command))
+            register2 = command[2] - '0';
 
-  /*TODO: handle error unknown var*/
+        /*TODO: handle error unknown var*/
 
-    /*addNewLine(commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
-}*/
+        addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
+    }
 }
 
 /**

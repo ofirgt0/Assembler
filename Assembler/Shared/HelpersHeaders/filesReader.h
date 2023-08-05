@@ -5,7 +5,7 @@
  * Logs a new line of text.
  * @param line The line of text to be logged.
  */
-void logNewLine(const char *line);
+void logNewLine(const char *line, int lineNumber);
 
 /*
  * Reads a file and processes its contents.
@@ -26,5 +26,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName);
  * @param command The command string to be processed.
  */
 void removePrefixSpaces(char *command);
+
+
 
 #endif /* FILESREADER_H */

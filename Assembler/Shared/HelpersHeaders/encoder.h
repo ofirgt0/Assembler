@@ -20,12 +20,6 @@ void encodImmidiate(char *fileName, int immidiate);
  */
 void setARE(char AREcode, int *commandCode);
 
-/* Converts a decimal number to a binary array.
- * @param arr the binary array.
- * @param decimalNumber the decimal number.
- */
-void setBinaryArray(int arr[], int decimalNumber);
-
 /* Encodes an external label.
  * @param fileName the name of the file.
  */
@@ -60,6 +54,6 @@ void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[]);
  * @param length the length of the binary array.
  * @return the Base64 string.
  */
-char *encodeToBase64(const int *binaryArray, size_t length);
+char* binaryArrayToBase64(int* inrArray, int length);
 
 #endif /*ENCODER_H*/

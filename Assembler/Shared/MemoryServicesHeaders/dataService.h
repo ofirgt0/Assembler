@@ -51,6 +51,7 @@ struct DataLabel
 {
     struct Label *label;
     int *data;
+    int size;
     struct DataLabel *next;
 };
 
@@ -72,7 +73,7 @@ struct StringLabel
  * @param immidiate1 the immidiate1.
  * @param immidiate2 the immidiate2.
  */
-void addNewLine(int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
+void addNewLine(char *fileName, int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
 
 /**
  * Validate if opcode matches addressing method.
@@ -103,16 +104,7 @@ bool addNewEntry(char *entryName);
  * @param labelName the name of the label.
  * @return true if adding is successful, false otherwise.
  */
-bool addData(int data[], char *labelName);
-
-/**
- * Duplicates a string by creating a new copy in the heap.
- * This function allocates memory for the new string, copies
- * the original string into the new memory, and returns a pointer to it.
- * @param s The string to be duplicated.
- * @return A pointer to the newly duplicated string, or NULL if the operation fails.
- */
-char *my_strdup(const char *s);
+bool addData(int data[], char *labelName, int length);
 
 /**
  * Add a string to a label.
@@ -155,7 +147,7 @@ int searchEntry(char *entryName);
  * @param labelName the name of the label.
  * @return the address of the data label if found, -1 otherwise.
  */
-int searchDataLabel(char *labelName);
+struct DataLabel *searchDataLabel(char *labelName);
 
 /**
  * Search for a string label by name.
@@ -163,6 +155,8 @@ int searchDataLabel(char *labelName);
  * @param labelName the name of the label.
  * @return the address of the string label if found, -1 otherwise.
  */
-int searchStringLabel(char *labelName);
+struct StringLabel *searchStringLabel(char *labelName);
+
+void printLabelList(struct LabelNode *head);
 
 #endif /* DATASERVICE_H */

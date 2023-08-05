@@ -38,6 +38,20 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
     }
 }
 
+void appendStringToFile(const char *filename, const char *text){
+    printf("add new command in base64: %s\n",text);
+    
+    FILE *file = fopen(filename, "a");
+    if (file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    fprintf(file, "%s\n", text);
+
+    fclose(file);
+}
+
 /**
  * Writes a label to a file.
  * If the label is of type Ext or Entry and the corresponding file does not exist,
@@ -46,18 +60,21 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
  * @param filename The name of the file to write to.
  * @param label    The label to be written to the file.
  * @return true if the operation is successful or if the file does not need to be created, otherwise - false.
-
-bool writeLabelToFile(const char *filename, Label *label)
+**/
+bool writeLabelToFile(const char *filename, char *labelName, int address)
 {
-    if ((label->type == Ext || label->type == Entry) && !isFileExist(filename))
-    {
-        return true;
+    printf("writeLabelToFile: %s  %d\n",labelName, address);
+    
+    FILE *file = fopen(filename, "a");
+    if (file == NULL) {
+        perror("Error opening file");
+        return;
     }
 
-    char labelText[256];
-    sprintf(labelText, "%s %d %d", label->name, label->address, label->type);
-    return writeToFile(filename, labelText);
-} */
+    fprintf(file, "%s  %d\n",labelName, address);
+
+    fclose(file);
+} 
 
 /**
  * Check if a file exists.
@@ -74,3 +91,4 @@ bool isFileExist(const char *fileName)
     }
     return false;
 }
+

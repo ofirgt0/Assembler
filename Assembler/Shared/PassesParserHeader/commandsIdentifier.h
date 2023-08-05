@@ -54,6 +54,8 @@ void removePrefixSpaces(char *command);
  */
 int getCommandIndexByList(char *command, char *list[], int listLength);
 
+void printLabel(const char *filename);
+
 /**
  * Check if a character represents a valid register name.
  * @param registerName the character to check.
@@ -119,6 +121,5 @@ int determineLinesNumber(char *command);
  * @param command the command string.
  * @param fileName the name of the input file.
  */
-void commandParser(char *command, char *fileName);
-
+void commandParser(char *command, char *fileName, int lineNumber);
 #endif /* COMMANDSIDENTIFIER_H */
