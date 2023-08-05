@@ -146,7 +146,7 @@ int searchEntry(char *entryName);
  * @param labelName the name of the label.
  * @return the address of the data label if found, -1 otherwise.
  */
-int searchDataLabel(char *labelName);
+struct DataLabel* searchDataLabel(char *labelName);
 
 /**
  * Search for a string label by name.
@@ -154,7 +154,7 @@ int searchDataLabel(char *labelName);
  * @param labelName the name of the label.
  * @return the address of the string label if found, -1 otherwise.
  */
-int searchStringLabel(char *labelName);
+struct StringLabel* searchStringLabel(char *labelName);
 
 void printLabelList(struct LabelNode *head);
 

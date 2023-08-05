@@ -477,7 +477,8 @@ void initIC()
 
 bool isLabelExist(char *label)
 {
-    return searchExternLabel(label) != -1 || searchEntry(label) != -1 || searchLabel(label) != -1 || searchDataLabel(label) != -1 || searchStringLabel(label) != -1;
+    return searchExternLabel(label) != -1 || searchEntry(label) != -1 || searchLabel(label) != -1 || 
+		searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
 }
 
 /**
@@ -590,7 +591,7 @@ int searchLabel(char *labelName)
  * If it finds a match, it returns the address of the label (adjusted by the current IC).
  * If it doesn't find a match, it returns -1.
  */
-int searchDataLabel(char *labelName)
+struct DataLabel* searchDataLabel(char *labelName)
 {
     struct DataLabel *current;
     current = dataLabelList;
@@ -598,11 +599,11 @@ int searchDataLabel(char *labelName)
     {
         if (strcmp(current->label->name, labelName) == 0)
         {
-            return current->label->address;
+            return current;
         }
         current = current->next;
     }
-    return -1; /*Label was not found*/
+    return NULL; /*Label was not found*/
 }
 
 /**
@@ -611,7 +612,7 @@ int searchDataLabel(char *labelName)
  * If it finds a match, it returns the address of the label (adjusted by the current IC).
  * If it doesn't find a match, it returns -1.
  */
-int searchStringLabel(char *labelName)
+struct StringLabel* searchStringLabel(char *labelName)
 {
     printf("searchStringLabel: %s\n", labelName);
     struct StringLabel *current;
@@ -622,11 +623,11 @@ int searchStringLabel(char *labelName)
         if (strcmp(current->label->name, labelName) == 0)
         {
 		printf("current->label->address: %d\n", current->label->address);
-            return current->label->address;
+            return current;
         }
         current = current->next;
     }
-    return -1; /*Label was not found*/
+    return NULL; /*Label was not found*/
 }
 
 void sendStringValue(char* fileName, char* labelName){
@@ -674,4 +675,3 @@ static struct LabelNode *entryLabelList = NULL;
 static struct LabelNode *normalCommandLabelList = NULL;
 static struct DataLabel *dataLabelList = NULL;
 static struct StringLabel *stringLabelList = NULL;*/
-
