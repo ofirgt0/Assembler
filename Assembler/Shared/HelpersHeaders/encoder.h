@@ -20,12 +20,6 @@ void encodImmidiate(char *fileName, int immidiate);
  */
 void setARE(char AREcode, int *commandCode);
 
-/* Converts a decimal number to a binary array.
- * @param arr the binary array.
- * @param decimalNumber the decimal number.
- */
-void setBinaryArray(int arr[], int decimalNumber);
-
 /* Encodes an external label.
  * @param fileName the name of the file.
  */

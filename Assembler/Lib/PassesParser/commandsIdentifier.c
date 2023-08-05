@@ -100,7 +100,7 @@ void remove_spaces(char *str)
     int j = 0, i;
     for (i = 0; i < len; i++)
     {
-        if (str[i] != ' ')
+        if (str[i] != ' ' && str[i] != '\n' && str[i] != '\t' && str[i] != 0 )
         {
             str[j++] = str[i];
         }
@@ -440,6 +440,11 @@ void commandParser(char *command, char *fileName)
             isMacro = true;
         if (prefixIndex == 3)
             isMacro = false;
+	if(prefixIndex == 4)
+	    sendDataValue(fileName, label);
+	if(prefixIndex == 5)
+	    sendStringValue(fileName, label);
+
 
         return; /*we handle this commands in the first run*/
     }
@@ -472,7 +477,7 @@ void commandParser(char *command, char *fileName)
         {
             /*TODO: handle error*/
         }
-        addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0, 0); /* Note: -1 means that there is no register in this operand slot*/
+        addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0.5, 0.5); /* Note: -1 means that there is no register in this operand slot*/
     }
     else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) /*one var*/
     {
@@ -481,7 +486,7 @@ void commandParser(char *command, char *fileName)
         {
             if (strlen(command) == 3)
             {
-                addNewLine(fileName, commandIndex, command[2] - '0', -1, NULL, NULL, 0.5, 0); /*Note: -1 means that there is no register in this operand slot*/
+                addNewLine(fileName, commandIndex, command[2] - '0', -1, NULL, NULL, 0.5, 0.5); /*Note: -1 means that there is no register in this operand slot*/
             }
             else
             {
@@ -491,7 +496,7 @@ void commandParser(char *command, char *fileName)
         else if (isLabelExist(command))
         {
             printf("isLabelExist\n");
-            addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0);
+            addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0.5);
         }
         else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
         {

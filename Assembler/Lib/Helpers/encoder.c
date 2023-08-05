@@ -12,7 +12,7 @@
 void encodLabelOperand(char *fileName, char AREcode, int address);
 void encodImmidiate(char *fileName, int immidiate);
 void setARE(char AREcode, int *commandCode);
-void setBinaryArray(int arr[], int decimalNumber);
+void setBinaryArray(int arr[], int decimalNumber, int borderCell);;
 char *concatenateStrings(const char *str1, const char *str2);
 char *removeFileNameExtension(const char *filename);
 
@@ -46,8 +46,13 @@ void encodLabelOperand(char *fileName, char AREcode, int address)
 {
     printf("encod Label Operand in address: %d\n", address);
     int code[12] = {0};
-    setBinaryCodeInRange(0, 9, address, code);
-    setARE(AREcode, code);
+    if(AREcode == 'E')
+	code[11]=1;
+    else{
+	setBinaryCodeInRange(0, 9, address, code);
+	setARE(AREcode, code);
+    }
+    
     fileName = removeFileNameExtension(fileName);
     printf("add new command in base64 to file: %s\n",binaryArrayToBase64(code, 12));
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
@@ -58,12 +63,21 @@ void encodImmidiate(char *fileName, int immediate)
 {
    
     int code[12] = {0};
-    (immediate < 0) ? setNegativeBinaryArray(code, immediate) : setBinaryArray(code, immediate);
+    (immediate < 0) ? setNegativeBinaryArray(code, immediate, 10) : setBinaryArray(code, immediate,10);
     setARE('A', code);
     fileName = removeFileNameExtension(fileName);
      printIntArray(code);
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
-    /*printCommandToFile(fileName, code); // Implement printCommandToFile function*/
+}
+
+void encodValue(char *fileName, int value)
+{
+    int code[12] = {0};
+    (value < 0) ? setNegativeBinaryArray(code, value, 12) : setBinaryArray(code, value, 12);
+  
+    fileName = removeFileNameExtension(fileName);
+    printIntArray(code);
+    appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
 }
 
 void encodeRegister(char *fileName, int register1, int register2)
@@ -136,53 +150,13 @@ char* binaryArrayToBase64(int* inrArray, int length) {
     free(binaryString);
     return base64String;
 }
-/*
-void setBinaryArray(int arr[], int decimalNumber)
-{
-    
+
+void setBinaryArray(int binaryArray[], int decimalNumber, int borderCell) {
+
+    int mask = 1 << borderCell - 1;
     int i;
-    for (i = 0; decimalNumber > 0; i++)
-    {
-        arr[i] = decimalNumber % 2;
-        decimalNumber = decimalNumber / 2;
-    }
-}
 
-void setNegativeBinaryArray(int arr[], int decimalNumber)
-{
-    int i;
-    decimalNumber = -decimalNumber;
-    setBinaryArray(arr, decimalNumber);
-    for(i = 0; i<10; i++)
-    {
-	arr[i] = arr[i] == 1 ? 0 : 1;
-    }
-    printIntArray(arr);
-    addOneToBinaryArray(arr, 10);
-}
-
-void addOneToBinaryArray(int binaryArray[], int size) {
-    int carry = 1, i;
-
-    for (i = size - 1; i >= 0; i--) {
-        if (carry == 0) {
-            break;
-        }
-
-        int sum = binaryArray[i] + carry;
-        binaryArray[i] = sum % 2;
-        carry = sum / 2;
-    }
-}
-
-*/
-
-void setBinaryArray(int binaryArray[], int decimalNumber) {
-
-    int mask = 1 << 9;
-int i;
-
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < borderCell; i++) {
         binaryArray[i] = (decimalNumber & mask) ? 1 : 0;
         mask >>= 1; 
     }
@@ -202,16 +176,16 @@ void addOneToBinaryArray(int binaryArray[], int size) {
     }
 }
 
-void setNegativeBinaryArray(int arr[], int decimalNumber) {
+void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell) {
     decimalNumber = -decimalNumber;
     int i;
-    setBinaryArray(arr, decimalNumber);
+    setBinaryArray(arr, decimalNumber,borderCell);
 
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < borderCell; i++) {
         arr[i] = (arr[i] == 1) ? 0 : 1;
     }
 
-    addOneToBinaryArray(arr, 10);
+    addOneToBinaryArray(arr, borderCell);
 }
 
 char *concatenateStrings(const char *str1, const char *str2) {
