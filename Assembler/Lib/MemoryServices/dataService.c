@@ -257,8 +257,8 @@ bool addNewEntry(char *entryName)
     label->type = ENTRY_LABEL_TYPE;
     strncpy(label->name, entryName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination (because the use of 'strncpy') */
-
-    label->address = 10; /*The address will be set later when the entry is resolved.*/
+    int address = searchLabel(entryName);
+    label->address = address != -1 ? address : 9; /*The address will be set later when the entry is resolved.*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
@@ -683,3 +683,4 @@ static struct LabelNode *entryLabelList = NULL;
 static struct LabelNode *normalCommandLabelList = NULL;
 static struct DataLabel *dataLabelList = NULL;
 static struct StringLabel *stringLabelList = NULL;*/
+

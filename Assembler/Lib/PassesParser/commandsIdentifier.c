@@ -100,7 +100,7 @@ void remove_spaces(char *str)
     int j = 0, i;
     for (i = 0; i < len; i++)
     {
-        if (str[i] != ' ' && str[i] != '\n' && str[i] != '\t' && str[i] != 0 )
+        if (str[i] != ' ' && str[i] != '\n' && str[i] != '\t' && str[i] != 0)
         {
             str[j++] = str[i];
         }
@@ -424,11 +424,18 @@ int determineLinesNumber(char *command)
 
 static bool isMacro = false;
 
-void commandParser(char *command, char *fileName)
+void commandParser(char *command, char *fileName, int lineNumber)
 {
-    char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL;
+    char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
     int prefixIndex, commandIndex, register1 = -1, register2 = -1;
     double immidiate1 = 0.5, immidiate2 = 0.5;
+
+    originalCommand = (char *)malloc(strlen(command) + 1);
+    if (originalCommand == NULL) {
+        perror("Memory allocation failed");
+        return 1;
+    }
+    strcpy(originalCommand, command);
 
     label = tryGetLabel(&command);
     removePrefixSpaces(command);
@@ -440,11 +447,10 @@ void commandParser(char *command, char *fileName)
             isMacro = true;
         if (prefixIndex == 3)
             isMacro = false;
-	if(prefixIndex == 4)
-	    sendDataValue(fileName, label);
-	if(prefixIndex == 5)
-	    sendStringValue(fileName, label);
-
+        if (prefixIndex == 4)
+            sendDataValue(fileName, label);
+        if (prefixIndex == 5)
+            sendStringValue(fileName, label);
 
         return; /*we handle this commands in the first run*/
     }
@@ -460,7 +466,7 @@ void commandParser(char *command, char *fileName)
         sendMacro(command, fileName);
         return;
     }
-
+    appendStringToFile(fileName,originalCommand);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
 
     command = command + strlen(commandsNames[commandIndex]);
@@ -493,7 +499,7 @@ void commandParser(char *command, char *fileName)
                 /*TODO: handle error for char*/
             }
         }
-        else if (isLabelExist(command))
+        else if (isLabelExist(command, lineNumber, fileName))
         {
             printf("isLabelExist\n");
             addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0.5);
@@ -516,7 +522,7 @@ void commandParser(char *command, char *fileName)
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0])) /* TODO: to check 'isdigit' should be ((unsigned char)firstVar[0])) ? */
             immidiate1 = tryGetNumber(firstVar);
 
-        else if (isLabelExist(firstVar))
+        else if (isLabelExist(firstVar, lineNumber, fileName))
         {
             label1 = firstVar;
         }
@@ -527,7 +533,7 @@ void commandParser(char *command, char *fileName)
         if (command[0] == '-' || isdigit(command[0])) /* TODO: to check 'isdigit' should be ((unsigned char)command[0]])) ? */
             immidiate2 = tryGetNumber(command);
 
-        else if (isLabelExist(command))
+        else if (isLabelExist(command, lineNumber, fileName))
         {
             label2 = command;
         }
