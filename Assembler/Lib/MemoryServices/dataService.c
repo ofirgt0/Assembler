@@ -665,8 +665,8 @@ void sendDataValue(char *fileName, char *labelName)
 void printLabels(const char *filename)
 {
     struct LabelNode *current_LabelNode;
-
     current_LabelNode = entryLabelList;
+    filename = removeFileNameExtension(filename);
     while (current_LabelNode != NULL)
     {
         writeLabelToFile(concatenateStrings(filename, ".ent"), current_LabelNode->label->name, current_LabelNode->label->address);
