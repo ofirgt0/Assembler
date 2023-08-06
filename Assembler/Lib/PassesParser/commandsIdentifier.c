@@ -9,6 +9,8 @@
 #include "dataService.h"
 #include "filesReader.h" /*to check if getting error while compiline because the commandsIndetifier in the filesRader*/
 
+#define MACRO_SUFIX ".am"
+
 /* An Array of our 16 commands names. */
 char *commandsNames[COMMANDS_NUMBER] = {
     "mov", /* 0 */
@@ -426,16 +428,14 @@ static bool isMacro = false;
 
 void commandParser(char *command, char *fileName, int lineNumber)
 {
-    char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL;
+    char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
     int prefixIndex, commandIndex, register1 = -1, register2 = -1;
     double immidiate1 = 0.5, immidiate2 = 0.5;
 
-    int commandLength = strlen(command);
-    char *originalCommand = (char *)malloc(commandLength + 1);
-    if (originalCommand == NULL)
-    {
-        printf("Memory allocation failed");
-        return;
+    originalCommand = (char *)malloc(strlen(command) + 1);
+    if (originalCommand == NULL) {
+        perror("Memory allocation failed");
+        return 1;
     }
     strcpy(originalCommand, command);
 
@@ -454,34 +454,30 @@ void commandParser(char *command, char *fileName, int lineNumber)
         if (prefixIndex == 5)
             sendStringValue(fileName, label);
 
-        free(originalCommand);
-        return; /*we handle these commands in the first run*/
+        return; /*we handle this commands in the first run*/
     }
 
     if (isMacro)
     {
         printf("command inside macro - continue\n");
-        free(originalCommand);
         return;
     }
 
     if (isMacroName(command))
     {
         sendMacro(command, fileName);
-        free(originalCommand);
         return;
     }
-
-    printf("original command %s\n", originalCommand);
+    
+    fileName = removeFileNameExtension(fileName);
+    appendStringToFile(concatenateStrings(fileName, MACRO_SUFIX),originalCommand);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
-
     command = command + strlen(commandsNames[commandIndex]);
     remove_spaces(command);
-
+    
     if (commandIndex == -1)
     {
         printf("ERROR: unknown command *************************************************************");
-        free(originalCommand);
         return;
     }
 
@@ -492,8 +488,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
             /*TODO: handle error*/
         }
         addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0.5, 0.5); /* Note: -1 means that there is no register in this operand slot*/
-        free(originalCommand);
-        return;
     }
     else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) /*one var*/
     {
@@ -503,8 +497,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
             if (strlen(command) == 3)
             {
                 addNewLine(fileName, commandIndex, command[2] - '0', -1, NULL, NULL, 0.5, 0.5); /*Note: -1 means that there is no register in this operand slot*/
-                free(originalCommand);
-                return;
             }
             else
             {
@@ -515,26 +507,21 @@ void commandParser(char *command, char *fileName, int lineNumber)
         {
             printf("isLabelExist\n");
             addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0.5);
-            free(originalCommand);
-            return;
         }
         else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
         {
             addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command), 0.5);
-            free(originalCommand);
-            return;
         }
         else
         {
+
             /*TODO: handle error - there is no option for command*/
-            free(originalCommand);
-            return;
         }
     }
-    else /* in this part we are in the case of 2 vars*/
+    else /* in this part we r in the case of 2 vars*/
     {
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
-        command += strlen(firstVar) + 1; /*+ 1 for separator ','*/
+        command += strlen(firstVar) + 1; /*+ 1 for seperator ','*/
 
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0])) /* TODO: to check 'isdigit' should be ((unsigned char)firstVar[0])) ? */
             immidiate1 = tryGetNumber(firstVar);
@@ -561,11 +548,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         /*TODO: handle error unknown var*/
 
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
-        free(originalCommand);
-        return;
     }
-
-    free(originalCommand);
 }
 
 /**

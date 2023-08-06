@@ -8,13 +8,12 @@
 #define fileSuffix_commands ".ob"
 #define fileSuffix_ENTRY ".ent"
 #define fileSuffix_EXTERN ".ext"
-#define fileSuffix_EXTERN ".am"
+#define fileSuffix_MACRO ".am"
 
 void encodLabelOperand(char *fileName, char AREcode, int address);
 void encodImmidiate(char *fileName, int immidiate);
 void setARE(char AREcode, int *commandCode);
 void setBinaryArray(int arr[], int decimalNumber, int borderCell);
-;
 char *concatenateStrings(const char *str1, const char *str2);
 char *removeFileNameExtension(const char *filename);
 
@@ -206,6 +205,7 @@ void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell)
 
 char *concatenateStrings(const char *str1, const char *str2)
 {
+    printf("concatenateStrings %s %s\n", str1, str2);
     size_t totalLength = strlen(str1) + strlen(str2) + 1;
     char *result = (char *)malloc(totalLength);
 
