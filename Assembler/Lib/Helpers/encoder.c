@@ -41,7 +41,6 @@ void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int o
     setBinaryCodeInRange(3, 6, opcode, code);
     setBinaryCodeInRange(7, 9, dstAddressing, code);
     setARE(AREcode, code);
-    fileName = removeFileNameExtension(fileName);
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
 } /*in the encoder: (ARE, dstAddressing, opcode, srcAddressing)*/
 
@@ -57,7 +56,6 @@ void encodLabelOperand(char *fileName, char AREcode, int address)
         setARE(AREcode, code);
     }
 
-    fileName = removeFileNameExtension(fileName);
     printf("add new command in base64 to file: %s\n", binaryArrayToBase64(code, 12));
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
     /*printCommandToFile(fileName, code); // Implement printCommandToFile function*/
@@ -69,7 +67,6 @@ void encodImmidiate(char *fileName, int immediate)
     int code[12] = {0};
     (immediate < 0) ? setNegativeBinaryArray(code, immediate, 10) : setBinaryArray(code, immediate, 10);
     setARE('A', code);
-    fileName = removeFileNameExtension(fileName);
     printIntArray(code);
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
 }
@@ -79,7 +76,6 @@ void encodValue(char *fileName, int value)
     int code[12] = {0};
     (value < 0) ? setNegativeBinaryArray(code, value, 12) : setBinaryArray(code, value, 12);
 
-    fileName = removeFileNameExtension(fileName);
     printIntArray(code);
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
 }
@@ -92,7 +88,6 @@ void encodeRegister(char *fileName, int register1, int register2)
     setBinaryCodeInRange(5, 9, register2, code);
     setARE('A', code);
 
-    fileName = removeFileNameExtension(fileName);
     appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
 }
 

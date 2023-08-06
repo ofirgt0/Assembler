@@ -467,9 +467,24 @@ void increaseIC(int value)
 {
     IC += value;
 }
-
-void initIC()
+char *intToStringWithSpace(int ic, int dc)
 {
+
+    int totalLength = snprintf(NULL, 0, "%d %d", ic, dc) + 1;
+    char *result = (char *)malloc(totalLength);
+    if (result == NULL)
+    {
+        return NULL;
+    }
+    snprintf(result, totalLength, "%d %d", ic, dc);
+
+    return result;
+}
+
+void prepareSecondRun(char *fileName)
+{
+
+    appendStringToFile(concatenateStrings(fileName, ".ob"), intToStringWithSpace(IC - 100, DC));
     IC = 100;
 }
 
@@ -666,7 +681,6 @@ void printLabels(const char *filename)
 {
     struct LabelNode *current_LabelNode;
     current_LabelNode = entryLabelList;
-    filename = removeFileNameExtension(filename);
     while (current_LabelNode != NULL)
     {
         writeLabelToFile(concatenateStrings(filename, ".ent"), current_LabelNode->label->name, current_LabelNode->label->address);

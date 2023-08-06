@@ -275,13 +275,13 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         printf("macro found, will be handled in the second run");
         return;
     }
-
+    printf("after isMacroName\n");
     if (macroFlag && prefixIndex != 3) /*if we in a macro - > count the lines*/
     {
         linesCounter++;
         return;
     }
-
+    printf("284\n");
     if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
     {
         if (prefixIndex < 2)
@@ -433,7 +433,8 @@ void commandParser(char *command, char *fileName, int lineNumber)
     double immidiate1 = 0.5, immidiate2 = 0.5;
 
     originalCommand = (char *)malloc(strlen(command) + 1);
-    if (originalCommand == NULL) {
+    if (originalCommand == NULL)
+    {
         perror("Memory allocation failed");
         return 1;
     }
@@ -446,15 +447,19 @@ void commandParser(char *command, char *fileName, int lineNumber)
     if (prefixIndex != -1)
     {
         if (prefixIndex == 2)
+        {
             isMacro = true;
+            return;
+        }
         if (prefixIndex == 3)
+        {
             isMacro = false;
+            return;
+        }
         if (prefixIndex == 4)
             sendDataValue(fileName, label);
         if (prefixIndex == 5)
             sendStringValue(fileName, label);
-
-        return; /*we handle this commands in the first run*/
     }
 
     if (isMacro)
@@ -468,13 +473,14 @@ void commandParser(char *command, char *fileName, int lineNumber)
         sendMacro(command, fileName);
         return;
     }
-    
-    fileName = removeFileNameExtension(fileName);
-    appendStringToFile(concatenateStrings(fileName, MACRO_SUFIX),originalCommand);
+    originalCommand[strlen(originalCommand) - 1] = '\0';
+    appendStringToFile(concatenateStrings(fileName, MACRO_SUFIX), originalCommand);
+    if (prefixIndex != -1)
+        return;
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
     command = command + strlen(commandsNames[commandIndex]);
     remove_spaces(command);
-    
+
     if (commandIndex == -1)
     {
         printf("ERROR: unknown command *************************************************************");

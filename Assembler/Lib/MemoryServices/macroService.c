@@ -24,8 +24,9 @@ bool isMacroName(char *macroName)
  */
 struct macroDataNode *getMacro(char *macroName)
 {
-    char* macroNameCopy = (char *)malloc(strlen(macroName) + 1);
-    if (macroNameCopy == NULL) {
+    char *macroNameCopy = (char *)malloc(strlen(macroName) + 1);
+    if (macroNameCopy == NULL)
+    {
         perror("Memory allocation failed");
         return 1;
     }
@@ -34,21 +35,22 @@ struct macroDataNode *getMacro(char *macroName)
     struct macroDataNode *macro = head;
     while (macro != NULL)
     {
-        printf("%s strcmp %s \n",macro->macroName, macroNameCopy);
-        if (strcmp(macro->macroName, macroNameCopy) == 0){
-	    printf("effefefeffe\n");
+        printf("%s strcmp %s \n", macro->macroName, macroNameCopy);
+        if (strcmp(macro->macroName, macroNameCopy) == 0)
+        {
+            printf("effefefeffe\n");
             return macro;
-	}
+        }
         macro = macro->next;
     }
-	printf("after getMacro\n");
+    printf("after getMacro\n");
     return NULL;
 }
 
 void sendMacro(char *macroName, char *fileName)
 {
     struct macroDataNode *macro = getMacro(macroName);
-    printf("send macro: %s %d %d\n",macro->macroName, macro->lineNumber, macro->linesCount);
+    printf("send macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
     if (macro == NULL)
     {
         /*Error: Macro was not found*/
@@ -57,7 +59,6 @@ void sendMacro(char *macroName, char *fileName)
     }
     getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
 }
-
 
 struct macroDataNode *searchNode(const char *macroName)
 {
@@ -89,7 +90,7 @@ void addMacro(const char *macroName, int lineNumber)
 
     /*Copy the macroName to the new node*/
     newNode->macroName = strdup(macroName); /*Note: Remember to free this memory later*/
-    newNode->lineNumber = lineNumber+2;
+    newNode->lineNumber = lineNumber + 2;
     newNode->linesCount = 0;
 
     /*Insert the new node at the beginning of the list*/
@@ -99,13 +100,13 @@ void addMacro(const char *macroName, int lineNumber)
 
 void updateLinesCount(const char *macroName, int newLinesCount)
 {
-    printf("update macro Lines Count: %s lines: %d\n",macroName,newLinesCount);
+    printf("update macro Lines Count: %s lines: %d\n", macroName, newLinesCount);
     struct macroDataNode *current = head;
     while (current != NULL)
     {
         if (strcmp(current->macroName, macroName) == 0)
         {
-	    printf("line number %d to line %d\n", current->lineNumber, current->lineNumber + newLinesCount);
+            printf("line number %d to line %d\n", current->lineNumber, current->lineNumber + newLinesCount);
             current->linesCount = newLinesCount; /*Update the linesCount property*/
             return;
         }
