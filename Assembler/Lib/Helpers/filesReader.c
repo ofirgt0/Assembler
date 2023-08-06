@@ -4,7 +4,7 @@
 void logNewLine(const char *line, int lineNumber)
 {
     printf("\n\n\n ----------------------------------------------------\n");
-    printf("Processing line: %s\n",line);
+    printf("Processing line: %s\n", line);
 }
 
 /**
@@ -14,8 +14,8 @@ void logNewLine(const char *line, int lineNumber)
  */
 void fileReader(const char *fileName)
 {
-    char line[256]; 
-    int i;   
+    char line[256];
+    int i;
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
@@ -24,28 +24,28 @@ void fileReader(const char *fileName)
     }
 
     /*First run - save the label, macro. entry, extern, data and string*/
-    for (i=0; fgets(line, sizeof(line), file) != NULL; i++)
-    {        
+    for (i = 0; fgets(line, sizeof(line), file) != NULL; i++)
+    {
         if (line == '\0')
             continue;
 
         removePrefixSpaces(line);
-	logNewLine(line,i);
+        logNewLine(line, i);
         startFirstRun(line, i, fileName);
     }
-    
+
     fseek(file, 0, SEEK_SET);
     initIC();
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
     /* Second run */
-    for (i=0; fgets(line, sizeof(line), file) != NULL; i++)
+    for (i = 0; fgets(line, sizeof(line), file) != NULL; i++)
     {
         removePrefixSpaces(line);
         if (line == '\0')
             continue;
 
-        logNewLine(line,0);
-        commandParser(line, fileName,i);
+        logNewLine(line, 0);
+        commandParser(line, fileName, i);
     }
     printLabels(fileName);
     fclose(file);
@@ -72,7 +72,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 
     while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
     {
-        logNewLine(line,1);
+        logNewLine(line, 1);
         commandParser(line, fileName);
         currentLine++;
     }
@@ -83,7 +83,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
 /**
  *  This function removes spaces at the beginning of a command.
  *  It shifts the command string to the right until it encounters a non-space character.
- 
+
 void removePrefixSpaces(char *command)
 {
     int i, j;

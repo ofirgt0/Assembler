@@ -28,7 +28,7 @@ bool writeIntArrayToFile(const char *filename, const int arr[]);
  * @return true if the operation is successful or if the file does not need to be created, otherwise - false.
  */
 /*bool writeLabelToFile(const char *filename, Label *label);
-*/
+ */
 /**
  * Checks if a file exists.
  * -------------------------
@@ -42,4 +42,3 @@ bool writeLabelToFile(const char *filename, char *labelName, int address);
 void appendStringToFile(const char *filename, const char *text);
 
 #endif /* WRITE_TO_FILE_H */
-

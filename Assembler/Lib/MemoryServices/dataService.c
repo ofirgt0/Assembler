@@ -32,15 +32,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     AddressingMethod srcAddressing;
     int address = 0;
     bool commandValidation;
-    /*
-    typedef enum
-    {
-        None = 0,
-        Immediate = 1,
-        Direct = 3,
-        RegisterDirect = 5
-    } AddressingMethod;
-    */
+
     printf("immidiate2 = %f, label2 = \n", immidiate2);
     dstAddressing = register2 != -1 ? RegisterDirect : (label2 != NULL ? Direct : (immidiate2 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
     srcAddressing = register1 != -1 ? RegisterDirect : (label1 != NULL ? Direct : (immidiate1 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
@@ -165,6 +157,11 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
         printf("IC is %d\n", IC);
         encodImmidiate(fileName, (int)immidiate2);
     }
+}
+
+void printAm(char *fileName, char *command)
+{
+    printf("printAm %s", command);
 }
 
 /**
@@ -480,7 +477,7 @@ bool isLabelExist(char *label, int lineNumber, char *fileName)
 {
     if (searchExternLabel(label) != -1)
     {
-        writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC +1);
+        writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC + 1);
         return true;
     }
 
@@ -668,7 +665,7 @@ void sendDataValue(char *fileName, char *labelName)
 void printLabels(const char *filename)
 {
     struct LabelNode *current_LabelNode;
-    
+
     current_LabelNode = entryLabelList;
     while (current_LabelNode != NULL)
     {
@@ -683,5 +680,3 @@ static struct LabelNode *entryLabelList = NULL;
 static struct LabelNode *normalCommandLabelList = NULL;
 static struct DataLabel *dataLabelList = NULL;
 static struct StringLabel *stringLabelList = NULL;*/
-
-

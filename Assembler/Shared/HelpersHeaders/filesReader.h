@@ -27,6 +27,4 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName);
  */
 void removePrefixSpaces(char *command);
 
-
-
 #endif /* FILESREADER_H */

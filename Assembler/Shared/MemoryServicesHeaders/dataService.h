@@ -84,6 +84,8 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
  */
 bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstAddressing);
 
+void printAm(char *fileName, char *command);
+
 /**
  * Add a new external label.
  * @param externName the name of the external label.
