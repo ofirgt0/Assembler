@@ -35,16 +35,16 @@ typedef enum
 /* Define the label structure */
 struct Label
 {
-    char type;
+    char *type;
     char name[MAX_LABEL_NAME_LENGTH];
     int address;
-};
+} Label;
 
 struct LabelNode
 {
     struct Label *label;
     struct LabelNode *next;
-};
+} LabelNode;
 
 /* Representing the data label structure. */
 struct DataLabel
@@ -53,7 +53,7 @@ struct DataLabel
     int *data;
     int size;
     struct DataLabel *next;
-};
+} DataLabel;
 
 /* Representing the string label structure. */
 struct StringLabel
@@ -61,7 +61,7 @@ struct StringLabel
     struct Label *label;
     char *string;
     struct StringLabel *next;
-};
+} StringLabel;
 
 /**
  * Add a new line with the given parameters.

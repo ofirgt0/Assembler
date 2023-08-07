@@ -16,6 +16,8 @@ void setARE(char AREcode, int *commandCode);
 void setBinaryArray(int arr[], int decimalNumber, int borderCell);
 char *concatenateStrings(const char *str1, const char *str2);
 char *removeFileNameExtension(const char *filename);
+void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell);
+char *my_strdup(const char *s);
 
 void encodExternLabel(char *fileName)
 {
@@ -25,8 +27,8 @@ void encodExternLabel(char *fileName)
 
 void printIntArray(const int array[])
 {
-    printf("Int Array: ");
     int i;
+    printf("Int Array: ");
     for (i = 0; i < 12; i++)
     {
         printf("%d ", array[i]);
@@ -46,8 +48,9 @@ void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int o
 
 void encodLabelOperand(char *fileName, char AREcode, int address)
 {
-    printf("encod Label Operand in address: %d\n", address);
     int code[12] = {0};
+
+    printf("encod Label Operand in address: %d\n", address);
     if (AREcode == 'E')
         code[11] = 1;
     else
@@ -82,8 +85,8 @@ void encodValue(char *fileName, int value)
 
 void encodeRegister(char *fileName, int register1, int register2)
 {
-    printf("encode Register: %s \n", fileName);
     int code[12] = {0};
+    printf("encode Register: %s \n", fileName);
     setBinaryCodeInRange(0, 4, register1, code);
     setBinaryCodeInRange(5, 9, register2, code);
     setARE('A', code);
@@ -157,7 +160,7 @@ char *binaryArrayToBase64(int *inrArray, int length)
 void setBinaryArray(int binaryArray[], int decimalNumber, int borderCell)
 {
 
-    int mask = 1 << borderCell - 1;
+    int mask = 1 << (borderCell - 1);
     int i;
 
     for (i = 0; i < borderCell; i++)
@@ -171,6 +174,7 @@ void addOneToBinaryArray(int binaryArray[], int size)
 {
     int carry = 1;
     int i;
+    int sum;
     for (i = size - 1; i >= 0; i--)
     {
         if (carry == 0)
@@ -178,7 +182,7 @@ void addOneToBinaryArray(int binaryArray[], int size)
             break;
         }
 
-        int sum = binaryArray[i] + carry;
+        sum = binaryArray[i] + carry;
         binaryArray[i] = sum % 2;
         carry = sum / 2;
     }
@@ -186,8 +190,8 @@ void addOneToBinaryArray(int binaryArray[], int size)
 
 void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell)
 {
-    decimalNumber = -decimalNumber;
     int i;
+    decimalNumber = -decimalNumber;
     setBinaryArray(arr, decimalNumber, borderCell);
 
     for (i = 0; i < borderCell; i++)
@@ -200,9 +204,9 @@ void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell)
 
 char *concatenateStrings(const char *str1, const char *str2)
 {
-    printf("concatenateStrings %s %s\n", str1, str2);
     size_t totalLength = strlen(str1) + strlen(str2) + 1;
     char *result = (char *)malloc(totalLength);
+    printf("concatenateStrings %s %s\n", str1, str2);
 
     if (result != NULL)
     {
@@ -227,5 +231,5 @@ char *removeFileNameExtension(const char *filename)
             return result;
         }
     }
-    return filename;
+    return my_strdup(filename);
 }

@@ -9,7 +9,14 @@
 #include "dataService.h"
 #include "filesReader.h" /*to check if getting error while compiline because the commandsIndetifier in the filesRader*/
 
-#define MACRO_SUFIX ".am"
+#define MACRO_SUFFIX ".am"
+
+void printLabels(const char *filename);
+void sendDataValue(const char *fileName, const char *label);
+void sendStringValue(const char *fileName, const char *label);
+void appendStringToFile(const char *fileName, const char *data);
+char *concatenateStrings(const char *str1, const char *str2);
+bool isLabelExist(const char *label, int lineNumber, const char *fileName);
 
 /* An Array of our 16 commands names. */
 char *commandsNames[COMMANDS_NUMBER] = {
@@ -45,7 +52,7 @@ static bool macroFlag = false;
 
 void printLabel(const char *filename)
 {
-    printLabels(*filename);
+    printLabels(filename);
 }
 
 /**
@@ -255,16 +262,17 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 {
     char *label;
     int prefixIndex = 0;
+    char *commandWithSpaces = NULL;
 
     label = tryGetLabel(&command); /*if label exist - we will get the label name and remove it from the command*/
 
     removePrefixSpaces(command);
     prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
 
-    char *commandWithSpaces = (char *)malloc(strlen(command) + 1);
+    commandWithSpaces = (char *)malloc(strlen(command) + 1);
     if (commandWithSpaces == NULL)
     {
-        return NULL;
+        return;
     }
     strcpy(commandWithSpaces, command);
 
@@ -370,15 +378,18 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 int *parseIntArray(char *input, size_t *length)
 {
     int *array = NULL;
+    char *token;
+    int num;
+    int *temp;
     *length = 0;
 
-    char *token = strtok(input, ",");
+    token = strtok(input, ",");
     while (token != NULL)
     {
         (*length)++;
-        int num = atoi(token);
+        num = atoi(token);
         printf("%d \n", num);
-        int *temp = realloc(array, (*length) * sizeof(int));
+        temp = realloc(array, (*length) * sizeof(int));
         if (temp == NULL)
         {
             free(array);
@@ -436,7 +447,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     if (originalCommand == NULL)
     {
         perror("Memory allocation failed");
-        return 1;
+        return;
     }
     strcpy(originalCommand, command);
 
@@ -474,7 +485,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         return;
     }
     originalCommand[strlen(originalCommand) - 1] = '\0';
-    appendStringToFile(concatenateStrings(fileName, MACRO_SUFIX), originalCommand);
+    appendStringToFile(concatenateStrings(fileName, MACRO_SUFFIX), originalCommand);
     if (prefixIndex != -1)
         return;
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);

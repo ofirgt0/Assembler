@@ -8,7 +8,7 @@ typedef struct macroDataNode
     int lineNumber;
     int linesCount;
     struct macroDataNode *next;
-};
+} macroDataNode;
 
 /**
  * Checks if a given macro name exists.

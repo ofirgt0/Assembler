@@ -34,13 +34,6 @@ void encodExternLabel(char *fileName);
  */
 void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int opcode, int dstAddressing);
 
-/* Encodes a register operand.
- * @param fileName the name of the file.
- * @param register1 the first register.
- * @param register2 the second register.
- */
-void encodeRegister(char *fileName, int register1, int register2);
-
 /* Sets a range of cells in a binary code array to represent a given number.
  * @param startCell the start index of the range.
  * @param endCell the end index of the range.
@@ -55,5 +48,14 @@ void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[]);
  * @return the Base64 string.
  */
 char *binaryArrayToBase64(int *inrArray, int length);
+
+char *concatenateStrings(const char *str1, const char *str2);
+
+/* Encodes a register operand.
+ * @param fileName the name of the file.
+ * @param register1 the first register.
+ * @param register2 the second register.
+ */
+void encodeRegister(char *fileName, int register1, int register2);
 
 #endif /*ENCODER_H*/

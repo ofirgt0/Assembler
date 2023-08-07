@@ -1,9 +1,16 @@
 #include <stdio.h>
 #include "filesReader.h"
 
+void prepareSecondRun(const char *fileName);
+void startFirstRun(char *line, int lineNumber, const char *fileName);
+char *removeFileNameExtension(const char *fileName);
+void printLabels(const char *fileName);
+void commandParser(const char *line, const char *fileName, int lineNumber);
+
 void logNewLine(const char *line, int lineNumber)
 {
     printf("\n\n\n ----------------------------------------------------\n");
+
     printf("Processing line: %s\n", line);
 }
 
@@ -34,7 +41,7 @@ void fileReader(const char *fileName)
         logNewLine(line, i);
         startFirstRun(line, i, fileName);
     }
-    printf("prepareSecondRun284\n");
+
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
@@ -74,31 +81,11 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
     while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
     {
         logNewLine(line, 1);
-        commandParser(line, fileName);
+        commandParser(line, fileName, currentLine);
         currentLine++;
     }
 
     fclose(file);
-}
-
-/**
- *  This function removes spaces at the beginning of a command.
- *  It shifts the command string to the right until it encounters a non-space character.
-
-void removePrefixSpaces(char *command)
-{
-    int i, j;
-
-    for (i = 0; command[i] == ' ' || command[i] == '\n' || command[i] == '\t'; i++)
-    {
-    }
-
-    for (j = 0; command[i]; j++, i++)
-    {
-        command[j] = command[i];
-    }
-
-    command[j] = '\0';
 }
 
 /**

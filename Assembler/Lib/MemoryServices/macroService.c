@@ -4,6 +4,10 @@
 #include <string.h>
 #include "macroService.h"
 
+void remove_spaces(char *str);
+void getBulkOfLines(int lineNumber, int linesNumber, char *fileName);
+char *my_strdup(const char *s);
+
 static struct macroDataNode *head = NULL;
 
 /**
@@ -24,15 +28,19 @@ bool isMacroName(char *macroName)
  */
 struct macroDataNode *getMacro(char *macroName)
 {
+    struct macroDataNode *macro;
+
     char *macroNameCopy = (char *)malloc(strlen(macroName) + 1);
     if (macroNameCopy == NULL)
     {
         perror("Memory allocation failed");
-        return 1;
+        return NULL;
     }
     strcpy(macroNameCopy, macroName);
     remove_spaces(macroNameCopy);
-    struct macroDataNode *macro = head;
+
+    macro = head;
+
     while (macro != NULL)
     {
         printf("%s strcmp %s \n", macro->macroName, macroNameCopy);
@@ -89,7 +97,7 @@ void addMacro(const char *macroName, int lineNumber)
     }
 
     /*Copy the macroName to the new node*/
-    newNode->macroName = strdup(macroName); /*Note: Remember to free this memory later*/
+    newNode->macroName = my_strdup(macroName); /*Note: Remember to free this memory later*/
     newNode->lineNumber = lineNumber + 2;
     newNode->linesCount = 0;
 
@@ -100,8 +108,12 @@ void addMacro(const char *macroName, int lineNumber)
 
 void updateLinesCount(const char *macroName, int newLinesCount)
 {
+    struct macroDataNode *current;
+
     printf("update macro Lines Count: %s lines: %d\n", macroName, newLinesCount);
-    struct macroDataNode *current = head;
+
+    current = head;
+
     while (current != NULL)
     {
         if (strcmp(current->macroName, macroName) == 0)

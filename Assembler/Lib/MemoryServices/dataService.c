@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <strings.h>
+#include <math.h>
 
 #include "errorsHandler.h"
 #include "dataService.h"
@@ -14,6 +16,11 @@ static struct LabelNode *entryLabelList = NULL;
 static struct LabelNode *normalCommandLabelList = NULL;
 static struct DataLabel *dataLabelList = NULL;
 static struct StringLabel *stringLabelList = NULL;
+
+int searchLabel(char *labelName);
+void updateEntryLabelAddress(char *entryName, int address);
+void encodValue(char *fileName, char character);
+char *charToString(char c);
 
 /* Initialize the global counters. */
 static int IC = 100; /* Instruction counter. */
@@ -120,7 +127,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     {
         IC++;
         printf("IC is %d\n", IC);
-        encodeRegister(ARE_CODE_A, 0, register2);
+        encodeRegister(charToString(ARE_CODE_A), 0, register2);
         return;
     }
     else if (label2 != NULL)
@@ -226,7 +233,8 @@ void printLabelList(struct LabelNode *head)
     printf("Label List:\n");
     while (current != NULL)
     {
-        printf("Type: %c, Name: %s, Address: %d\n", current->label->type, current->label->name, current->label->address);
+        printf("Type: %s, Name: %s, Address: %d\n", current->label->type, current->label->name, current->label->address);
+
         current = current->next;
     }
 }
@@ -242,6 +250,7 @@ bool addNewEntry(char *entryName)
 {
     struct Label *label = NULL;
     struct LabelNode *newNode = NULL;
+    int address;
 
     /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
@@ -254,7 +263,7 @@ bool addNewEntry(char *entryName)
     label->type = ENTRY_LABEL_TYPE;
     strncpy(label->name, entryName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination (because the use of 'strncpy') */
-    int address = searchLabel(entryName);
+    address = searchLabel(entryName);
     label->address = address != -1 ? address : 9; /*The address will be set later when the entry is resolved.*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
@@ -282,9 +291,10 @@ bool addNewEntry(char *entryName)
  */
 bool addData(int data[], char *labelName, int length)
 {
-    printf("addData %s\n", labelName);
     struct Label *label = NULL;
     struct DataLabel *newNode = NULL;
+
+    printf("addData %s\n", labelName);
 
     /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
@@ -327,13 +337,15 @@ bool addData(int data[], char *labelName, int length)
  */
 char *my_strdup(const char *s)
 {
+    char *new;
+
     if (s == NULL)
     {
         printf("Error: Null pointer passed to my_strdup.\n");
         return NULL;
     }
 
-    char *new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
+    new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
     if (new == NULL)
     {
         printf("Error: Memory allocation failed in my_strdup.\n");
@@ -356,6 +368,9 @@ bool addString(char *string, char *labelName)
 {
     struct Label *label = NULL;
     struct StringLabel *newNode = NULL;
+    int stringLength;
+    char *startQuote;
+    char *endQuote;
 
     /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
@@ -372,25 +387,25 @@ bool addString(char *string, char *labelName)
     printf("DC BEFORE is %d\n", DC);
 
     /* Find the opening and closing quotation marks */
-    char *startQuote = strchr(string, '\"');
-    char *endQuote = strrchr(string, '\"');
+    startQuote = strchr(string, '\"');
+    endQuote = strrchr(string, '\"');
 
     /* Check that both an opening and a closing quotation mark were found */
     if (startQuote == NULL || endQuote == NULL || startQuote >= endQuote)
     {
         printf("Error: String not properly enclosed in quotation marks.\n");
-        return;
+        return false;
     }
 
     /* Check that there are no unexpected characters after the closing quotation mark */
     if (*(endQuote + 1) != '\0' && *(endQuote + 1) != '\n' && *(endQuote + 1) != ' ')
     {
         printf("Error: Unexpected characters after closing quotation mark.\n");
-        return;
+        return false;
     }
 
     /* Calculate the actual length of the string between the quotation marks */
-    int stringLength = endQuote - startQuote;
+    stringLength = endQuote - startQuote;
 
     DC += stringLength;  /*+1 FOR /0*/
     label->address = DC; /*The address will be set later when the string is linked to the code.*/
@@ -465,18 +480,43 @@ bool addNewLabel(char *labelName)
  */
 void increaseIC(int value)
 {
-    IC += value;
+    if (value >= 0)
+    {
+        IC += value;
+    }
+    else
+    {
+        printf("Error: Invalid value passed to increaseIC. IC can only be incremented by a non-negative value.\n");
+    }
 }
-char *intToStringWithSpace(int ic, int dc)
-{
+/*char* intToStringWithSpace(int ic, int dc) {
 
     int totalLength = snprintf(NULL, 0, "%d %d", ic, dc) + 1;
+    char* result = (char*)malloc(totalLength);
+    if (result == NULL) {
+        return NULL;
+    }
+    snprintf(result, totalLength, "%d %d", ic, dc);
+
+    return result;
+}*/
+
+char *intToStringWithSpace(int ic, int dc)
+{
+    /* Calculate length of numbers in string format */
+    size_t ic_length = (ic == 0) ? 1 : (int)log10(ic) + 1;
+    size_t dc_length = (dc == 0) ? 1 : (int)log10(dc) + 1;
+
+    /* Calculate total length (+2 for space and null terminator) */
+    int totalLength = ic_length + dc_length + 2;
+
     char *result = (char *)malloc(totalLength);
     if (result == NULL)
     {
         return NULL;
     }
-    snprintf(result, totalLength, "%d %d", ic, dc);
+
+    sprintf(result, "%d %d", ic, dc);
 
     return result;
 }
@@ -507,14 +547,15 @@ bool isLabelExist(char *label, int lineNumber, char *fileName)
  */
 int searchExternLabel(char *externName)
 {
-    printf("searchExternLabel got %s \n", externName);
     struct LabelNode *current;
+    size_t nameLabelLength;
+    printf("searchExternLabel got %s \n", externName);
     current = externalLabelList;
     while (current != NULL)
     {
         printf("current->label->name: %d, externName: %d\n",
                strlen(current->label->name), externName[2]);
-        size_t nameLabelLength = strlen(current->label->name);
+        nameLabelLength = strlen(current->label->name);
         if (current->label->name[nameLabelLength - 1] == '\n')
         {
             current->label->name[nameLabelLength - 1] = '\0';
@@ -538,7 +579,7 @@ int searchExternLabel(char *externName)
 int searchEntry(char *entryName)
 {
     struct LabelNode *current;
-    size_t i;
+    /*size_t i;*/
     current = entryLabelList;
     while (current != NULL)
     {
@@ -560,7 +601,7 @@ int searchEntry(char *entryName)
     return -1; /*Label was not found*/
 }
 
-updateEntryLabelAddress(char *entryName, int address)
+void updateEntryLabelAddress(char *entryName, int address)
 {
     struct LabelNode *current;
     current = entryLabelList;
@@ -634,8 +675,8 @@ struct DataLabel *searchDataLabel(char *labelName)
  */
 struct StringLabel *searchStringLabel(char *labelName)
 {
-    printf("searchStringLabel: %s\n", labelName);
     struct StringLabel *current;
+    printf("searchStringLabel: %s\n", labelName);
     current = stringLabelList;
     while (current != NULL)
     {
@@ -652,11 +693,12 @@ struct StringLabel *searchStringLabel(char *labelName)
 
 void sendStringValue(char *fileName, char *labelName)
 {
-    printf("sendStringValue: %s %s\n", fileName, labelName);
     struct StringLabel *current;
+    int i;
+    printf("sendStringValue: %s %s\n", fileName, labelName);
     current = searchStringLabel(labelName);
     printf("sendStringValue: %s\n", current->label->name);
-    int i;
+
     for (i = 1; current->string[i] != '\0'; i++)
     {
         if (current->string[i] != 34)
@@ -668,8 +710,8 @@ void sendStringValue(char *fileName, char *labelName)
 void sendDataValue(char *fileName, char *labelName)
 {
     struct DataLabel *current;
-    current = searchDataLabel(labelName);
     int i;
+    current = searchDataLabel(labelName);
 
     for (i = 0; i < current->size; i++)
     {
@@ -686,6 +728,14 @@ void printLabels(const char *filename)
         writeLabelToFile(concatenateStrings(filename, ".ent"), current_LabelNode->label->name, current_LabelNode->label->address);
         current_LabelNode = current_LabelNode->next;
     }
+}
+
+char *charToString(char c)
+{
+    static char str[2];
+    str[0] = c;
+    str[1] = '\0';
+    return str;
 }
 
 /*

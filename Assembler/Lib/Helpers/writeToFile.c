@@ -40,9 +40,11 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
 
 void appendStringToFile(const char *filename, const char *text)
 {
+    FILE *file;
+
     printf("add new command in base64: %s\n", text);
 
-    FILE *file = fopen(filename, "a");
+    file = fopen(filename, "a");
     if (file == NULL)
     {
         perror("Error opening file");
@@ -65,18 +67,22 @@ void appendStringToFile(const char *filename, const char *text)
  **/
 bool writeLabelToFile(const char *filename, char *labelName, int address)
 {
+    FILE *file;
+
     printf("writeLabelToFile: %s  %d\n", labelName, address);
 
-    FILE *file = fopen(filename, "a");
+    file = fopen(filename, "a");
     if (file == NULL)
     {
         perror("Error opening file");
-        return;
+        return false;
     }
 
     fprintf(file, "%s  %d\n", labelName, address);
 
     fclose(file);
+
+    return true; /* If everything went right */
 }
 
 /**
@@ -86,11 +92,15 @@ bool writeLabelToFile(const char *filename, char *labelName, int address)
  */
 bool isFileExist(const char *fileName)
 {
-    FILE *file = fopen(fileName, "r");
+    FILE *file;
+
+    file = fopen(fileName, "r");
+
     if (file != NULL)
     {
         fclose(file);
         return true;
     }
+
     return false;
 }
