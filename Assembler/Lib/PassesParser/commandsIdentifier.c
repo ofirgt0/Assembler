@@ -7,7 +7,7 @@
 #include "commandsIdentifier.h"
 #include "macroService.h"
 #include "dataService.h"
-#include "filesReader.h" /*to check if getting error while compiline because the commandsIndetifier in the filesRader*/
+#include "filesReader.h"
 
 #define MACRO_SUFFIX ".am"
 
@@ -566,6 +566,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
     }
+    free(originalCommand);
 }
 
 /**

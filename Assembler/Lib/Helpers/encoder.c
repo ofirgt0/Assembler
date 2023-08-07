@@ -39,16 +39,23 @@ void printIntArray(const int array[])
 void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int opcode, int dstAddressing)
 {
     int code[12] = {0};
+    char *base64Str;
+    char *concatenatedStr;
     setBinaryCodeInRange(0, 2, srcAddressing, code);
     setBinaryCodeInRange(3, 6, opcode, code);
     setBinaryCodeInRange(7, 9, dstAddressing, code);
     setARE(AREcode, code);
-    appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
+    base64Str = binaryArrayToBase64(code, 12);
+    concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
+    appendStringToFile(concatenatedStr, base64Str);
+    free(base64Str);
+    free(concatenatedStr);
 } /*in the encoder: (ARE, dstAddressing, opcode, srcAddressing)*/
 
 void encodLabelOperand(char *fileName, char AREcode, int address)
 {
     int code[12] = {0};
+    char *concatenatedStr;
 
     printf("encod Label Operand in address: %d\n", address);
     if (AREcode == 'E')
@@ -60,38 +67,56 @@ void encodLabelOperand(char *fileName, char AREcode, int address)
     }
 
     printf("add new command in base64 to file: %s\n", binaryArrayToBase64(code, 12));
-    appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
-    /*printCommandToFile(fileName, code); // Implement printCommandToFile function*/
+    concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
+    appendStringToFile(concatenatedStr, binaryArrayToBase64(code, 12));
+    free(concatenatedStr);
 }
 
 void encodImmidiate(char *fileName, int immediate)
 {
 
     int code[12] = {0};
+    char *base64Str;
+    char *concatenatedStr;
     (immediate < 0) ? setNegativeBinaryArray(code, immediate, 10) : setBinaryArray(code, immediate, 10);
     setARE('A', code);
-    printIntArray(code);
-    appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
+    base64Str = binaryArrayToBase64(code, 12);
+    concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
+    appendStringToFile(concatenatedStr, base64Str);
+    free(base64Str);
+    free(concatenatedStr);
 }
 
 void encodValue(char *fileName, int value)
 {
     int code[12] = {0};
+    char *base64Str;
+    char *concatenatedStr;
     (value < 0) ? setNegativeBinaryArray(code, value, 12) : setBinaryArray(code, value, 12);
 
     printIntArray(code);
-    appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
+    base64Str = binaryArrayToBase64(code, 12);
+    concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
+    appendStringToFile(concatenatedStr, base64Str);
+    free(base64Str);
+    free(concatenatedStr);
 }
 
 void encodeRegister(char *fileName, int register1, int register2)
 {
     int code[12] = {0};
+    char *base64Str;
+    char *concatenatedStr;
     printf("encode Register: %s \n", fileName);
     setBinaryCodeInRange(0, 4, register1, code);
     setBinaryCodeInRange(5, 9, register2, code);
     setARE('A', code);
 
-    appendStringToFile(concatenateStrings(fileName, fileSuffix_commands), binaryArrayToBase64(code, 12));
+    base64Str = binaryArrayToBase64(code, 12);
+    concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
+    appendStringToFile(concatenatedStr, base64Str);
+    free(base64Str);
+    free(concatenatedStr);
 }
 
 void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])

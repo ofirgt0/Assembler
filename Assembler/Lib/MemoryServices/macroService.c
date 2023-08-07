@@ -46,11 +46,12 @@ struct macroDataNode *getMacro(char *macroName)
         printf("%s strcmp %s \n", macro->macroName, macroNameCopy);
         if (strcmp(macro->macroName, macroNameCopy) == 0)
         {
-            printf("effefefeffe\n");
+            free(macroNameCopy);
             return macro;
         }
         macro = macro->next;
     }
+    free(macroNameCopy);
     printf("after getMacro\n");
     return NULL;
 }
@@ -125,4 +126,17 @@ void updateLinesCount(const char *macroName, int newLinesCount)
         current = current->next;
     }
     printf("Error: Macro '%s' not found in the list.\n", macroName);
+}
+
+/* This function is used to free all the allocated memory when the program terminates. */
+void freeMacroList()
+{
+    struct macroDataNode *current = head, *temp;
+    while (current != NULL)
+    {
+        temp = current;
+        current = current->next;
+        free(temp->macroName);
+        free(temp);
+    }
 }

@@ -394,6 +394,7 @@ bool addString(char *string, char *labelName)
     if (startQuote == NULL || endQuote == NULL || startQuote >= endQuote)
     {
         printf("Error: String not properly enclosed in quotation marks.\n");
+        free(label);
         return false;
     }
 
@@ -401,6 +402,7 @@ bool addString(char *string, char *labelName)
     if (*(endQuote + 1) != '\0' && *(endQuote + 1) != '\n' && *(endQuote + 1) != ' ')
     {
         printf("Error: Unexpected characters after closing quotation mark.\n");
+        free(label);
         return false;
     }
 
@@ -737,10 +739,3 @@ char *charToString(char c)
     str[1] = '\0';
     return str;
 }
-
-/*
-static struct LabelNode *externalLabelList = NULL;
-static struct LabelNode *entryLabelList = NULL;
-static struct LabelNode *normalCommandLabelList = NULL;
-static struct DataLabel *dataLabelList = NULL;
-static struct StringLabel *stringLabelList = NULL;*/
