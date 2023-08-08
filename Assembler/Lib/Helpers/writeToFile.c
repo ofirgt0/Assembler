@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "writeToFile.h"
 #include <stdbool.h>
+#include "errorsHandler.h"
 
 /**
  * Write an integer array as a string to a file on the last line.
@@ -33,8 +34,7 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
     }
     else
     {
-        printf("Failed to open/create the file.\n");
-        return false;
+        FILE_OPEN_ERROR_BOOL(filename, __LINE__);
     }
 }
 
@@ -47,7 +47,7 @@ void appendStringToFile(const char *filename, const char *text)
     file = fopen(filename, "a");
     if (file == NULL)
     {
-        perror("Error opening file");
+        FILE_OPEN_ERROR(filename, __LINE__);
         return;
     }
 
@@ -74,8 +74,7 @@ bool writeLabelToFile(const char *filename, char *labelName, int address)
     file = fopen(filename, "a");
     if (file == NULL)
     {
-        perror("Error opening file");
-        return false;
+        FILE_OPEN_ERROR_BOOL(filename, __LINE__);
     }
 
     fprintf(file, "%s  %d\n", labelName, address);

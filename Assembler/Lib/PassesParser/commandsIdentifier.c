@@ -295,7 +295,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     {
         if (prefixIndex < 2)
         {
-            /*TODO: warning*/
+            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
         }
         else
         {

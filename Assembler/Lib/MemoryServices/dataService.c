@@ -128,7 +128,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
         IC++;
         printf("IC is %d\n", IC);
         printf("label2 != NULL  %s\n", label2);
-        address = searchExternLabel(label2); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
+        address = searchExternLabel(label2);
         if (address != -1)
         {
             encodLabelOperand(fileName, ARE_CODE_E, address);

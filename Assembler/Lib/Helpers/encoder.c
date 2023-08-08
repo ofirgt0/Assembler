@@ -123,7 +123,7 @@ void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])
 {
     int i;
     for (i = endCell; i >= startCell; i--)
-    { /*TODO: make sure its work correctly*/
+    {
         arr[i] = number % 2;
         number /= 2;
     }
@@ -158,12 +158,15 @@ char *binaryArrayToBase64(int *inrArray, int length)
     char *binaryString = (char *)malloc(length * sizeof(char) * 6);
     char *base64String = (char *)malloc(length * sizeof(char) * 2);
     int i, j = 0;
-    
-      if (!binaryString || !base64String){
-      
-        if (binaryString) free(binaryString);
-        if (base64String) free(base64String);
-        
+
+    if (!binaryString || !base64String)
+    {
+
+        if (binaryString)
+            free(binaryString);
+        if (base64String)
+            free(base64String);
+
         MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
     }
 
@@ -243,7 +246,7 @@ char *concatenateStrings(const char *str1, const char *str2)
     {
         MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
     }
-    
+
     strcpy(result, str1);
     strcat(result, str2);
     return result;
@@ -260,11 +263,11 @@ char *removeFileNameExtension(const char *filename)
         {
             MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
         }
-        
+
         strncpy(result, filename, extensionIndex);
         result[extensionIndex] = '\0';
         return result;
     }
-    
+
     return my_strdup(filename);
 }

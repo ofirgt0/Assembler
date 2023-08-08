@@ -6,7 +6,7 @@
 int errorsCounter = 0;
 
 /* Function to print error log prefix */
-void printLogPrefix(char *fileName, int address)
+void printLogPrefix(const char *fileName, int address)
 {
     fprintf(stderr, "Error in file %s at address %d: ", fileName, address);
 }

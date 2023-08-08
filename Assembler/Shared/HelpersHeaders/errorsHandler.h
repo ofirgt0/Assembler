@@ -16,7 +16,7 @@ extern int errorsCounter;
  * @param fileName The name of the file where the error occurred.
  * @param address The address at which the error occurred.
  */
-void printLogPrefix(char *fileName, int address);
+void printLogPrefix(const char *fileName, int address);
 
 /* Retrieves the total count of errors.
  * @return The count of errors.
@@ -150,6 +150,22 @@ int getErrorsCounter();
  * with the provided file name and address, and then reports the error message, to the standard error stream.
  * @param fileName The name of the source file where the error occurred.
  * @param address The line number in the source file where the error occurred.
+ * @return false if can not open/create the file.
+ */
+#define FILE_OPEN_ERROR_BOOL(fileName, address)              \
+    do                                                       \
+    {                                                        \
+        errorsCounter++;                                     \
+        printLogPrefix(fileName, address);                   \
+        fprintf(stderr, "Failed to open/create the file\n"); \
+        return false;                                        \
+    } while (0)
+
+/**
+ * This macro increments the global error counter, prints an error log prefix
+ * with the provided file name and address, and then reports the error message, to the standard error stream.
+ * @param fileName The name of the source file where the error occurred.
+ * @param address The line number in the source file where the error occurred.
  */
 #define INVALID_FILE_FORMAT(fileName, address)    \
     do                                            \
@@ -242,6 +258,21 @@ int getErrorsCounter();
         printLogPrefix(fileName, address);               \
         fprintf(stderr, "Invalid option for command\n"); \
         return;                                          \
+    } while (0)
+
+/**
+ * This macro increments the global error counter, prints an error log prefix
+ * with the provided file name and address, and then reports the error message, to the standard error stream.
+ * @param fileName The name of the source file where the error occurred.
+ * @param address The line number in the source file where the error occurred.
+ */
+#define INCORRECT_OPERANDS_ERROR(fileName, address)                 \
+    do                                                              \
+    {                                                               \
+        errorsCounter++;                                            \
+        printLogPrefix(fileName, address);                          \
+        fprintf(stderr, "Incorrect number of operands provided\n"); \
+        return;                                                     \
     } while (0)
 
 #endif /* ERRORSHANDLER_H */
