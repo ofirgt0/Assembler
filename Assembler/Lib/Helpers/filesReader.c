@@ -5,7 +5,7 @@
 void prepareSecondRun(const char *fileName);
 void startFirstRun(char *line, int lineNumber, const char *fileName);
 char *removeFileNameExtension(const char *fileName);
-void printLabels(const char *fileName);
+void sendLabelsToFile(const char *fileName);
 void commandParser(const char *line, const char *fileName, int lineNumber);
 
 void logNewLine(const char *line, int lineNumber)
@@ -56,7 +56,7 @@ void fileReader(const char *fileName)
         logNewLine(line, 0);
         commandParser(line, fileName, i);
     }
-    printLabels(fileName);
+    sendLabelsToFile(fileName);
     fclose(file);
 }
 

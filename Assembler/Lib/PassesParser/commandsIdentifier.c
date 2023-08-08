@@ -12,7 +12,7 @@
 
 #define MACRO_SUFFIX ".am"
 
-void printLabels(const char *filename);
+void sendLabelsToFile(const char *filename);
 void sendDataValue(const char *fileName, const char *label);
 void sendStringValue(const char *fileName, const char *label);
 void appendStringToFile(const char *fileName, const char *data);
@@ -53,7 +53,7 @@ static bool macroFlag = false;
 
 void printLabel(const char *filename)
 {
-    printLabels(filename);
+    sendLabelsToFile(filename);
 }
 
 /**

@@ -11,32 +11,33 @@
 #include "writeToFile.h"
 
 /* Initialize the label lists. */
-static struct LabelNode *externalLabelList = NULL;
-static struct LabelNode *entryLabelList = NULL;
-static struct LabelNode *normalCommandLabelList = NULL;
-static struct DataLabel *dataLabelList = NULL;
-static struct StringLabel *stringLabelList = NULL;
+static struct GenericLabelNode *externalLabelList = NULL;
+static struct GenericLabelNode *entryLabelList = NULL;
+static struct GenericLabelNode *normalCommandLabelList = NULL;
+static struct GenericLabelNode *dataLabelList = NULL;
+static struct GenericLabelNode *stringLabelList = NULL;
+
+typedef enum
+{
+    None = 0,
+    Immediate = 1,
+    Direct = 3,
+    RegisterDirect = 5
+} AddressingMethod;
 
 int searchLabel(char *labelName);
 void updateEntryLabelAddress(char *entryName, int address);
 void encodValue(char *fileName, char character);
 char *charToString(char c);
+bool handleLastLines(char *fileName, char *label, int register, double immidiate, bool isFirstOperand);
 
 /* Initialize the global counters. */
 static int IC = 100; /* Instruction counter. */
 static int DC = 0;   /* Data counter. */
 
-/**
- * The addNewLine function is responsible for adding new lines of machine code
- * to the program image. It accepts the opcode, registers, labels, and immediates
- * as arguments and adds them to the binary code. This function also handles encoding
- * of the operands based on the type of addressing and increments the IC (Instruction Counter).
- * Note: -1 is used to indicate an empty register slot.
- */
 void addNewLine(char *fileName, int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2)
 {
-    AddressingMethod dstAddressing;
-    AddressingMethod srcAddressing;
+    AddressingMethod dstAddressing, srcAddressing;
     int address = 0;
     bool commandValidation;
 
@@ -65,100 +66,50 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     if (opcode > 13) /*only 1 line for stop and rts*/
         return;
 
-    if (register1 != -1)
+    if (handleLastLines(fileName, label1, register1, immidiate1, true))
+        handleLastLines(fileName, label2, register2, immidiate2, false);
+}
+
+bool handleLastLines(char *fileName, char *label, int reg, double immidiate, bool isFirstOperand)
+{
+    int address = 0;
+    if (label != NULL)
     {
         IC++;
-        printf("IC is %d\n", IC);
-        if (register2 != -1)
-        {
-            encodeRegister(fileName, register1, register2);
-            return;
-        }
-        else
-        {
-            encodeRegister(fileName, register1, 0);
-        }
-    }
-    else if (label1 != NULL)
-    {
-        IC++;
-        printf("IC is %d\n", IC);
-        printf("we r in the case that label1 != NULL\n");
-
-        address = searchExternLabel(label1); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
-        if (address != -1)
-        {
-            printf("dataservice sent ARE CODE E\n");
-            encodLabelOperand(fileName, ARE_CODE_E, address);
-            return;
-        }
-
-        address = searchLabel(label1);
-        if (address != -1)
-        {
-            encodLabelOperand(fileName, ARE_CODE_R, address);
-            return;
-        }
-
-        address = searchEntry(label1);
-        if (address != -1)
-        {
-            encodLabelOperand(fileName, ARE_CODE_R, address);
-            return;
-        }
-
-        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label1);
-    }
-    else if (immidiate1 != 0.5)
-    {
-        IC++;
-        printf("IC is %d\n", IC);
-        encodImmidiate(fileName, (int)immidiate1);
-    }
-
-    if (register2 != -1)
-    {
-        IC++;
-        printf("IC is %d\n", IC);
-        encodeRegister(charToString(ARE_CODE_A), 0, register2);
-        return;
-    }
-    else if (label2 != NULL)
-    {
-        IC++;
-        printf("IC is %d\n", IC);
-        printf("label2 != NULL  %s\n", label2);
-        address = searchExternLabel(label2);
+        address = searchExternLabel(label);
         if (address != -1)
         {
             encodLabelOperand(fileName, ARE_CODE_E, address);
-            return;
+            return false;
         }
 
-        address = searchLabel(label2);
-        printf("searchLabel return address %d\n", address);
+        address = searchLabel(label);
         if (address != -1)
         {
             encodLabelOperand(fileName, ARE_CODE_R, address);
-            return;
+            return false;
         }
 
-        address = searchEntry(label2);
-        printf("searchEntry return address %d\n", address);
+        address = searchEntry(label);
         if (address != -1)
         {
             encodLabelOperand(fileName, ARE_CODE_R, address);
-            return;
+            return false;
         }
 
-        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label2);
+        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label);
     }
-    else if (immidiate2 != 0.5)
+    else if (immidiate != 0.5)
     {
         IC++;
-        printf("IC is %d\n", IC);
-        encodImmidiate(fileName, (int)immidiate2);
+        encodImmidiate(fileName, (int)immidiate);
     }
+    else if (reg != -1)
+    {
+        IC++;
+        isFirstOperand ? encodeRegister(fileName, reg, 0) : encodeRegister(fileName, 0, reg);
+    }
+    return true;
 }
 
 void printAm(char *fileName, char *command)
@@ -180,156 +131,6 @@ bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstA
     return validateSrcAddressing && validateDstAddressing;
 }
 
-/**
- * The addNewExtern function is used to add a new external label to the label list.
- * It accepts the name of the external label as an argument. This function creates
- * a new Label instance, sets the label type to External, sets the label name, and
- * appends it to the externalLabelList. It returns true if the operation is successful
- * and false otherwise (e.g., if memory allocation fails).
- */
-bool addNewExtern(char *externName)
-{
-    struct Label *label = NULL;
-    struct LabelNode *newNode = NULL;
-
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
-    if (label == NULL)
-    {
-        /*Memory allocation failed*/
-        return false;
-    }
-
-    label->type = EXTERN_LABEL_TYPE;
-    strncpy(label->name, externName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0';
-
-    label->address = 1; /*Assuming -1 represents an external label address.*/
-
-    newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
-    if (newNode == NULL)
-    {
-        /*Memory allocation failed*/
-        free(label); /*Clean up the previously allocated memory*/
-        return false;
-    }
-
-    newNode->label = label;
-    newNode->next = externalLabelList;
-    externalLabelList = newNode;
-
-    return true;
-}
-
-void printLabelList(struct LabelNode *head)
-{
-    struct LabelNode *current = head;
-
-    printf("Label List:\n");
-    while (current != NULL)
-    {
-        printf("Type: %s, Name: %s, Address: %d\n", current->label->type, current->label->name, current->label->address);
-
-        current = current->next;
-    }
-}
-
-/**
- * The addNewEntry function is used to add a new entry label to the label list.
- * It accepts the name of the entry label as an argument. This function creates
- * a new Label instance, sets the label type to Entry, sets the label name, and
- * appends it to the entryLabelList. It returns true if the operation is successful
- * and false otherwise (e.g., if memory allocation fails).
- */
-bool addNewEntry(char *entryName)
-{
-    struct Label *label = NULL;
-    struct LabelNode *newNode = NULL;
-    int address;
-
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
-    if (label == NULL)
-    {
-        /*Memory allocation failed*/
-        return false;
-    }
-
-    label->type = ENTRY_LABEL_TYPE;
-    strncpy(label->name, entryName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination (because the use of 'strncpy') */
-    address = searchLabel(entryName);
-    label->address = address != -1 ? address : 9; /*The address will be set later when the entry is resolved.*/
-
-    newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
-    if (newNode == NULL)
-    {
-        /*Memory allocation failed*/
-        free(label); /*Clean up the previously allocated memory*/
-        return false;
-    }
-
-    newNode->label = label;
-    newNode->next = entryLabelList;
-    entryLabelList = newNode;
-
-    return true;
-}
-
-/**
- * The addData function is used to add a new data label to the data label list.
- * It accepts an array of data and the name of the label as arguments. This function
- * creates a new Label and DataLabel instances, sets the label type to Data, sets
- * the label name and data, and appends it to the dataLabelList. It also increments
- * the DC (Data Counter) accordingly. It returns true if the operation is successful
- * and false otherwise (e.g., if memory allocation fails).
- */
-bool addData(int data[], char *labelName, int length)
-{
-    struct Label *label = NULL;
-    struct DataLabel *newNode = NULL;
-
-    printf("addData %s\n", labelName);
-
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
-    if (label == NULL)
-    {
-        /*Memory allocation failed*/
-        return false;
-    }
-
-    label->type = DATA_LABEL_TYPE;
-    strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
-
-    printf("DC before is %d\n", DC);
-    DC += length;
-    printf("DC after is %d\n", DC);
-    label->address = DC; /*The address will be set later when data is linked to the code.*/
-
-    newNode = (struct DataLabel *)malloc(sizeof(struct DataLabel));
-    if (newNode == NULL)
-    {
-        /*Memory allocation failed*/
-        free(label); /*Clean up the previously allocated memory*/
-        return false;
-    }
-
-    newNode->label = label;
-    newNode->data = data;
-    newNode->next = dataLabelList;
-    newNode->size = length;
-    dataLabelList = newNode;
-
-    return true;
-}
-
-/**
- * Duplicates a string by creating a new copy in the heap.
- * This function allocates memory for the new string, copies
- * the original string into the new memory, and returns a pointer to it.
- */
 char *my_strdup(const char *s)
 {
     char *new;
@@ -350,140 +151,9 @@ char *my_strdup(const char *s)
     return new;
 }
 
-/**
- * The addString function is used to add a new string label to the string label list.
- * It accepts a string and the name of the label as arguments. This function creates
- * a new Label and StringLabel instances, sets the label type to String, sets the label
- * name and string, and appends it to the stringLabelList. It also increments the DC (Data Counter)
- * by the length of the string. It returns true if the operation is successful
- * and false otherwise (e.g., if memory allocation fails).
- */
-bool addString(char *string, char *labelName)
-{
-    struct Label *label = NULL;
-    struct StringLabel *newNode = NULL;
-    int stringLength;
-    char *startQuote;
-    char *endQuote;
-
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
-    if (label == NULL)
-    {
-        /*Memory allocation failed*/
-        return false;
-    }
-
-    label->type = STRING_LABEL_TYPE;
-    strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination  */
-
-    printf("DC BEFORE is %d\n", DC);
-
-    /* Find the opening and closing quotation marks */
-    startQuote = strchr(string, '\"');
-    endQuote = strrchr(string, '\"');
-
-    /* Check that both an opening and a closing quotation mark were found */
-    if (startQuote == NULL || endQuote == NULL || startQuote >= endQuote)
-    {
-        printf("Error: String not properly enclosed in quotation marks.\n");
-        free(label);
-        return false;
-    }
-
-    /* Check that there are no unexpected characters after the closing quotation mark */
-    if (*(endQuote + 1) != '\0' && *(endQuote + 1) != '\n' && *(endQuote + 1) != ' ')
-    {
-        printf("Error: Unexpected characters after closing quotation mark.\n");
-        free(label);
-        return false;
-    }
-
-    /* Calculate the actual length of the string between the quotation marks */
-    stringLength = endQuote - startQuote;
-
-    DC += stringLength;  /*+1 FOR /0*/
-    label->address = DC; /*The address will be set later when the string is linked to the code.*/
-    printf("DC AFTER is %d\n", DC);
-
-    newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
-    if (newNode == NULL)
-    {
-        /*Memory allocation failed*/
-        free(label); /*Clean up the previously allocated memory*/
-        return false;
-    }
-
-    newNode->label = label;
-    newNode->string = my_strdup(string);
-    newNode->next = stringLabelList;
-    stringLabelList = newNode;
-
-    return true;
-}
-
-/**
- * The addNewLabel function is used to add a new label to the normal command label list.
- * It accepts the name of the label as an argument. This function creates a new Label
- * instance, sets the label type to NormalCommand, sets the label name and address (which is the current IC),
- * and appends it to the normalCommandLabelList. It returns true if the operation is successful
- * and false otherwise (e.g., if memory allocation fails).
- */
-bool addNewLabel(char *labelName)
-{
-    struct Label *label = NULL;
-    struct LabelNode *newNode = NULL;
-
-    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
-    label = (struct Label *)malloc(sizeof(struct Label) + 1);
-    if (label == NULL)
-    {
-        /*Memory allocation failed*/
-        return false;
-    }
-
-    /*Set appropriate label type and name as per your requirement*/
-    label->type = NORMAL_LABEL_TYPE;
-    strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
-    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
-    label->address = IC + DC;                      /* due to page 30*/
-
-    newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
-    if (newNode == NULL)
-    {
-        /*Memory allocation failed*/
-        free(label); /*Clean up the previously allocated memory*/
-        return false;
-    }
-
-    newNode->label = label;
-    newNode->next = normalCommandLabelList;
-    normalCommandLabelList = newNode;
-
-    if (searchEntry(labelName) != -1)
-    {
-        printf("updateEntryLabelAddress to address %d \n", label->address);
-        updateEntryLabelAddress(labelName, label->address);
-    }
-    printf("addNewLabel %s with address %d done\n", labelName, label->address);
-    return true;
-}
-
-/**
- * The increaseIC function is used to increment the IC (Instruction Counter) by a given value.
- * This function is typically used after a machine instruction or directive has been processed.
- */
 void increaseIC(int value)
 {
-    if (value >= 0)
-    {
-        IC += value;
-    }
-    else
-    {
-        printf("Error: Invalid value passed to increaseIC. IC can only be incremented by a non-negative value.\n");
-    }
+    IC += value;
 }
 
 char *intToStringWithSpace(int ic, int dc)
@@ -508,7 +178,6 @@ char *intToStringWithSpace(int ic, int dc)
 
 void prepareSecondRun(char *fileName)
 {
-
     appendStringToFile(concatenateStrings(fileName, ".ob"), intToStringWithSpace(IC - 100, DC));
     IC = 100;
 }
@@ -525,67 +194,6 @@ bool isLabelExist(char *label, int lineNumber, char *fileName)
            searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
 }
 
-/**
- * The searchExternLabel function searches for an external label in the label list by its name.
- * It traverses the externalLabelList and compares each label's name with the given name.
- * If it finds a match, it returns the address of the label. If it doesn't find a match, it returns -1.
- */
-int searchExternLabel(char *externName)
-{
-    struct LabelNode *current;
-    size_t nameLabelLength;
-    printf("searchExternLabel got %s \n", externName);
-    current = externalLabelList;
-    while (current != NULL)
-    {
-        printf("current->label->name: %d, externName: %d\n",
-               strlen(current->label->name), externName[2]);
-        nameLabelLength = strlen(current->label->name);
-        if (current->label->name[nameLabelLength - 1] == '\n')
-        {
-            current->label->name[nameLabelLength - 1] = '\0';
-        }
-        if (strcmp(current->label->name, externName) == 0)
-        {
-            printf("%s found in externalLabelList", externName);
-            return current->label->address;
-        }
-        current = current->next;
-    }
-
-    return -1; /*Label was not found*/
-}
-
-/**
- * The searchEntry function searches for an entry label in the label list by its name.
- * It traverses the entryLabelList and compares each label's name with the given name.
- * If it finds a match, it returns the address of the label. If it doesn't find a match, it returns -1.
- */
-int searchEntry(char *entryName)
-{
-    struct LabelNode *current;
-    /*size_t i;*/
-    current = entryLabelList;
-    while (current != NULL)
-    {
-        size_t nameLabelLength = strlen(current->label->name);
-        if (current->label->name[nameLabelLength - 1] == '\n')
-        {
-            current->label->name[nameLabelLength - 1] = '\0';
-        }
-
-        if (strncmp(current->label->name, entryName, strlen(current->label->name)) == 0)
-        {
-            printf("%s found in entryLabelList\n", entryName);
-            return current->label->address;
-        }
-
-        current = current->next;
-    }
-
-    return -1; /*Label was not found*/
-}
-
 void updateEntryLabelAddress(char *entryName, int address)
 {
     struct LabelNode *current;
@@ -600,7 +208,6 @@ void updateEntryLabelAddress(char *entryName, int address)
 
         if (strcasecmp(current->label->name, entryName) == 0)
         {
-            printf("innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
             current->label->address = address;
             return;
         }
@@ -608,73 +215,15 @@ void updateEntryLabelAddress(char *entryName, int address)
     }
 }
 
-int searchLabel(char *labelName)
+char *charToString(char c)
 {
-    struct LabelNode *current;
-    current = normalCommandLabelList;
-    while (current != NULL)
-    {
-        size_t newlinePos = strcspn(labelName, "\n");
-        if (newlinePos != strlen(labelName))
-        {
-            labelName[newlinePos] = '\0';
-        }
-
-        if (strcasecmp(current->label->name, labelName) == 0)
-        {
-            return current->label->address;
-        }
-        current = current->next;
-    }
-    /*    printf("searchLabel return -1 to %s", labelName);
-        printLabelList(normalCommandLabelList);*/
-    return -1; /*Label was not found*/
+    static char str[2];
+    str[0] = c;
+    str[1] = '\0';
+    return str;
 }
 
-/**
- * The searchDataLabel function searches for a data label in the data label list by its name.
- * It traverses the dataLabelList and compares each label's name with the given name.
- * If it finds a match, it returns the address of the label (adjusted by the current IC).
- * If it doesn't find a match, it returns -1.
- */
-struct DataLabel *searchDataLabel(char *labelName)
-{
-    struct DataLabel *current;
-    current = dataLabelList;
-    while (current != NULL)
-    {
-        if (strcmp(current->label->name, labelName) == 0)
-        {
-            return current;
-        }
-        current = current->next;
-    }
-    return NULL; /*Label was not found*/
-}
-
-/**
- * The searchStringLabel function searches for a string label in the string label list by its name.
- * It traverses the stringLabelList and compares each label's name and string with the given name and string.
- * If it finds a match, it returns the address of the label (adjusted by the current IC).
- * If it doesn't find a match, it returns -1.
- */
-struct StringLabel *searchStringLabel(char *labelName)
-{
-    struct StringLabel *current;
-    printf("searchStringLabel: %s\n", labelName);
-    current = stringLabelList;
-    while (current != NULL)
-    {
-        printf("current->label->name: %s\n", current->label->name);
-        if (strcmp(current->label->name, labelName) == 0)
-        {
-            printf("current->label->address: %d\n", current->label->address);
-            return current;
-        }
-        current = current->next;
-    }
-    return NULL; /*Label was not found*/
-}
+/*Region: senders*/
 
 void sendStringValue(char *fileName, char *labelName)
 {
@@ -704,7 +253,7 @@ void sendDataValue(char *fileName, char *labelName)
     }
 }
 
-void printLabels(const char *filename)
+void sendLabelsToFile(const char *filename)
 {
     struct LabelNode *current_LabelNode;
     current_LabelNode = entryLabelList;
@@ -715,10 +264,192 @@ void printLabels(const char *filename)
     }
 }
 
-char *charToString(char c)
+int getStringLenUntilNewLine(char *string)
 {
-    static char str[2];
-    str[0] = c;
-    str[1] = '\0';
-    return str;
+    char *startQuote, *endQuote;
+
+    /* Find the opening and closing quotation marks */
+    startQuote = strchr(string, '\"');
+    endQuote = strrchr(string, '\"');
+
+    /* Check that both an opening and a closing quotation mark were found */
+    if (startQuote == NULL || endQuote == NULL || startQuote >= endQuote)
+    {
+        printf("Error: String not properly enclosed in quotation marks.\n");
+        return false;
+    }
+
+    /* Check that there are no unexpected characters after the closing quotation mark */
+    if (*(endQuote + 1) != '\0' && *(endQuote + 1) != '\n' && *(endQuote + 1) != ' ')
+    {
+        printf("Error: Unexpected characters after closing quotation mark.\n");
+        return false;
+    }
+
+    /* Calculate the actual length of the string between the quotation marks */
+    return endQuote - startQuote;
+}
+
+/*Region: generic linkList functions*/
+
+struct GenericLabelNode *getListByType(LabelType LabelType)
+{
+    switch (LabelType)
+    {
+    case (NormalCommand):
+        return normalCommandLabelList;
+        break;
+    case (External):
+        return externalLabelList;
+        break;
+    case (Entry):
+        return entryLabelList;
+        break;
+    case (Data):
+        return dataLabelList;
+        break;
+    case (String):
+        return stringLabelList;
+        break;
+    default:
+        break;
+    }
+}
+
+bool addNewGenericLabel(char *labelName, LabelType type, int *data, int size, char *string)
+{
+    struct Label *label = NULL;
+    struct GenericLabelNode *newNode = NULL;
+    struct GenericLabelNode *head = getListByType(type);
+    int address;
+
+    /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
+    label = (struct Label *)malloc(sizeof(struct Label) + 1);
+    if (label == NULL)
+    {
+        /*Memory allocation failed*/
+        return genericLabelNode;
+    }
+
+    /*Set appropriate label type and name as per your requirement*/
+    strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
+    label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
+    label->address = IC + DC;                      /* due to page 30*/
+
+    newNode = (struct GenericLabelNode *)malloc(sizeof(struct GenericLabelNode));
+    if (newNode == NULL)
+    {
+        /*Memory allocation failed*/
+        free(label); /*Clean up the previously allocated memory*/
+        return genericLabelNode;
+    }
+
+    newNode->label = label;
+    newNode->next = NULL;
+
+    if (type == Data)
+    {
+        newNode->data = data;
+        newNode->size = size;
+        DC += size;
+    }
+    else if (type == String)
+    {
+        newNode->string = string;
+        DC += getStringLenUntilNewLine(string);
+    }
+    else if (type == NormalCommand)
+    {
+        if (searchEntry(labelName) != -1)
+        {
+            printf("updateEntryLabelAddress to address %d \n", label->address);
+            updateEntryLabelAddress(labelName, label->address);
+        }
+    }
+    else if (type == External)
+    {
+        label->address = 1;
+    }
+    else if (type == Entry)
+    {
+        address = searchLabel(entryName);
+        label->address = address != -1 ? address : 9;
+    }
+
+    newNode->next = head;
+    head = newNode;
+
+    return true;
+}
+
+struct GenericLabelNode *searchGenericLabel(char *labelName, LabelType type)
+{
+    struct GenericLabelNode *current;
+    current = getListByType(type);
+    size_t nameLabelLength = strlen(current->label->name);
+    if (current->label->name[nameLabelLength - 1] == '\n')
+    {
+        current->label->name[nameLabelLength - 1] = '\0';
+    }
+    while (current != NULL)
+    {
+        if (strcmp(current->label->name, labelName) == 0)
+        {
+            return current;
+        }
+        current = current->next;
+    }
+    return NULL; /*Label was not found*/
+}
+
+/*Region: custom generic functions*/
+
+struct GenericLabelNode *searchDataLabel(char *labelName)
+{
+    return searchGenericLabel(labelName, Data); /*Label was not found*/
+}
+
+struct GenericLabelNode *searchStringLabel(char *labelName)
+{
+    return searchGenericLabel(labelName, String);
+}
+
+int searchLabel(char *labelName)
+{
+    return searchGenericLabel(labelName, NormalCommand)->label->address;
+}
+
+int searchExternLabel(char *externName)
+{
+    return searchGenericLabel(externName, External)->label->address;
+}
+
+int searchEntry(char *entryName)
+{
+    return searchGenericLabel(entryName, Entry)->label->address;
+}
+
+bool addData(int data[], char *labelName, int length)
+{
+    return addNewGenericLabel(labelName, Data, data, length, NULL);
+}
+
+bool addString(char *string, char *labelName)
+{
+    return addNewGenericLabel(labelName, String, NULL, 0, string);
+}
+
+bool addNewLabel(char *labelName)
+{
+    return addNewGenericLabel(labelName, NormalCommand, NULL, 0, NULL);
+}
+
+bool addNewEntry(char *entryName)
+{
+    return addNewGenericLabel(entryName, Entry, NULL, 0, NULL);
+}
+
+bool addNewExtern(char *externName)
+{
+    return addNewGenericLabel(externName, External, NULL, 0, NULL);
 }
