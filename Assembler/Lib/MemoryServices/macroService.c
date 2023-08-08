@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "macroService.h"
+#include "errorsHandler.h"
 
 void remove_spaces(char *str);
 void getBulkOfLines(int lineNumber, int linesNumber, char *fileName);
@@ -33,8 +34,7 @@ struct macroDataNode *getMacro(char *macroName)
     char *macroNameCopy = (char *)malloc(strlen(macroName) + 1);
     if (macroNameCopy == NULL)
     {
-        perror("Memory allocation failed");
-        return NULL;
+        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
     }
     strcpy(macroNameCopy, macroName);
     remove_spaces(macroNameCopy);
@@ -63,10 +63,13 @@ void sendMacro(char *macroName, char *fileName)
     if (macro == NULL)
     {
         /*Error: Macro was not found*/
-        printf("Error: Macro not found\n");
-        return;
+        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
     }
-    getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
+    else
+    {
+        printf("send macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
+        getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
+    }
 }
 
 struct macroDataNode *searchNode(const char *macroName)
@@ -89,16 +92,22 @@ void addMacro(const char *macroName, int lineNumber)
     struct macroDataNode *newNode = (struct macroDataNode *)malloc(sizeof(struct macroDataNode));
     if (newNode == NULL)
     {
-        printf("Error: Memory allocation failed.\n");
-        return;
+        MEMORY_ALLOCATION_FAILED_FOR_VOID(__FILE__, __LINE__);
     }
     if (searchNode(macroName) != NULL)
     {
-        /*TODO: handle error which macro already exist */
+        free(newNode);
+        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+        return;
     }
 
     /*Copy the macroName to the new node*/
-    newNode->macroName = my_strdup(macroName); /*Note: Remember to free this memory later*/
+    newNode->macroName = my_strdup(macroName);
+    if (newNode->macroName == NULL)
+    {
+        free(newNode);
+        MEMORY_ALLOCATION_FAILED_FOR_VOID(__FILE__, __LINE__);
+    }
     newNode->lineNumber = lineNumber + 2;
     newNode->linesCount = 0;
 
@@ -125,7 +134,7 @@ void updateLinesCount(const char *macroName, int newLinesCount)
         }
         current = current->next;
     }
-    printf("Error: Macro '%s' not found in the list.\n", macroName);
+    MACRO_NAME_CONFLICT(__FILE__, __LINE__);
 }
 
 /* This function is used to free all the allocated memory when the program terminates. */

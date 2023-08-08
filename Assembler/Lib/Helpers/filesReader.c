@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "filesReader.h"
+#include "errorsHandler.h"
 
 void prepareSecondRun(const char *fileName);
 void startFirstRun(char *line, int lineNumber, const char *fileName);
@@ -26,7 +27,7 @@ void fileReader(const char *fileName)
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
-        printf("Failed to open file: %s\n", fileName);
+        FILE_OPEN_ERROR(__FILE__, __LINE__);
         return;
     }
 
@@ -70,7 +71,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
-        printf("Failed to open file: %s\n", fileName);
+        FILE_OPEN_ERROR(__FILE__, __LINE__);
         return;
     }
     currentLine = 1;

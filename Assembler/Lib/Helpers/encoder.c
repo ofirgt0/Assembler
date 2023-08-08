@@ -146,7 +146,7 @@ void setARE(char AREcode, int *commandCode)
         commandCode[11] = 1;
         break;
     default:
-        printf("Error: Invalid ARE code\n");
+        INVALID_ARE_CODE(__FILE__, __LINE__);
         exit(1);
     }
 }
@@ -158,6 +158,14 @@ char *binaryArrayToBase64(int *inrArray, int length)
     char *binaryString = (char *)malloc(length * sizeof(char) * 6);
     char *base64String = (char *)malloc(length * sizeof(char) * 2);
     int i, j = 0;
+    
+      if (!binaryString || !base64String){
+      
+        if (binaryString) free(binaryString);
+        if (base64String) free(base64String);
+        
+        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+    }
 
     for (i = 0; i < length; i++)
     {
@@ -231,14 +239,13 @@ char *concatenateStrings(const char *str1, const char *str2)
 {
     size_t totalLength = strlen(str1) + strlen(str2) + 1;
     char *result = (char *)malloc(totalLength);
-    printf("concatenateStrings %s %s\n", str1, str2);
-
-    if (result != NULL)
+    if (!result)
     {
-        strcpy(result, str1);
-        strcat(result, str2);
+        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
     }
-
+    
+    strcpy(result, str1);
+    strcat(result, str2);
     return result;
 }
 
@@ -249,12 +256,15 @@ char *removeFileNameExtension(const char *filename)
     {
         size_t extensionIndex = extension - filename;
         char *result = (char *)malloc(extensionIndex + 1);
-        if (result != NULL)
+        if (!result)
         {
-            strncpy(result, filename, extensionIndex);
-            result[extensionIndex] = '\0';
-            return result;
+            MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
         }
+        
+        strncpy(result, filename, extensionIndex);
+        result[extensionIndex] = '\0';
+        return result;
     }
+    
     return my_strdup(filename);
 }

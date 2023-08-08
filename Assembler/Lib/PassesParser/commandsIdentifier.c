@@ -8,6 +8,7 @@
 #include "macroService.h"
 #include "dataService.h"
 #include "filesReader.h"
+#include "errorsHandler.h"
 
 #define MACRO_SUFFIX ".am"
 
@@ -272,7 +273,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     commandWithSpaces = (char *)malloc(strlen(command) + 1);
     if (commandWithSpaces == NULL)
     {
-        return;
+        MEMORY_ALLOCATION_FAILED_FOR_VOID(fileName, __LINE__);
     }
     strcpy(commandWithSpaces, command);
 
@@ -421,7 +422,7 @@ int determineLinesNumber(char *command)
     if (commandIndex > 3 && commandIndex != 6) /*one var*/
         return 2;
 
-    else /* in this part we r in the case of 2 vars*/
+    else /* in this part we are in a case of 2 vars*/
     {
         command = command + strlen(commandsNames[commandIndex]);
         remove_spaces(command);
@@ -446,8 +447,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     originalCommand = (char *)malloc(strlen(command) + 1);
     if (originalCommand == NULL)
     {
-        perror("Memory allocation failed");
-        return;
+        MEMORY_ALLOCATION_FAILED_FOR_VOID(fileName, __LINE__);
     }
     strcpy(originalCommand, command);
 
@@ -502,7 +502,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     {
         if (strlen(command) > 0)
         {
-            /*TODO: handle error*/
+            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
         }
         addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0.5, 0.5); /* Note: -1 means that there is no register in this operand slot*/
     }
@@ -532,15 +532,15 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else
         {
 
-            /*TODO: handle error - there is no option for command*/
+            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
         }
     }
-    else /* in this part we r in the case of 2 vars*/
+    else /* In this part we are handle a case where there are 2 vars*/
     {
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /*+ 1 for seperator ','*/
 
-        if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0])) /* TODO: to check 'isdigit' should be ((unsigned char)firstVar[0])) ? */
+        if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0]))
             immidiate1 = tryGetNumber(firstVar);
 
         else if (isLabelExist(firstVar, lineNumber, fileName))
@@ -551,7 +551,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else if (isRegisterName(firstVar))
             register1 = firstVar[2] - '0';
 
-        if (command[0] == '-' || isdigit(command[0])) /* TODO: to check 'isdigit' should be ((unsigned char)command[0]])) ? */
+        if (command[0] == '-' || isdigit(command[0]))
             immidiate2 = tryGetNumber(command);
 
         else if (isLabelExist(command, lineNumber, fileName))
@@ -562,7 +562,10 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else if (isRegisterName(command))
             register2 = command[2] - '0';
 
-        /*TODO: handle error unknown var*/
+        else
+        {
+            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
+        }
 
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
     }

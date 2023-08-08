@@ -40,7 +40,6 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     int address = 0;
     bool commandValidation;
 
-    printf("immidiate2 = %f, label2 = \n", immidiate2);
     dstAddressing = register2 != -1 ? RegisterDirect : (label2 != NULL ? Direct : (immidiate2 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
     srcAddressing = register1 != -1 ? RegisterDirect : (label1 != NULL ? Direct : (immidiate1 != 0.5 ? Immediate : None)); /*0.5 means null for int*/
 
@@ -49,11 +48,6 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
         dstAddressing = srcAddressing;
         srcAddressing = None;
     }
-
-    printf("\nsrcAddressing = %d, dstAddressing = %d\n\n\n", srcAddressing, dstAddressing);
-
-    printf("label1: %s , register1: %d , immidiate1: %f\n", label1, register1, immidiate1);
-    printf("\n\n");
 
     IC++; /*for the base command*/
     encodInstructionCode(fileName, ARE_CODE_A, srcAddressing, opcode, dstAddressing);
@@ -65,8 +59,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
 
     if (!commandValidation)
     {
-        /*TODO: handle error*/
-        printf("ERROR: invalid command\n");
+        INVALID_COMMAND_ERROR(fileName, __LINE__);
     }
 
     if (opcode > 13) /*only 1 line for stop and rts*/
@@ -114,7 +107,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
             return;
         }
 
-        /* TODO: handle error label not found*/
+        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label1);
     }
     else if (immidiate1 != 0.5)
     {
@@ -157,6 +150,8 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
             encodLabelOperand(fileName, ARE_CODE_R, address);
             return;
         }
+
+        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label2);
     }
     else if (immidiate2 != 0.5)
     {
@@ -348,8 +343,7 @@ char *my_strdup(const char *s)
     new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
     if (new == NULL)
     {
-        printf("Error: Memory allocation failed in my_strdup.\n");
-        return NULL;
+        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
     }
 
     strcpy(new, s);
@@ -491,17 +485,6 @@ void increaseIC(int value)
         printf("Error: Invalid value passed to increaseIC. IC can only be incremented by a non-negative value.\n");
     }
 }
-/*char* intToStringWithSpace(int ic, int dc) {
-
-    int totalLength = snprintf(NULL, 0, "%d %d", ic, dc) + 1;
-    char* result = (char*)malloc(totalLength);
-    if (result == NULL) {
-        return NULL;
-    }
-    snprintf(result, totalLength, "%d %d", ic, dc);
-
-    return result;
-}*/
 
 char *intToStringWithSpace(int ic, int dc)
 {
