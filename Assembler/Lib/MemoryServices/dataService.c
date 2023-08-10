@@ -24,6 +24,7 @@ char *charToString(char c);
 
 /* Initialize the global counters. */
 static int IC = 100; /* Instruction counter. */
+static int TotalInstructions = 0; /* Total Instruction counter. */
 static int DC = 0;   /* Data counter. */
 
 /**
@@ -440,7 +441,7 @@ bool addNewLabel(char *labelName)
     label->type = NORMAL_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
-    label->address = IC + DC;                      /* due to page 30*/
+    label->address = IC;                      /* due to page 30*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
@@ -501,17 +502,17 @@ char *intToStringWithSpace(int ic, int dc)
 
 void prepareSecondRun(char *fileName)
 {
-
+    TotalInstructions = IC;
     appendStringToFile(concatenateStrings(fileName, ".ob"), intToStringWithSpace(IC - 100, DC));
     IC = 100;
 }
 
-bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile)
+bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand)
 {
     if (searchExternLabel(label) != -1)
     {
         if (writeToFile)
-            writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC + 1);
+            writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC + linesNumberForCommand);
         return true;
     }
 
@@ -528,12 +529,9 @@ int searchExternLabel(char *externName)
 {
     struct LabelNode *current;
     size_t nameLabelLength;
-    printf("searchExternLabel got %s \n", externName);
     current = externalLabelList;
     while (current != NULL)
     {
-        printf("current->label->name: %d, externName: %d\n",
-               strlen(current->label->name), externName[2]);
         nameLabelLength = strlen(current->label->name);
         if (current->label->name[nameLabelLength - 1] == '\n')
         {
@@ -541,7 +539,6 @@ int searchExternLabel(char *externName)
         }
         if (strcmp(current->label->name, externName) == 0)
         {
-            printf("%s found in externalLabelList", externName);
             return current->label->address;
         }
         current = current->next;
@@ -558,7 +555,6 @@ int searchExternLabel(char *externName)
 int searchEntry(char *entryName)
 {
     struct LabelNode *current;
-    /*size_t i;*/
     current = entryLabelList;
     while (current != NULL)
     {
@@ -570,7 +566,6 @@ int searchEntry(char *entryName)
 
         if (strncmp(current->label->name, entryName, strlen(current->label->name)) == 0)
         {
-            printf("%s found in entryLabelList\n", entryName);
             return current->label->address;
         }
 
@@ -594,7 +589,6 @@ void updateEntryLabelAddress(char *entryName, int address)
 
         if (strcasecmp(current->label->name, entryName) == 0)
         {
-            printf("innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
             current->label->address = address;
             return;
         }
@@ -620,9 +614,11 @@ int searchLabel(char *labelName)
         }
         current = current->next;
     }
-    /*    printf("searchLabel return -1 to %s", labelName);
-        printLabelList(normalCommandLabelList);*/
     return -1; /*Label was not found*/
+}
+
+void updateAddress(struct LabelNode *labelToUpdate){
+    labelToUpdate->label->address += TotalInstructions;
 }
 
 /**
@@ -639,6 +635,7 @@ struct DataLabel *searchDataLabel(char *labelName)
     {
         if (strcmp(current->label->name, labelName) == 0)
         {
+            updateAddress(current->label);
             return current;
         }
         current = current->next;
@@ -663,6 +660,7 @@ struct StringLabel *searchStringLabel(char *labelName)
         if (strcmp(current->label->name, labelName) == 0)
         {
             printf("current->label->address: %d\n", current->label->address);
+            updateAddress(current->label);
             return current;
         }
         current = current->next;

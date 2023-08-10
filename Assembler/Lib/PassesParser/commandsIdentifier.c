@@ -266,13 +266,13 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     int prefixIndex = 0;
     char *originalCommand = NULL;
 
+
     originalCommand = (char *)malloc(strlen(command) + 1);
     if (originalCommand == NULL)
     {
         MEMORY_ALLOCATION_FAILED_FOR_VOID(fileName, __LINE__);
     }
     strcpy(originalCommand, command);
-
     label = tryGetLabel(&command); /*if label exist - we will get the label name and remove it from the command*/
 
     removePrefixSpaces(command);
@@ -292,6 +292,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     }
 
     appendStringToFile(getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION), originalCommand);
+    tryGetLabel(&originalCommand); // for determining lines number
 
     if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
     {
@@ -368,16 +369,14 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     }
     else
     {
-        // int linesNumber;
-        // linesNumber = determineLinesNumber(commandWithSpaces);
+        int linesNumber;
+        linesNumber = determineLinesNumber(originalCommand);
+        increaseIC(linesNumber);
         if (label != NULL)
             addNewLabel(label);
-        // increaseIC(linesNumber);
     }
     if (label != NULL)
-    {
         free(label);
-    }
 }
 
 /**
@@ -466,37 +465,39 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
     if (prefixIndex != -1)
     {
-        if (prefixIndex == 2)
-        {
-            isMacro = true;
-            return;
-        }
-        if (prefixIndex == 3)
-        {
-            isMacro = false;
-            return;
-        }
+        // if (prefixIndex == 2)
+        // {
+        //     isMacro = true;
+        //     return;
+        // }
+        // if (prefixIndex == 3)
+        // {
+        //     isMacro = false;
+        //     return;
+        // }
         if (prefixIndex == 4)
             sendDataValue(fileName, label);
         if (prefixIndex == 5)
             sendStringValue(fileName, label);
-    }
-
-    if (isMacro)
-    {
-        printf("command inside macro - continue\n");
         return;
     }
 
-    if (isMacroName(command))
-    {
-        sendMacro(command, fileName);
-        return;
-    }
-    originalCommand[strlen(originalCommand) - 1] = '\0';
-    appendStringToFile(concatenateStrings(fileName, MACRO_SUFFIX), originalCommand);
-    if (prefixIndex != -1)
-        return;
+    // if (isMacro)
+    // {
+    //     printf("command inside macro - continue\n");
+    //     return;
+    // }
+
+    // if (isMacroName(command))
+    // {
+    //     sendMacro(command, fileName);
+    //     return;
+    // }
+    originalCommand[strlen(originalCommand) - 1] = '\0'; // TODO: is it necessary?
+    // appendStringToFile(concatenateStrings(fileName, MACRO_SUFFIX), originalCommand);
+    // if (prefixIndex != -1)
+    //     return;
+    tryGetLabel(&originalCommand); /* we want to remove the label before sending it to determin lines number*/
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
     command = command + strlen(commandsNames[commandIndex]);
     remove_spaces(command);
@@ -511,13 +512,12 @@ void commandParser(char *command, char *fileName, int lineNumber)
     {
         if (strlen(command) > 0)
         {
-            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
+            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__); //if there is another char that we dont want
         }
         addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0.5, 0.5); /* Note: -1 means that there is no register in this operand slot*/
     }
     else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) /*one var*/
     {
-        printf("one var %s\n", command);
         if (isRegisterName(command))
         {
             if (strlen(command) == 3)
@@ -526,12 +526,11 @@ void commandParser(char *command, char *fileName, int lineNumber)
             }
             else
             {
-                /*TODO: handle error for char*/
+                INVALID_OPTION_FOR_COMMAND(fileName, __LINE__); //if there is another char that we dont want
             }
         }
-        else if (isLabelExist(command, lineNumber, fileName))
+        else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumber(originalCommand) - 1 ))
         {
-            printf("isLabelExist\n");
             addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0.5);
         }
         else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
@@ -552,7 +551,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0]))
             immidiate1 = tryGetNumber(firstVar);
 
-        else if (isLabelExist(firstVar, lineNumber, fileName))
+        else if (isLabelExist(firstVar, lineNumber, fileName, true, determineLinesNumber(originalCommand) - 1))
         {
             label1 = firstVar;
         }
@@ -563,7 +562,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         if (command[0] == '-' || isdigit(command[0]))
             immidiate2 = tryGetNumber(command);
 
-        else if (isLabelExist(command, lineNumber, fileName))
+        else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumber(originalCommand) - 1))
         {
             label2 = command;
         }
