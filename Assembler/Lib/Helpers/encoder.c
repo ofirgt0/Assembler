@@ -44,6 +44,7 @@ void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int o
     setBinaryCodeInRange(0, 2, srcAddressing, code);
     setBinaryCodeInRange(3, 6, opcode, code);
     setBinaryCodeInRange(7, 9, dstAddressing, code);
+    
     setARE(AREcode, code);
     base64Str = binaryArrayToBase64(code, 12);
     concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);

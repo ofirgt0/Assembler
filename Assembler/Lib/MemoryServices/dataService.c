@@ -204,7 +204,7 @@ bool addNewExtern(char *externName)
     strncpy(label->name, externName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0';
 
-    label->address = 1; /*Assuming -1 represents an external label address.*/
+    label->address = 1; /*Assuming 1 represents an external label address.*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
@@ -289,8 +289,6 @@ bool addData(int data[], char *labelName, int length)
     struct Label *label = NULL;
     struct DataLabel *newNode = NULL;
 
-    printf("addData %s\n", labelName);
-
     /* Allocating an extra byte because of the "Ensure null termination" in the label name, according to the  "strncpy" method */
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
     if (label == NULL)
@@ -303,10 +301,8 @@ bool addData(int data[], char *labelName, int length)
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
 
-    printf("DC before is %d\n", DC);
-    DC += length;
-    printf("DC after is %d\n", DC);
     label->address = DC; /*The address will be set later when data is linked to the code.*/
+    DC += length;
 
     newNode = (struct DataLabel *)malloc(sizeof(struct DataLabel));
     if (newNode == NULL)
@@ -323,31 +319,6 @@ bool addData(int data[], char *labelName, int length)
     dataLabelList = newNode;
 
     return true;
-}
-
-/**
- * Duplicates a string by creating a new copy in the heap.
- * This function allocates memory for the new string, copies
- * the original string into the new memory, and returns a pointer to it.
- */
-char *my_strdup(const char *s)
-{
-    char *new;
-
-    if (s == NULL)
-    {
-        printf("Error: Null pointer passed to my_strdup.\n");
-        return NULL;
-    }
-
-    new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
-    if (new == NULL)
-    {
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
-    }
-
-    strcpy(new, s);
-    return new;
 }
 
 /**
@@ -378,8 +349,6 @@ bool addString(char *string, char *labelName)
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination  */
 
-    printf("DC BEFORE is %d\n", DC);
-
     /* Find the opening and closing quotation marks */
     startQuote = strchr(string, '\"');
     endQuote = strrchr(string, '\"');
@@ -403,24 +372,48 @@ bool addString(char *string, char *labelName)
     /* Calculate the actual length of the string between the quotation marks */
     stringLength = endQuote - startQuote;
 
-    DC += stringLength;  /*+1 FOR /0*/
     label->address = DC; /*The address will be set later when the string is linked to the code.*/
-    printf("DC AFTER is %d\n", DC);
+    DC += stringLength;
 
     newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
     if (newNode == NULL)
     {
-        /*Memory allocation failed*/
-        free(label); /*Clean up the previously allocated memory*/
+        free(label);
         return false;
     }
 
     newNode->label = label;
     newNode->string = my_strdup(string);
+    /*TODO: check if we can just do: newNode->string = string;*/
     newNode->next = stringLabelList;
     stringLabelList = newNode;
 
     return true;
+}
+
+/**
+ * Duplicates a string by creating a new copy in the heap.
+ * This function allocates memory for the new string, copies
+ * the original string into the new memory, and returns a pointer to it.
+ */
+char *my_strdup(const char *s)
+{
+    char *new;
+
+    if (s == NULL)
+    {
+        printf("Error: Null pointer passed to my_strdup.\n");
+        return NULL;
+    }
+
+    new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
+    if (new == NULL)
+    {
+        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+    }
+
+    strcpy(new, s);
+    return new;
 }
 
 /**
@@ -513,11 +506,12 @@ void prepareSecondRun(char *fileName)
     IC = 100;
 }
 
-bool isLabelExist(char *label, int lineNumber, char *fileName)
+bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile)
 {
     if (searchExternLabel(label) != -1)
     {
-        writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC + 1);
+        if (writeToFile)
+            writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC + 1);
         return true;
     }
 

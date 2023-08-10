@@ -11,6 +11,7 @@
 #include "errorsHandler.h"
 
 #define MACRO_SUFFIX ".am"
+#define MACRO_FILE_NAME_EXTENSION ".am"
 
 void printLabels(const char *filename);
 void sendDataValue(const char *fileName, const char *label);
@@ -263,34 +264,35 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 {
     char *label;
     int prefixIndex = 0;
-    char *commandWithSpaces = NULL;
+    char *originalCommand = NULL;
+
+    originalCommand = (char *)malloc(strlen(command) + 1);
+    if (originalCommand == NULL)
+    {
+        MEMORY_ALLOCATION_FAILED_FOR_VOID(fileName, __LINE__);
+    }
+    strcpy(originalCommand, command);
 
     label = tryGetLabel(&command); /*if label exist - we will get the label name and remove it from the command*/
 
     removePrefixSpaces(command);
     prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
 
-    commandWithSpaces = (char *)malloc(strlen(command) + 1);
-    if (commandWithSpaces == NULL)
-    {
-        MEMORY_ALLOCATION_FAILED_FOR_VOID(fileName, __LINE__);
-    }
-    strcpy(commandWithSpaces, command);
-
     remove_spaces(command);
 
     if (isMacroName(command))
     {
-        printf("macro found, will be handled in the second run");
+        macroLayout(command, getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION), lineNumber);
         return;
     }
-    printf("after isMacroName\n");
     if (macroFlag && prefixIndex != 3) /*if we in a macro - > count the lines*/
     {
         linesCounter++;
         return;
     }
-    printf("284\n");
+
+    appendStringToFile(getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION), originalCommand);
+
     if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
     {
         if (prefixIndex < 2)
@@ -299,7 +301,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         }
         else
         {
-            addNewLabel(label); /*regular label*/
+            addNewLabel(label);
         }
     }
 
@@ -313,32 +315,41 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         {
         case 0: /*extern*/
         {
-            /*TODO: add warning for the option that label != null  as note in page 41*/
-            addNewExtern(secondVar);
-            return;
+            if(isLabelExist(secondVar, lineNumber, fileName, false))
+                addNewExtern(secondVar);
+            else{
+                printf("ERROR: label %s not exist in line %d\n", secondVar, lineNumber);
+            }
         }
         case 1: /*entry*/
         {
-            addNewEntry(secondVar);
-            return;
+            if(isLabelExist(secondVar, lineNumber, fileName, false))
+                addNewEntry(secondVar);
+            else{
+                printf("ERROR: label %s already exist \n", secondVar);
+            }
         }
         case 2: /*mcro*/
         {
             if (currentMacro == NULL)
                 currentMacro = (char *)malloc(strlen(secondVar) + 1);
+            
+            if (label != NULL && strcmp(label, "") != 0)
+                addNewLabel(label);
+            
             strcpy(currentMacro, secondVar);
             addMacro(secondVar, lineNumber);
             macroFlag = true;
-            return;
         }
         case 3: /*endmcro*/
         {
-            updateLinesCount(currentMacro, linesCounter);
+            if (label != NULL && strcmp(label, "") != 0)
+                addNewLabel(label);
 
+            updateLinesCount(currentMacro, linesCounter);
             macroFlag = false;
             currentMacro = NULL;
             linesCounter = 0;
-            return;
         }
         case 4: /*data*/
         {
@@ -346,12 +357,10 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             int *data;
             data = parseIntArray(secondVar, &length);
             addData(data, label, length);
-            return;
         }
         case 5: /*string*/
         {
             addString(secondVar, label);
-            return;
         }
         default: /*useless*/
             return;
@@ -359,11 +368,11 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     }
     else
     {
-        int linesNumber;
-        linesNumber = determineLinesNumber(commandWithSpaces);
+        // int linesNumber;
+        // linesNumber = determineLinesNumber(commandWithSpaces);
         if (label != NULL)
             addNewLabel(label);
-        increaseIC(linesNumber);
+        // increaseIC(linesNumber);
     }
     if (label != NULL)
     {
@@ -442,7 +451,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
 {
     char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
     int prefixIndex, commandIndex, register1 = -1, register2 = -1;
-    double immidiate1 = 0.5, immidiate2 = 0.5;
+    double immidiate1 = 0.5, immidiate2 = 0.5; // 0.5 represent the default value for immidiate
 
     originalCommand = (char *)malloc(strlen(command) + 1);
     if (originalCommand == NULL)

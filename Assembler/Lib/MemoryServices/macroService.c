@@ -72,6 +72,21 @@ void sendMacro(char *macroName, char *fileName)
     }
 }
 
+// TODO: remove send macro and keep this one
+void macroLayout(char *macroName, char *fileName, int macroLineInFile)
+{
+    struct macroDataNode *macro = getMacro(macroName);
+    if (macro == NULL)
+    {
+        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+    }
+    else
+    {
+        printf("layout macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
+        layoutBulkOfLines(macro->lineNumber, macro->linesCount, fileName, macroLineInFile);
+    }
+}
+
 struct macroDataNode *searchNode(const char *macroName)
 {
     struct macroDataNode *current = head;
