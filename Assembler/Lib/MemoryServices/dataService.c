@@ -59,7 +59,8 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
 
     if (!commandValidation)
     {
-        INVALID_COMMAND_ERROR(fileName, __LINE__);
+        INVALID_OPTION_FOR_COMMAND(fileName, -1);
+        return;
     }
 
     if (opcode > 13) /*only 1 line for stop and rts*/
@@ -107,7 +108,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
             return;
         }
 
-        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label1);
+        LABEL_WAS_NOT_FOUND_ERROR(fileName, -1, label1);
     }
     else if (immidiate1 != 0.5)
     {
@@ -128,7 +129,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
         IC++;
         printf("IC is %d\n", IC);
         printf("label2 != NULL  %s\n", label2);
-        address = searchExternLabel(label2);
+        address = searchExternLabel(label2); /*TODO: we need to check if the label is external or entry to set the ARE code as well*/
         if (address != -1)
         {
             encodLabelOperand(fileName, ARE_CODE_E, address);
@@ -151,7 +152,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
             return;
         }
 
-        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label2);
+        LABEL_WAS_NOT_FOUND_ERROR(fileName, -1, label2);
     }
     else if (immidiate2 != 0.5)
     {
@@ -343,7 +344,8 @@ char *my_strdup(const char *s)
     new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
     if (new == NULL)
     {
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        MEMORY_ALLOCATION_FAILED(__FILE__, -1);
+        return NULL;
     }
 
     strcpy(new, s);
@@ -485,6 +487,17 @@ void increaseIC(int value)
         printf("Error: Invalid value passed to increaseIC. IC can only be incremented by a non-negative value.\n");
     }
 }
+/*char* intToStringWithSpace(int ic, int dc) {
+
+    int totalLength = snprintf(NULL, 0, "%d %d", ic, dc) + 1;
+    char* result = (char*)malloc(totalLength);
+    if (result == NULL) {
+        return NULL;
+    }
+    snprintf(result, totalLength, "%d %d", ic, dc);
+
+    return result;
+}*/
 
 char *intToStringWithSpace(int ic, int dc)
 {
@@ -600,7 +613,6 @@ void updateEntryLabelAddress(char *entryName, int address)
 
         if (strcasecmp(current->label->name, entryName) == 0)
         {
-            printf("innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
             current->label->address = address;
             return;
         }

@@ -5,14 +5,23 @@
 /* Variable to store the count of errors */
 int errorsCounter = 0;
 
-/* Function to print error log prefix */
-void printLogPrefix(const char *fileName, int address)
-{
-    fprintf(stderr, "Error in file %s at address %d: ", fileName, address);
-}
-
 /* Function to get the count of errors */
 int getErrorsCounter()
 {
     return errorsCounter;
+}
+
+void logNewError(const char *fileName, int lineNumber)
+{
+    lineNumber++;
+    if (lineNumber != -1)
+    {
+        fprintf(stderr, "In the file %s there is an error at line number %d: \n", fileName, lineNumber);
+    }
+    else
+    {
+        fprintf(stderr, "Error in file %s: \n", fileName);
+    }
+
+    errorsCounter++;
 }

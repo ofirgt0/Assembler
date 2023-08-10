@@ -123,7 +123,7 @@ void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])
 {
     int i;
     for (i = endCell; i >= startCell; i--)
-    {
+    { /*TODO: make sure its work correctly*/
         arr[i] = number % 2;
         number /= 2;
     }
@@ -146,7 +146,7 @@ void setARE(char AREcode, int *commandCode)
         commandCode[11] = 1;
         break;
     default:
-        INVALID_ARE_CODE(__FILE__, __LINE__);
+        INVALID_ARE_CODE(AREcode, -1);
         exit(1);
     }
 }
@@ -167,7 +167,8 @@ char *binaryArrayToBase64(int *inrArray, int length)
         if (base64String)
             free(base64String);
 
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        MEMORY_ALLOCATION_FAILED(__FILE__, -1);
+        return NULL;
     }
 
     for (i = 0; i < length; i++)
@@ -244,7 +245,8 @@ char *concatenateStrings(const char *str1, const char *str2)
     char *result = (char *)malloc(totalLength);
     if (!result)
     {
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        MEMORY_ALLOCATION_FAILED(__FILE__, -1);
+        return NULL;
     }
 
     strcpy(result, str1);
@@ -261,7 +263,8 @@ char *removeFileNameExtension(const char *filename)
         char *result = (char *)malloc(extensionIndex + 1);
         if (!result)
         {
-            MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+            MEMORY_ALLOCATION_FAILED(__FILE__, -1);
+            return NULL;
         }
 
         strncpy(result, filename, extensionIndex);

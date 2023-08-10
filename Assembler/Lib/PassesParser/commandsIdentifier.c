@@ -18,6 +18,7 @@ void sendStringValue(const char *fileName, const char *label);
 void appendStringToFile(const char *fileName, const char *data);
 char *concatenateStrings(const char *str1, const char *str2);
 bool isLabelExist(const char *label, int lineNumber, const char *fileName);
+bool isLabelDeclaration(char *command);
 
 /* An Array of our 16 commands names. */
 char *commandsNames[COMMANDS_NUMBER] = {
@@ -252,6 +253,12 @@ char *getSubstringBySeparator(char *str, char separator)
     return new_string;
 }
 
+/* Checks if the command is declaring a label (it contains a colon) */
+bool isLabelDeclaration(char *command)
+{
+    return strchr(command, ':') != NULL;
+}
+
 static int linesCounter = 0;      /* Counter for the number of lines processed in the  code. */
 static char *currentMacro = NULL; /* Holds the name of the macro that is currently being processed. */
 
@@ -273,7 +280,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     commandWithSpaces = (char *)malloc(strlen(command) + 1);
     if (commandWithSpaces == NULL)
     {
-        MEMORY_ALLOCATION_FAILED_FOR_VOID(fileName, __LINE__);
+        MEMORY_ALLOCATION_FAILED(fileName, lineNumber);
     }
     strcpy(commandWithSpaces, command);
 
@@ -284,22 +291,29 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         printf("macro found, will be handled in the second run");
         return;
     }
-    printf("after isMacroName\n");
     if (macroFlag && prefixIndex != 3) /*if we in a macro - > count the lines*/
     {
         linesCounter++;
         return;
     }
-    printf("284\n");
     if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
     {
         if (prefixIndex < 2)
         {
-            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
+            INVALID_LABEL_FORMAT(fileName, lineNumber);
+            return;
         }
         else
         {
-            addNewLabel(label); /*regular label*/
+            if (isLabelDeclaration(command) && isLabelExist(label, lineNumber, fileName))
+            {
+
+                LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label);
+            }
+            else
+            {
+                addNewLabel(label); /* regular label */
+            }
         }
     }
 
@@ -345,6 +359,10 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             size_t length;
             int *data;
             data = parseIntArray(secondVar, &length);
+            if (data == NULL)
+            {
+                return;
+            }
             addData(data, label, length);
             return;
         }
@@ -372,6 +390,52 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 }
 
 /**
+ * Checks if the provided string represents a valid integer.
+ */
+bool isValidInteger(const char *str, bool *isFloat)
+{
+
+    int dotCount = 0; /* Counter for dots in the string */
+    *isFloat = false; /* we assume the number is not a float */
+
+    if (*str == '+' || *str == '-')
+    {
+        str++;
+    }
+
+    if (!*str)
+    {
+        return false;
+    }
+
+    while (*str)
+    {
+        if (*str == '.')
+        {
+            dotCount++;
+            if (dotCount > 1)
+            {
+                return false; /* More than one dot found, invalid format */
+            }
+        }
+        else if (*str != ' ' && (*str < '0' || *str > '9'))
+        {
+            return false; /* Invalid character */
+        }
+
+        str++;
+    }
+
+    if (dotCount == 1)
+    {
+        *isFloat = true;
+        return false; /* It's a float */
+    }
+
+    return true;
+}
+
+/**
  * Parses an array of integers from a comma-separated string.
  * The function returns a dynamically allocated array of integers and stores the array size in 'length'.
  * If an error occurs during parsing, the function returns NULL and 'length' is undefined.
@@ -382,18 +446,39 @@ int *parseIntArray(char *input, size_t *length)
     char *token;
     int num;
     int *temp;
+    bool isFloat;
     *length = 0;
+
+    /* Check for trailing comma */
+    if (input[strlen(input) - 1] == ',')
+    {
+        fprintf(stderr, "Error: Trailing comma detected.\n");
+    }
 
     token = strtok(input, ",");
     while (token != NULL)
     {
+        if (!isValidInteger(token, &isFloat))
+        {
+            if (isFloat)
+            {
+                fprintf(stderr, "Error: Invalid float value encountered: %s\n", token);
+            }
+            else
+            {
+                fprintf(stderr, "Error: Invalid character encountered in: %s\n", token);
+            }
+            free(array);
+        }
+
         (*length)++;
         num = atoi(token);
-        printf("%d \n", num);
+
         temp = realloc(array, (*length) * sizeof(int));
         if (temp == NULL)
         {
             free(array);
+            fprintf(stderr, "Memory allocation failed.\n");
             return NULL;
         }
         array = temp;
@@ -447,7 +532,8 @@ void commandParser(char *command, char *fileName, int lineNumber)
     originalCommand = (char *)malloc(strlen(command) + 1);
     if (originalCommand == NULL)
     {
-        MEMORY_ALLOCATION_FAILED_FOR_VOID(fileName, __LINE__);
+        MEMORY_ALLOCATION_FAILED(fileName, lineNumber);
+        return;
     }
     strcpy(originalCommand, command);
 
@@ -476,12 +562,15 @@ void commandParser(char *command, char *fileName, int lineNumber)
     if (isMacro)
     {
         printf("command inside macro - continue\n");
+        free(originalCommand);
+        free(label);
         return;
     }
 
     if (isMacroName(command))
     {
         sendMacro(command, fileName);
+        free(originalCommand);
         return;
     }
     originalCommand[strlen(originalCommand) - 1] = '\0';
@@ -494,7 +583,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
     if (commandIndex == -1)
     {
-        printf("ERROR: unknown command *************************************************************");
+        UNKNOWN_COMMAND_ERROR(fileName, lineNumber);
         return;
     }
 
@@ -502,7 +591,8 @@ void commandParser(char *command, char *fileName, int lineNumber)
     {
         if (strlen(command) > 0)
         {
-            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
+            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
+            return;
         }
         addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0.5, 0.5); /* Note: -1 means that there is no register in this operand slot*/
     }
@@ -532,7 +622,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else
         {
 
-            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
+            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
         }
     }
     else /* In this part we are handle a case where there are 2 vars*/
@@ -564,7 +654,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
         else
         {
-            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
+            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
         }
 
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);

@@ -122,4 +122,5 @@ int determineLinesNumber(char *command);
  * @param fileName the name of the input file.
  */
 void commandParser(char *command, char *fileName, int lineNumber);
+
 #endif /* COMMANDSIDENTIFIER_H */

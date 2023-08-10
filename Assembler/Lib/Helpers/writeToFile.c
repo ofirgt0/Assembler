@@ -34,7 +34,7 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
     }
     else
     {
-        FILE_OPEN_ERROR_BOOL(filename, __LINE__);
+        OPENING_FILE_ERROR(filename, -1);
     }
 }
 
@@ -42,12 +42,10 @@ void appendStringToFile(const char *filename, const char *text)
 {
     FILE *file;
 
-    printf("add new command in base64: %s\n", text);
-
     file = fopen(filename, "a");
     if (file == NULL)
     {
-        FILE_OPEN_ERROR(filename, __LINE__);
+        OPENING_FILE_ERROR(filename, -1);
         return;
     }
 
@@ -74,7 +72,7 @@ bool writeLabelToFile(const char *filename, char *labelName, int address)
     file = fopen(filename, "a");
     if (file == NULL)
     {
-        FILE_OPEN_ERROR_BOOL(filename, __LINE__);
+        OPENING_FILE_ERROR(filename, -1);
     }
 
     fprintf(file, "%s  %d\n", labelName, address);

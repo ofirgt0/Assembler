@@ -24,18 +24,30 @@ void fileReader(const char *fileName)
 {
     char line[256];
     int i;
-    FILE *file = fopen(fileName, "r");
+    char actualFileName[256];
+
+    strcpy(actualFileName, fileName);
+
+    FILE *file = fopen(actualFileName, "r");
+
     if (file == NULL)
     {
-        FILE_OPEN_ERROR(__FILE__, __LINE__);
+        strcat(actualFileName, ".as");
+        file = fopen(actualFileName, "r");
+    }
+
+    if (file == NULL)
+    {
+        OPENING_FILE_ERROR(__FILE__, -1);
         return;
     }
 
     fileName = removeFileNameExtension(fileName);
+
     /*First run - save the label, macro. entry, extern, data and string*/
     for (i = 0; fgets(line, sizeof(line), file) != NULL; i++)
     {
-        if (line == '\0')
+        if (line[0] == '\0')
             continue;
 
         removePrefixSpaces(line);
@@ -45,12 +57,14 @@ void fileReader(const char *fileName)
 
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
+
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
+
     /* Second run */
     for (i = 0; fgets(line, sizeof(line), file) != NULL; i++)
     {
         removePrefixSpaces(line);
-        if (line == '\0')
+        if (line[0] == '\0')
             continue;
 
         logNewLine(line, 0);
@@ -71,7 +85,7 @@ void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
     FILE *file = fopen(fileName, "r");
     if (file == NULL)
     {
-        FILE_OPEN_ERROR(__FILE__, __LINE__);
+        OPENING_FILE_ERROR(__FILE__, lineNumber);
         return;
     }
     currentLine = 1;

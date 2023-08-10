@@ -18,7 +18,6 @@ static struct macroDataNode *head = NULL;
  */
 bool isMacroName(char *macroName)
 {
-    printf("inside isMacroName\n");
     return getMacro(macroName) != NULL;
 }
 
@@ -34,7 +33,8 @@ struct macroDataNode *getMacro(char *macroName)
     char *macroNameCopy = (char *)malloc(strlen(macroName) + 1);
     if (macroNameCopy == NULL)
     {
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        MEMORY_ALLOCATION_FAILED(macroName, -1);
+        return NULL;
     }
     strcpy(macroNameCopy, macroName);
     remove_spaces(macroNameCopy);
@@ -52,7 +52,6 @@ struct macroDataNode *getMacro(char *macroName)
         macro = macro->next;
     }
     free(macroNameCopy);
-    printf("after getMacro\n");
     return NULL;
 }
 
@@ -63,7 +62,7 @@ void sendMacro(char *macroName, char *fileName)
     if (macro == NULL)
     {
         /*Error: Macro was not found*/
-        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+        MACRO_NAME_CONFLICT(fileName, -1);
     }
     else
     {
@@ -92,12 +91,12 @@ void addMacro(const char *macroName, int lineNumber)
     struct macroDataNode *newNode = (struct macroDataNode *)malloc(sizeof(struct macroDataNode));
     if (newNode == NULL)
     {
-        MEMORY_ALLOCATION_FAILED_FOR_VOID(__FILE__, __LINE__);
+        MEMORY_ALLOCATION_FAILED(macroName, -1);
     }
     if (searchNode(macroName) != NULL)
     {
         free(newNode);
-        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+        MACRO_NAME_CONFLICT(macroName, -1);
         return;
     }
 
@@ -106,7 +105,7 @@ void addMacro(const char *macroName, int lineNumber)
     if (newNode->macroName == NULL)
     {
         free(newNode);
-        MEMORY_ALLOCATION_FAILED_FOR_VOID(__FILE__, __LINE__);
+        MEMORY_ALLOCATION_FAILED(macroName, -1);
     }
     newNode->lineNumber = lineNumber + 2;
     newNode->linesCount = 0;
@@ -134,7 +133,7 @@ void updateLinesCount(const char *macroName, int newLinesCount)
         }
         current = current->next;
     }
-    MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+    MACRO_NAME_CONFLICT(macroName, -1);
 }
 
 /* This function is used to free all the allocated memory when the program terminates. */
