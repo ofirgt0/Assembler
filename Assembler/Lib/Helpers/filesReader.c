@@ -18,6 +18,20 @@ void logNewLine(const char *line, int lineNumber)
     printf("Processing line: %s\n", line);
 }
 
+char *getFileNameWithExtension(const char *fileName, char *extension)
+{
+    char *fileNameWithExtension = (char *)malloc(strlen(fileName) + strlen(extension) + 1);
+    if (!fileNameWithExtension)
+    {
+        return NULL;
+    }
+
+    strcpy(fileNameWithExtension, fileName);
+    strcat(fileNameWithExtension, extension);
+
+    return fileNameWithExtension;
+}
+
 /**
  *  This function reads and processes a given file.
  *  In the first run, it saves labels, macros, entries, externs, data, and strings.
@@ -28,18 +42,25 @@ void fileReader(const char *fileName)
     char line[256];
     int i;
 
-    FILE *file = fopen(getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION), "r");
-    if (file == NULL)
+    char *asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
+
+    if (!asmFileName)
     {
-        FILE_OPEN_ERROR(__FILE__, __LINE__);
         return;
     }
 
-    /*fileName = removeFileNameExtension(fileName);*/
-    /*First run - save the label, macro. entry, extern, data and string*/
+    FILE *file = fopen(asmFileName, "r");
+
+    if (file == NULL)
+    {
+        OPENING_FILE_ERROR(fileName, __LINE__);
+        free(asmFileName);
+        return;
+    }
+
     for (i = 0; fgets(line, sizeof(line), file) != NULL; i++)
     {
-        if (line == '\0')
+        if (line[0] == '\0')
             continue;
 
         removePrefixSpaces(line);
@@ -50,12 +71,19 @@ void fileReader(const char *fileName)
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
-    /* Second run */
 
-    FILE *macroFile = fopen(getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION), "r");
+    char *macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
+    if (!macroFileName)
+    {
+        return;
+    }
+
+    FILE *macroFile = fopen(macroFileName, "r");
+    free(macroFileName);
+
     if (macroFile == NULL)
     {
-        FILE_OPEN_ERROR(__FILE__, __LINE__);
+        OPENING_FILE_ERROR(macroFileName, __LINE__);
         return;
     }
 
@@ -73,69 +101,48 @@ void fileReader(const char *fileName)
     fclose(macroFile);
 }
 
-char *getFileNameWithExtension(const char *fileName, char *extension)
-{
-    char fileNameWithExtension[100];
-    strcat(fileNameWithExtension, fileName);
-    strcat(fileNameWithExtension, extension);
-    return fileNameWithExtension;
-}
-
-/**
- *  This function retrieves a block of lines from a file and processes them.
- *  It starts reading from a specified line number and reads a specified number of lines.
- */
-void getBulkOfLines(int lineNumber, int linesNumber, char *fileName)
-{
-    char line[256];
-    int currentLine;
-    FILE *file = fopen(getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION), "r");
-    if (file == NULL)
-    {
-        FILE_OPEN_ERROR(__FILE__, __LINE__);
-        return;
-    }
-    currentLine = 1;
-
-    while (currentLine < lineNumber && fgets(line, sizeof(line), file))
-        currentLine++;
-
-    while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
-    {
-        logNewLine(line, 1);
-        commandParser(line, fileName, currentLine);
-        currentLine++;
-    }
-
-    fclose(file);
-}
-
-/*TODO: will replace getBulk*/
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile)
 {
     char line[256];
     int currentLine;
-    FILE *file = fopen(getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION), "r");
-    if (file == NULL)
+    int i = 0;
+
+    char *asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
+    if (!asmFileName)
     {
-        FILE_OPEN_ERROR(__FILE__, __LINE__);
         return;
     }
+
+    FILE *file = fopen(asmFileName, "r");
+    free(asmFileName);
+
+    if (file == NULL)
+    {
+        OPENING_FILE_ERROR(__FILE__, __LINE__);
+        return;
+    }
+
     currentLine = 1;
 
     while (currentLine < lineNumber && fgets(line, sizeof(line), file))
         currentLine++;
 
-    int i = 0;
-    char fileNameWithExtension[100] = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
+    char *macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
+    if (!macroFileName)
+    {
+        fclose(file);
+        return;
+    }
+
     while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
     {
         logNewLine(line, 1);
-        startFirstRun(line, fileNameWithExtension, i + macroLineInFile);
+        startFirstRun(line, macroFileName, i + macroLineInFile);
         currentLine++;
         i++;
     }
 
+    free(macroFileName);
     fclose(file);
 }
 

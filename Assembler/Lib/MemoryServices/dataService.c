@@ -21,11 +21,12 @@ int searchLabel(char *labelName);
 void updateEntryLabelAddress(char *entryName, int address);
 void encodValue(char *fileName, char character);
 char *charToString(char c);
+char *my_strdup(const char *s);
 
 /* Initialize the global counters. */
-static int IC = 100; /* Instruction counter. */
+static int IC = 100;              /* Instruction counter. */
 static int TotalInstructions = 0; /* Total Instruction counter. */
-static int DC = 0;   /* Data counter. */
+static int DC = 0;                /* Data counter. */
 
 /**
  * The addNewLine function is responsible for adding new lines of machine code
@@ -60,7 +61,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
 
     if (!commandValidation)
     {
-        INVALID_COMMAND_ERROR(fileName, __LINE__);
+        INVALID_OPTION_FOR_COMMAND(fileName, __LINE__); /*TODO: need to set the real lineNumber */
     }
 
     if (opcode > 13) /*only 1 line for stop and rts*/
@@ -108,7 +109,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
             return;
         }
 
-        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label1);
+        LABEL_WAS_NOT_FOUND_ERROR(fileName, -1, label1); /* TODO: need to handle -1 issue and to provide the real lineNumber */
     }
     else if (immidiate1 != 0.5)
     {
@@ -152,7 +153,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
             return;
         }
 
-        LABEL_NOT_FOUND_ERROR(fileName, __LINE__, label2);
+        LABEL_WAS_NOT_FOUND_ERROR(fileName, -1, label2); /*TODO: need to handle -1 issue, and to set the real lineNumber */
     }
     else if (immidiate2 != 0.5)
     {
@@ -410,7 +411,8 @@ char *my_strdup(const char *s)
     new = (char *)malloc(strlen(s) + 1); /*+1 for the null-terminator*/
     if (new == NULL)
     {
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        printf("Memory allocation failed");
+        return NULL;
     }
 
     strcpy(new, s);
@@ -441,7 +443,7 @@ bool addNewLabel(char *labelName)
     label->type = NORMAL_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
-    label->address = IC;                      /* due to page 30*/
+    label->address = IC;                           /* due to page 30*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
@@ -617,7 +619,8 @@ int searchLabel(char *labelName)
     return -1; /*Label was not found*/
 }
 
-void updateAddress(struct LabelNode *labelToUpdate){
+void updateAddress(struct LabelNode *labelToUpdate)
+{
     labelToUpdate->label->address += TotalInstructions;
 }
 

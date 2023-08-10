@@ -6,7 +6,7 @@
 #include "errorsHandler.h"
 
 void remove_spaces(char *str);
-void getBulkOfLines(int lineNumber, int linesNumber, char *fileName);
+void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile);
 char *my_strdup(const char *s);
 
 static struct macroDataNode *head = NULL;
@@ -18,7 +18,6 @@ static struct macroDataNode *head = NULL;
  */
 bool isMacroName(char *macroName)
 {
-    printf("inside isMacroName\n");
     return getMacro(macroName) != NULL;
 }
 
@@ -34,7 +33,8 @@ struct macroDataNode *getMacro(char *macroName)
     char *macroNameCopy = (char *)malloc(strlen(macroName) + 1);
     if (macroNameCopy == NULL)
     {
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        MEMORY_ALLOCATION_FAILED(macroName, -1); /* TODO: handle -1 issue, need to add a relevent lineNumber */
+        return NULL;
     }
     strcpy(macroNameCopy, macroName);
     remove_spaces(macroNameCopy);
@@ -52,33 +52,31 @@ struct macroDataNode *getMacro(char *macroName)
         macro = macro->next;
     }
     free(macroNameCopy);
-    printf("after getMacro\n");
     return NULL;
 }
 
-void sendMacro(char *macroName, char *fileName)
+/*void sendMacro(char *macroName, char *fileName)
 {
     struct macroDataNode *macro = getMacro(macroName);
     printf("send macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
     if (macro == NULL)
     {
         /*Error: Macro was not found*/
-        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
-    }
-    else
-    {
-        printf("send macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
-        getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
-    }
+/*MACRO_NAME_CONFLICT(fileName, -1); /* TODO: need to fix the -1 issue to a real lineNumber */
+/*}
+else
+{
+    printf("send macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
+    getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
 }
+}*/
 
-// TODO: remove send macro and keep this one
 void macroLayout(char *macroName, char *fileName, int macroLineInFile)
 {
     struct macroDataNode *macro = getMacro(macroName);
     if (macro == NULL)
     {
-        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+        MACRO_NAME_CONFLICT(fileName, macroLineInFile);
     }
     else
     {
@@ -107,12 +105,12 @@ void addMacro(const char *macroName, int lineNumber)
     struct macroDataNode *newNode = (struct macroDataNode *)malloc(sizeof(struct macroDataNode));
     if (newNode == NULL)
     {
-        MEMORY_ALLOCATION_FAILED_FOR_VOID(__FILE__, __LINE__);
+        MEMORY_ALLOCATION_FAILED(macroName, lineNumber);
     }
     if (searchNode(macroName) != NULL)
     {
         free(newNode);
-        MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+        MACRO_NAME_CONFLICT(macroName, lineNumber);
         return;
     }
 
@@ -121,7 +119,7 @@ void addMacro(const char *macroName, int lineNumber)
     if (newNode->macroName == NULL)
     {
         free(newNode);
-        MEMORY_ALLOCATION_FAILED_FOR_VOID(__FILE__, __LINE__);
+        MEMORY_ALLOCATION_FAILED(macroName, lineNumber);
     }
     newNode->lineNumber = lineNumber + 2;
     newNode->linesCount = 0;
@@ -149,7 +147,7 @@ void updateLinesCount(const char *macroName, int newLinesCount)
         }
         current = current->next;
     }
-    MACRO_NAME_CONFLICT(__FILE__, __LINE__);
+    MACRO_NAME_CONFLICT(macroName, newLinesCount);
 }
 
 /* This function is used to free all the allocated memory when the program terminates. */

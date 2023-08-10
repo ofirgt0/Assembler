@@ -44,7 +44,7 @@ void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int o
     setBinaryCodeInRange(0, 2, srcAddressing, code);
     setBinaryCodeInRange(3, 6, opcode, code);
     setBinaryCodeInRange(7, 9, dstAddressing, code);
-    
+
     setARE(AREcode, code);
     base64Str = binaryArrayToBase64(code, 12);
     concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
@@ -168,7 +168,8 @@ char *binaryArrayToBase64(int *inrArray, int length)
         if (base64String)
             free(base64String);
 
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        printf("Memory allocation failed");
+        return NULL;
     }
 
     for (i = 0; i < length; i++)
@@ -245,7 +246,8 @@ char *concatenateStrings(const char *str1, const char *str2)
     char *result = (char *)malloc(totalLength);
     if (!result)
     {
-        MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+        printf("Memory allocation failed");
+        return NULL;
     }
 
     strcpy(result, str1);
@@ -262,7 +264,7 @@ char *removeFileNameExtension(const char *filename)
         char *result = (char *)malloc(extensionIndex + 1);
         if (!result)
         {
-            MEMORY_ALLOCATION_FAILED(__FILE__, __LINE__, NULL);
+            printf("Memory allocation failed");
         }
 
         strncpy(result, filename, extensionIndex);

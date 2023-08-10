@@ -34,7 +34,7 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
     }
     else
     {
-        FILE_OPEN_ERROR_BOOL(filename, __LINE__);
+        OPENING_FILE_ERROR(filename, -1); /* TODO: to handle -1 issue, need to set the real lineNumber */
     }
 }
 
@@ -47,7 +47,7 @@ void appendStringToFile(const char *filename, const char *text)
     file = fopen(filename, "a");
     if (file == NULL)
     {
-        FILE_OPEN_ERROR(filename, __LINE__);
+        OPENING_FILE_ERROR(filename, -1); /* TODO: to handle -1 issue, need to set the real lineNumber */
         return;
     }
 
@@ -74,7 +74,7 @@ bool writeLabelToFile(const char *filename, char *labelName, int address)
     file = fopen(filename, "a");
     if (file == NULL)
     {
-        FILE_OPEN_ERROR_BOOL(filename, __LINE__);
+        OPENING_FILE_ERROR(filename, address);
     }
 
     fprintf(file, "%s  %d\n", labelName, address);

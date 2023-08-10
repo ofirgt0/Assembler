@@ -14,17 +14,13 @@ void logNewLine(const char *line, int lineNumber);
 void fileReader(const char *fileName);
 
 /*
- * Retrieves a specified number of lines from a file, starting from a specified line number.
- * @param lineNumber The number of the line from which to start reading.
- * @param linesNumber The number of lines to read.
- * @param fileName The name of the file to read.
- */
-void getBulkOfLines(int lineNumber, int linesNumber, char *fileName);
-
-/*
  * Removes leading spaces from a command string.
  * @param command The command string to be processed.
  */
 void removePrefixSpaces(char *command);
+
+char *getFileNameWithExtension(const char *fileName, char *extension);
+
+void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile);
 
 #endif /* FILESREADER_H */
