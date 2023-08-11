@@ -337,7 +337,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         }
         case 1: /*entry*/
         {
-            if (!isLabelExist(secondVar, lineNumber, fileName, false, 1))
+            if (isValidNewEntry(secondVar))
             {
                 addNewEntry(secondVar);
             }

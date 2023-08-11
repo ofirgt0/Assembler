@@ -108,6 +108,8 @@ bool addNewEntry(char *entryName);
  */
 bool addData(int data[], char *labelName, int length);
 
+bool isValidNewEntry(char *label);
+
 /**
  * Add a string to a label.
  * @param string the string.

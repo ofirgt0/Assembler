@@ -523,6 +523,12 @@ bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile,
            searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
 }
 
+/* validate if entries and externs list doesn already contain the label*/
+bool isValidNewEntry(char *label)
+{
+    return searchEntry(label) == -1 && searchExternLabel(label) == -1;
+}
+
 /**
  * The searchExternLabel function searches for an external label in the label list by its name.
  * It traverses the externalLabelList and compares each label's name with the given name.
