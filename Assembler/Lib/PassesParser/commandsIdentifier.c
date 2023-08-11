@@ -16,7 +16,7 @@
 void printLabels(const char *filename);
 void sendDataValue(const char *fileName, const char *label);
 void sendStringValue(const char *fileName, const char *label);
-void appendStringToFile(const char *fileName, const char *data);
+void appendStringToFile(const char *fileName, const char *text);
 char *concatenateStrings(const char *str1, const char *str2);
 bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand);
 
@@ -262,6 +262,7 @@ static char *currentMacro = NULL; /* Holds the name of the macro that is current
  */
 void startFirstRun(char command[], int lineNumber, char *fileName)
 {
+    printf("fileName %s \n", fileName);
     char *label;
     int prefixIndex = 0;
     char *originalCommand = NULL;
@@ -289,6 +290,9 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 
         return;
     }
+
+    printf("A\n");
+
     if (macroFlag && prefixIndex != 3) /*if we in a macro - > count the lines*/
     {
         linesCounter++;
@@ -297,7 +301,12 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     }
 
     if (prefixIndex != 2 && prefixIndex != 3)
-        appendStringToFile(getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION), originalCommand);
+    {
+
+        char *fullFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
+
+        appendStringToFile(fullFileName, originalCommand);
+    }
 
     tryGetLabel(&originalCommand); /* for determining lines number */
 

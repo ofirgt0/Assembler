@@ -20,17 +20,17 @@ void logNewLine(const char *line, int lineNumber)
 
 char *getFileNameWithExtension(const char *fileName, char *extension)
 {
-    char *fileNameWithExtension = (char *)malloc(strlen(fileName) + strlen(extension) + 1); 
-    if (!fileNameWithExtension) {
+    char *fileNameWithExtension = (char *)malloc(strlen(fileName) + strlen(extension) + 1);
+    if (!fileNameWithExtension)
+    {
         return NULL;
     }
-    
+
     strcpy(fileNameWithExtension, fileName);
     strcat(fileNameWithExtension, extension);
-    
+
     return fileNameWithExtension;
 }
-
 
 /**
  *  This function reads and processes a given file.
@@ -43,9 +43,10 @@ void fileReader(const char *fileName)
     int i;
 
     char *asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
-    
-    if (!asmFileName) {
-        return; 
+
+    if (!asmFileName)
+    {
+        return;
     }
 
     FILE *file = fopen(asmFileName, "r");
@@ -72,8 +73,9 @@ void fileReader(const char *fileName)
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
 
     char *macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
-    if (!macroFileName) {
-        return; 
+    if (!macroFileName)
+    {
+        return;
     }
 
     FILE *macroFile = fopen(macroFileName, "r");
@@ -88,7 +90,7 @@ void fileReader(const char *fileName)
     for (i = 0; fgets(line, sizeof(line), macroFile) != NULL; i++)
     {
         removePrefixSpaces(line);
-        if (line == '\0' || line == '\n'|| strlen(line) == 0)
+        if (line == '\0' || line == '\n' || strlen(line) == 0)
             continue;
 
         logNewLine(line, 0);
@@ -99,15 +101,19 @@ void fileReader(const char *fileName)
     fclose(macroFile);
 }
 
-
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile)
 {
     char line[256];
     int currentLine;
     int i = 0;
-    
-   char *asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
-    if (!asmFileName) {
+
+    printf("lineNumber %d linesNumber %d fileName %s macroLineInFile %d \n", lineNumber, linesNumber, fileName, macroLineInFile);
+
+    fileName = removeFileNameExtension(fileName);
+
+    char *asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
+    if (!asmFileName)
+    {
         return;
     }
 
@@ -119,22 +125,24 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
         OPENING_FILE_ERROR(__FILE__, __LINE__);
         return;
     }
-    
+
     currentLine = 1;
 
     while (currentLine < lineNumber && fgets(line, sizeof(line), file))
         currentLine++;
 
     char *macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
-    if (!macroFileName) {
+    if (!macroFileName)
+    {
         fclose(file);
         return;
     }
 
     while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
     {
+        removePrefixSpaces(line);
         logNewLine(line, 1);
-        startFirstRun(line, macroFileName, i + macroLineInFile);
+        startFirstRun(line, i + macroLineInFile, macroFileName);
         currentLine++;
         i++;
     }
