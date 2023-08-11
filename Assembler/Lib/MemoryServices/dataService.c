@@ -24,9 +24,9 @@ char *charToString(char c);
 char *my_strdup(const char *s);
 
 /* Initialize the global counters. */
-static int IC = 100;              /* Instruction counter. */
+static int IC = 100; /* Instruction counter. */
 static int TotalInstructions = 0; /* Total Instruction counter. */
-static int DC = 0;                /* Data counter. */
+static int DC = 0;   /* Data counter. */
 
 /**
  * The addNewLine function is responsible for adding new lines of machine code
@@ -443,7 +443,7 @@ bool addNewLabel(char *labelName)
     label->type = NORMAL_LABEL_TYPE;
     strncpy(label->name, labelName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure null termination */
-    label->address = IC;                           /* due to page 30*/
+    label->address = IC;                      /* due to page 30*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
@@ -511,6 +511,7 @@ void prepareSecondRun(char *fileName)
 
 bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand)
 {
+	printf("isLabelExist: label - %s lineNumber - %d fileName %s writeToFile linesNumberForCommand %d \n", label, lineNumber, fileName, linesNumberForCommand);
     if (searchExternLabel(label) != -1)
     {
         if (writeToFile)
@@ -619,8 +620,7 @@ int searchLabel(char *labelName)
     return -1; /*Label was not found*/
 }
 
-void updateAddress(struct LabelNode *labelToUpdate)
-{
+void updateAddress(struct LabelNode *labelToUpdate){
     labelToUpdate->label->address += TotalInstructions;
 }
 
