@@ -1,15 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "filesReader.h"
 #include "errorsHandler.h"
 
-#define ASM_FILE_NAME_EXTENSION ".as"
-#define MACRO_FILE_NAME_EXTENSION ".am"
-
+char *removeFileNameExtension(const char *filename);
 void prepareSecondRun(const char *fileName);
-void startFirstRun(char *line, int lineNumber, const char *fileName);
-char *removeFileNameExtension(const char *fileName);
-void printLabels(const char *fileName);
-void commandParser(const char *line, const char *fileName, int lineNumber);
+void commandParser(char *command, const char *fileName, int lineNumber);
+void printLabels(const char *);
+void startFirstRun(char *, int, const char *);
 
 void logNewLine(const char *line, int lineNumber)
 {
@@ -40,16 +39,20 @@ char *getFileNameWithExtension(const char *fileName, char *extension)
 void fileReader(const char *fileName)
 {
     char line[256];
+    char *asmFileName;
+    char *macroFileName;
     int i;
+    FILE *file;
+    FILE *macroFile;
 
-    char *asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
+    asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
 
     if (!asmFileName)
     {
         return;
     }
 
-    FILE *file = fopen(asmFileName, "r");
+    file = fopen(asmFileName, "r");
 
     if (file == NULL)
     {
@@ -70,15 +73,16 @@ void fileReader(const char *fileName)
 
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
+
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
 
-    char *macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
+    macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
     if (!macroFileName)
     {
         return;
     }
 
-    FILE *macroFile = fopen(macroFileName, "r");
+    macroFile = fopen(macroFileName, "r");
     free(macroFileName);
 
     if (macroFile == NULL)
@@ -90,7 +94,7 @@ void fileReader(const char *fileName)
     for (i = 0; fgets(line, sizeof(line), macroFile) != NULL; i++)
     {
         removePrefixSpaces(line);
-        if (line == '\0' || line == '\n' || strlen(line) == 0)
+        if (line[0] == '\0' || line[0] == '\n' || strlen(line) == 0)
             continue;
 
         logNewLine(line, 0);
@@ -106,18 +110,19 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     char line[256];
     int currentLine;
     int i = 0;
-
-    printf("lineNumber %d linesNumber %d fileName %s macroLineInFile %d \n", lineNumber, linesNumber, fileName, macroLineInFile);
+    char *asmFileName;
+    char *macroFileName;
+    FILE *file;
 
     fileName = removeFileNameExtension(fileName);
 
-    char *asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
+    asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
     if (!asmFileName)
     {
         return;
     }
 
-    FILE *file = fopen(asmFileName, "r");
+    file = fopen(asmFileName, "r");
     free(asmFileName);
 
     if (file == NULL)
@@ -131,7 +136,7 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     while (currentLine < lineNumber && fgets(line, sizeof(line), file))
         currentLine++;
 
-    char *macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
+    macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
     if (!macroFileName)
     {
         fclose(file);
@@ -142,6 +147,8 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     {
         removePrefixSpaces(line);
         logNewLine(line, 1);
+        printf("line: %s\n", line);
+        printf("macroFileName %s \n", macroFileName);
         startFirstRun(line, i + macroLineInFile, macroFileName);
         currentLine++;
         i++;

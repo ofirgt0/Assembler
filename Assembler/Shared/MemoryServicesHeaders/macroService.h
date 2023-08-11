@@ -29,7 +29,7 @@ struct macroDataNode *getMacro(char *macroName);
  * @param macroName The name of the macro.
  * @param fileName The name of the file.
  */
-void sendMacro(char *macroName, char *fileName);
+/*void sendMacro(char *macroName, char *fileName);*/
 
 /**
  * Adds a new macro.
@@ -51,5 +51,7 @@ struct macroDataNode *searchNode(const char *macroName);
  * @param newLinesCount The new lines count.
  */
 void updateLinesCount(const char *macroName, int newLinesCount);
+
+void macroLayout(char *macroName, char *fileName, int macroLineInFile);
 
 #endif /* MACROSERVICE_H */

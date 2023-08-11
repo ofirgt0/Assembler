@@ -12,53 +12,37 @@
 
 extern int errorsCounter;
 
-/* Retrieves the total count of errors.
- * @return The count of errors.
+/**
+ * Retrieves the current count of errors encountered during assembly file processing.
+ * @return The total count of errors so far.
  */
 int getErrorsCounter();
 
+/**
+ * Logs a new error to the global errorsCounter and prints the error details.
+ * @param fileName Name of the assembly file where the error occurred.
+ * @param lineNumber Line number in the file where the error was found.
+ */
 void logNewError(const char *fileName, int lineNumber);
 
-/* Macro for reporting an error when there is extraneous text after the end of a command.
- * @param fileName The name of the file where the error occurred.
- * @param address The address at which the error occurred.
+/**
+ * Logs an error for extraneous text after the end of a command.
+ * @param fileName Name of the assembly file where the error occurred.
+ * @param lineNumber Line number in the file where the error was found.
  */
-#define EXTRANEOUS_TEXT(fileName, lineNumber)                      \
+#define EXTRANEOUS_TEXT_ERROR(fileName, lineNumber)                \
     do                                                             \
     {                                                              \
-        errorsCounter++;                                           \
-        printLogPrefix(fileName, lineNumber);                      \
+        logNewError(fileName, lineNumber);                         \
         fprintf(stderr, "Extraneous text after end of command\n"); \
         return;                                                    \
     } while (0)
 
-/* Macro for reporting an error when a parameter is missing.
- * @param fileName The name of the file where the error occurred.
- * @param address The address at which the error occurred.
+/**
+ * Logs an error when multiple consecutive commas are found.
+ * @param fileName Name of the assembly file where the error occurred.
+ * @param lineNumber Line number in the file where the error was found.
  */
-#define MISSING_PARAMETER(fileName, lineNumber) \
-    do                                          \
-    {                                           \
-        errorsCounter++;                        \
-        printLogPrefix(fileName, lineNumber);   \
-        fprintf(stderr, "Missing parameter\n"); \
-        return;                                 \
-    } while (0)
-
-/* Macro for reporting an error when a comma is missing.
- * @param fileName The name of the file where the error occurred.
- * @param address The address at which the error occurred.
- */
-#define MISSING_COMMA(fileName, lineNumber)   \
-    do                                        \
-    {                                         \
-        errorsCounter++;                      \
-        printLogPrefix(fileName, lineNumber); \
-        fprintf(stderr, "Missing comma\n");   \
-        return;                               \
-    } while (0)
-
-/* Macro for reporting an error when there are multiple consecutive commas.*/
 #define TRAILING_COMMA_ERROR(fileName, lineNumber)                            \
     do                                                                        \
     {                                                                         \
@@ -67,6 +51,12 @@ void logNewError(const char *fileName, int lineNumber);
                 fileName, lineNumber);                                        \
     } while (0)
 
+/**
+ * Logs an error when an invalid floating point number is detected.
+ * @param fileName The name of the file where the error occurred.
+ * @param lineNumber The line number in the file where the error occurred.
+ * @param token The actual token or value that caused the error.
+ */
 #define INVALID_FLOAT_ERROR(fileName, lineNumber, token)                                 \
     do                                                                                   \
     {                                                                                    \
@@ -75,6 +65,12 @@ void logNewError(const char *fileName, int lineNumber);
                 fileName, lineNumber, token);                                            \
     } while (0)
 
+/**
+ * Logs an error when an invalid character is detected.
+ * @param fileName The name of the file where the error occurred.
+ * @param lineNumber The line number in the file where the error occurred.
+ * @param token The actual token or character that caused the error.
+ */
 #define INVALID_CHAR_ERROR(fileName, lineNumber, token)                                   \
     do                                                                                    \
     {                                                                                     \
@@ -216,6 +212,12 @@ void logNewError(const char *fileName, int lineNumber);
         fprintf(stderr, "This line has been failed according to: In the current line no matching label was found for: %s.\n", labelName); \
     } while (0)
 
+/**
+ * Logs an error when an invalid label format is detected. Labels must start with
+ * capital letters and be immediately followed by a colon.
+ * @param fileName The name of the file where the error occurred.
+ * @param lineNumber The line number in the file where the error occurred.
+ */
 #define INVALID_LABEL_FORMAT(fileName, lineNumber)                                                                                                                         \
     do                                                                                                                                                                     \
     {                                                                                                                                                                      \

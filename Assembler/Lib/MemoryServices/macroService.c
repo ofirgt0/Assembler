@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
 #include "macroService.h"
 #include "errorsHandler.h"
+#include "helpfulFunctions.h"
 
 void remove_spaces(char *str);
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile);
-char *my_strdup(const char *s);
 
 static struct macroDataNode *head = NULL;
 
@@ -36,6 +37,7 @@ struct macroDataNode *getMacro(char *macroName)
         MEMORY_ALLOCATION_FAILED(macroName, -1); /* TODO: handle -1 issue, need to add a relevent lineNumber */
         return NULL;
     }
+
     strcpy(macroNameCopy, macroName);
     remove_spaces(macroNameCopy);
 
@@ -54,22 +56,6 @@ struct macroDataNode *getMacro(char *macroName)
     free(macroNameCopy);
     return NULL;
 }
-
-/*void sendMacro(char *macroName, char *fileName)
-{
-    struct macroDataNode *macro = getMacro(macroName);
-    printf("send macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
-    if (macro == NULL)
-    {
-        /*Error: Macro was not found*/
-/*MACRO_NAME_CONFLICT(fileName, -1); /* TODO: need to fix the -1 issue to a real lineNumber */
-/*}
-else
-{
-    printf("send macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
-    getBulkOfLines(macro->lineNumber, macro->linesCount, fileName);
-}
-}*/
 
 void macroLayout(char *macroName, char *fileName, int macroLineInFile)
 {

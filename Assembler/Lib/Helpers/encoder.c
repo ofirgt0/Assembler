@@ -1,23 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "writeToFile.h"
 #include "errorsHandler.h"
 #include "encoder.h"
-
-#define fileSuffix_commands ".ob"
-#define fileSuffix_ENTRY ".ent"
-#define fileSuffix_EXTERN ".ext"
-#define fileSuffix_MACRO ".am"
-
-void encodLabelOperand(char *fileName, char AREcode, int address);
-void encodImmidiate(char *fileName, int immidiate);
-void setARE(char AREcode, int *commandCode);
-void setBinaryArray(int arr[], int decimalNumber, int borderCell);
-char *concatenateStrings(const char *str1, const char *str2);
-char *removeFileNameExtension(const char *filename);
-void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell);
-char *my_strdup(const char *s);
+#include "helpfulFunctions.h"
 
 void encodExternLabel(char *fileName)
 {

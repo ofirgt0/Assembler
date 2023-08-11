@@ -32,7 +32,6 @@ typedef enum
     RegisterDirect = 5
 } AddressingMethod;
 
-/* Define the label structure */
 struct Label
 {
     char *type;
@@ -46,7 +45,6 @@ struct LabelNode
     struct LabelNode *next;
 } LabelNode;
 
-/* Representing the data label structure. */
 struct DataLabel
 {
     struct Label *label;
@@ -55,7 +53,6 @@ struct DataLabel
     struct DataLabel *next;
 } DataLabel;
 
-/* Representing the string label structure. */
 struct StringLabel
 {
     struct Label *label;
@@ -63,104 +60,149 @@ struct StringLabel
     struct StringLabel *next;
 } StringLabel;
 
-/**
- * Add a new line with the given parameters.
- * @param opcode the opcode.
- * @param register1 the register1.
- * @param register2 the register2.
- * @param label1 the label1.
- * @param label2 the label2.
- * @param immidiate1 the immidiate1.
- * @param immidiate2 the immidiate2.
+/*
+ * Function to add a new line to the assembly code.
+ * @param fileName: Name of the file being processed.
+ * @param opcode: Operation code.
+ * @param register1: First register.
+ * @param register2: Second register.
+ * @param label1: First label.
+ * @param label2: Second label.
+ * @param immidiate1: First immediate value.
+ * @param immidiate2: Second immediate value.
  */
 void addNewLine(char *fileName, int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
 
-/**
- * Validate if opcode matches addressing method.
- * @param opcode the opcode.
- * @param srcAddressing the source addressing.
- * @param dstAddressing the destination addressing.
- * @return true if validation is successful, false otherwise.
+/*
+ * Validates if the opcode matches the given addressing methods.
+ * @param opcode: The operation code.
+ * @param srcAddressing: The addressing method for the source operand.
+ * @param dstAddressing: The addressing method for the destination operand.
+ * @return true if the opcode matches the addressing methods, false otherwise.
  */
 bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstAddressing);
 
+/*
+ * Prints the assembly memory (.am) for a given command.
+ * @param fileName: Name of the file being processed.
+ * @param command: The command to be printed in assembly memory format.
+ */
 void printAm(char *fileName, char *command);
 
-/**
- * Add a new external label.
- * @param externName the name of the external label.
- * @return true if adding is successful, false otherwise.
+/*
+ * Adds a new external label.
+ * @param externName: Name of the external label.
+ * @return true if the external label was added successfully, false otherwise.
  */
 bool addNewExtern(char *externName);
 
-/**
- * Add a new entry label.
- * @param entryName the name of the entry label.
- * @return true if adding is successful, false otherwise.
+/*
+ * Adds a new entry label.
+ * @param entryName: Name of the entry label.
+ * @return true if the entry label was added successfully, false otherwise.
  */
 bool addNewEntry(char *entryName);
 
-/**
- * Add data to a label.
- * @param data the data.
- * @param labelName the name of the label.
- * @return true if adding is successful, false otherwise.
+/*
+ * Adds a new data label with associated data.
+ * @param data: Array of data to be associated with the label.
+ * @param labelName: Name of the label.
+ * @param length: Length of the data array.
+ * @return true if the data label was added successfully, false otherwise.
  */
 bool addData(int data[], char *labelName, int length);
 
+/*
+ * Validates if a new entry label is valid.
+ * @param label: Name of the label to validate.
+ * @return true if the label is valid, false otherwise.
+ */
 bool isValidNewEntry(char *label);
 
-/**
- * Add a string to a label.
- * @param string the string.
- * @param labelName the name of the label.
- * @return true if adding is successful, false otherwise.
+/*
+ * Adds a new string label.
+ * @param string: The string to be associated with the label.
+ * @param labelName: Name of the label.
+ * @return true if the string label was added successfully, false otherwise.
  */
 bool addString(char *string, char *labelName);
 
-/**
- * Add a new label.
- * @param labelName the name of the label.
- * @return true if adding is successful, false otherwise.
+/*
+ * Adds a new label.
+ * @param labelName: Name of the label to be added.
+ * @return true if the label was added successfully, false otherwise.
  */
 bool addNewLabel(char *labelName);
 
-/**
- * Increase IC by the given value.
- * @param value the value to increase IC by.
+/*
+ * Increases the Instruction Counter (IC) by a given value.
+ * @param value: The value to increase the IC by.
  */
 void increaseIC(int value);
 
-/**
- * Search for an external label by name.
- * @param externName the name of the external label.
- * @return the address of the external label if found, -1 otherwise.
+/*
+ * Searches for an external label.
+ * @param externName: Name of the external label to search for.
+ * @return The address of the external label if found, -1 otherwise.
  */
 int searchExternLabel(char *externName);
 
-/**
- * Search for an entry label by name.
- * @param entryName the name of the entry label.
- * @return the address of the entry label if found, -1 otherwise.
+/*
+ * Searches for an entry label.
+ * @param entryName: Name of the entry label to search for.
+ * @return The address of the entry label if found, -1 otherwise.
  */
 int searchEntry(char *entryName);
 
-/**
- * Search for a data label by name.
- * @param data the data.
- * @param labelName the name of the label.
- * @return the address of the data label if found, -1 otherwise.
+/*
+ * Searches for a data label.
+ * @param labelName: Name of the data label to search for.
+ * @return Pointer to the DataLabel structure if found, NULL otherwise.
  */
 struct DataLabel *searchDataLabel(char *labelName);
 
-/**
- * Search for a string label by name.
- * @param string the string.
- * @param labelName the name of the label.
- * @return the address of the string label if found, -1 otherwise.
+/*
+ * Searches for a string label.
+ * @param labelName: Name of the string label to search for.
+ * @return Pointer to the StringLabel structure if found, NULL otherwise.
  */
 struct StringLabel *searchStringLabel(char *labelName);
 
+/*
+ * Prints the list of labels.
+ * @param head: Pointer to the head of the label list.
+ */
 void printLabelList(struct LabelNode *head);
+
+/*
+ * Prints the labels to a given file.
+ * @param filename: Name of the file to print the labels to.
+ */
+void printLabels(const char *filename);
+
+/*
+ * Checks if a label exists.
+ * @param label: Name of the label to check for.
+ * @param lineNumber: Line number in the source code where the label is found.
+ * @param fileName: Name of the source file.
+ * @param writeToFile: Flag to determine if the result should be written to file.
+ * @param linesNumberForCommand: Number of lines associated with the command using the label.
+ * @return true if the label exists, false otherwise.
+ */
+bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand);
+
+/*
+ * Sends the value of a string label to a file.
+ * @param fileName: Name of the file to send the value to.
+ * @param labelName: Name of the string label.
+ */
+void sendStringValue(char *fileName, char *labelName);
+
+/*
+ * Sends the value of a data label to a file.
+ * @param fileName: Name of the file to send the value to.
+ * @param labelName: Name of the data label.
+ */
+void sendDataValue(char *fileName, char *labelName);
 
 #endif /* DATASERVICE_H */

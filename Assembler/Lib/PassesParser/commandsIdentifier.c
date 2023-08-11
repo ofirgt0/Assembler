@@ -9,16 +9,8 @@
 #include "dataService.h"
 #include "filesReader.h"
 #include "errorsHandler.h"
-
-#define MACRO_SUFFIX ".am"
-#define MACRO_FILE_NAME_EXTENSION ".am"
-
-void printLabels(const char *filename);
-void sendDataValue(const char *fileName, const char *label);
-void sendStringValue(const char *fileName, const char *label);
-void appendStringToFile(const char *fileName, const char *text);
-char *concatenateStrings(const char *str1, const char *str2);
-bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand);
+#include "writeToFile.h"
+#include "helpfulFunctions.h"
 
 /* An Array of our 16 commands names. */
 char *commandsNames[COMMANDS_NUMBER] = {
@@ -262,10 +254,10 @@ static char *currentMacro = NULL; /* Holds the name of the macro that is current
  */
 void startFirstRun(char command[], int lineNumber, char *fileName)
 {
-    printf("fileName %s \n", fileName);
     char *label;
     int prefixIndex = 0;
     char *originalCommand = NULL;
+    int linesNumber;
 
     originalCommand = (char *)malloc(strlen(command) + 1);
     if (originalCommand == NULL)
@@ -291,8 +283,6 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         return;
     }
 
-    printf("A\n");
-
     if (macroFlag && prefixIndex != 3) /*if we in a macro - > count the lines*/
     {
         linesCounter++;
@@ -304,6 +294,8 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     {
 
         char *fullFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
+
+        printf("fullFileNameWithExtension: %s \n", fileName);
 
         appendStringToFile(fullFileName, originalCommand);
     }
@@ -403,20 +395,16 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             return;
         }
     }
+
     else
     {
-        printf("in the last else %s\n", originalCommand);
-        int linesNumber;
         linesNumber = determineLinesNumber(originalCommand);
-        printf("in the last else %d\n", linesNumber);
         increaseIC(linesNumber);
         if (label != NULL)
             addNewLabel(label);
     }
     if (label != NULL)
         free(label);
-
-    /*free(originalCommand);  */
 }
 
 /**
@@ -499,6 +487,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
     int prefixIndex, commandIndex, register1 = -1, register2 = -1;
     double immidiate1 = 0.5, immidiate2 = 0.5; /* 0.5 represent the default value for immidiate */
+    int determineLinesNumberResult;
 
     originalCommand = (char *)malloc(strlen(command) + 1);
     if (originalCommand == NULL)
@@ -541,7 +530,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
          sendMacro(command, fileName);
          return;
      }
-    originalCommand[strlen(originalCommand) - 1] = '\0'; /* TODO: is it necessary?
+    originalCommand[strlen(originalCommand) - 1] = '\0';
      appendStringToFile(concatenateStrings(fileName, MACRO_SUFFIX), originalCommand);
      if (prefixIndex != -1)
         return; */
@@ -565,7 +554,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     {
         if (strlen(command) > 0)
         {
-            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__); /* if there is another char that we dont want */
+            EXTRANEOUS_TEXT_ERROR(fileName, lineNumber); /* if there is another char that we dont want */
         }
         addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, 0.5, 0.5); /* Note: -1 means that there is no register in this operand slot*/
     }
@@ -579,7 +568,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
             }
             else
             {
-                INVALID_OPTION_FOR_COMMAND(fileName, __LINE__); /* if there is another char that we dont want */
+                INVALID_OPTION_FOR_COMMAND(fileName, lineNumber); /* if there is another char that we dont want */
             }
         }
         else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumber(originalCommand) - 1))
@@ -593,14 +582,14 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else
         {
 
-            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
+            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
         }
     }
     else /* In this part we are handle a case where there are 2 vars*/
     {
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /*+ 1 for seperator ','*/
-        int determineLinesNumberResult = determineLinesNumber(originalCommand) - 1;
+        determineLinesNumberResult = determineLinesNumber(originalCommand) - 1;
         printf("firstVar %s command %s\n", firstVar, command);
 
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0]))
@@ -629,47 +618,9 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else
         {
             printf("error\n");
-            INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
+            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
         }
         printf("addNewLine: filename %s  commandIndex %d register1 %c register2 %c label1 %s label2 %s immidiate1 %f immidiate2 %f\n", fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
     }
-    /*free(originalCommand);*/
-}
-
-/**
- * This function works like the standard 'strtok' function but is reentrant and doesn't modify the delimiters string.
- * It returns a pointer to the next token in 'str' that is delimited by a character from 'delim'.
- * If there are no more tokens, it returns NULL.
- */
-char *my_strtok_r(char *str, const char *delim, char **saveptr)
-{
-    char *token;
-    if (str == NULL)
-    {
-        if (saveptr == NULL)
-        {
-            printf("Error: saveptr is NULL\n");
-            return NULL;
-        }
-        str = *saveptr;
-    }
-    str += strspn(str, delim);
-    if (*str == '\0')
-    {
-        *saveptr = str;
-        return NULL;
-    }
-    token = str;
-    str = strpbrk(token, delim);
-    if (str == NULL)
-    {
-        *saveptr = (char *)strchr(token, '\0');
-    }
-    else
-    {
-        *str = '\0';
-        *saveptr = str + 1;
-    }
-    return token;
 }
