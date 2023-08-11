@@ -620,8 +620,10 @@ int searchLabel(char *labelName)
     return -1; /*Label was not found*/
 }
 
-void updateAddress(struct LabelNode *labelToUpdate){
-    labelToUpdate->label->address += TotalInstructions;
+void updateAddress(struct Label *labelToUpdate){
+    
+    labelToUpdate->address += TotalInstructions;
+    printf("updateAddress ######################### %d \n", labelToUpdate->address);
 }
 
 /**
