@@ -454,10 +454,10 @@ int determineLinesNumber(char *command)
 {
     char *firstVar;
     int commandIndex;
-
+        printf("command: %s\n",command);
     removePrefixSpaces(command);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
-    printf("command[0]: %d\n",command[0]);
+    printf("command: %s\n",command);
     if (commandIndex > 13) /*0 vars*/
         return 1;
 
@@ -468,10 +468,11 @@ int determineLinesNumber(char *command)
     {
         command = command + strlen(commandsNames[commandIndex]);
         remove_spaces(command);
-
+	printf("command: %s\n",command);
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /* + 1 for seperator ','*/
-
+	printf("command: %s\n",command);
+	printf("firstVar: %s\n",firstVar);
         if (isRegisterName(firstVar) && isRegisterName(command))
             return 2;
         return 3;
@@ -533,11 +534,13 @@ void commandParser(char *command, char *fileName, int lineNumber)
         return; */
         
     tryGetLabel(&originalCommand); /*we want to remove the label before sending it to determin lines number*/
-    
-    
+
+        printf("originalCommand: %s\n",originalCommand);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
     command = command + strlen(commandsNames[commandIndex]);
     remove_spaces(command);
+printf("originalCommand: %s\n",originalCommand);
+        printf("commandIndex %d \n", commandIndex);    
 
     if (commandIndex == -1)
     {
@@ -584,11 +587,13 @@ void commandParser(char *command, char *fileName, int lineNumber)
     {
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /*+ 1 for seperator ','*/
-
+	int determineLinesNumberResult = determineLinesNumber(originalCommand) - 1;
+	printf("firstVar %s command %s\n",firstVar, command );
+	
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0]))
             immidiate1 = tryGetNumber(firstVar);
 
-        else if (isLabelExist(firstVar, lineNumber, fileName, true, determineLinesNumber(originalCommand) - 1))
+        else if (isLabelExist(firstVar, lineNumber, fileName, true, determineLinesNumberResult))
         {
             label1 = firstVar;
         }
@@ -596,12 +601,15 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else if (isRegisterName(firstVar))
             register1 = firstVar[2] - '0';
 
+		
+
         if (command[0] == '-' || isdigit(command[0]))
             immidiate2 = tryGetNumber(command);
 
-        else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumber(originalCommand) - 1))
+        else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumberResult))
         {
             label2 = command;
+	    printf("label2\n");
         }
 
         else if (isRegisterName(command))
@@ -609,12 +617,13 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
         else
         {
+	    printf("error\n");
             INVALID_OPTION_FOR_COMMAND(fileName, __LINE__);
         }
-
+	printf("addNewLine: filename %s  commandIndex %d register1 %c register2 %c label1 %s label2 %s immidiate1 %f immidiate2 %f\n",fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
     }
-    free(originalCommand);
+    /*free(originalCommand);*/
 }
 
 /**
