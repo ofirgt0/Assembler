@@ -14,7 +14,7 @@ LIBS = -lm
 MAIN = asm
 
 # Define the object files
-OBJS = filesReader.o commandsIdentifier.o macroService.o dataService.o errorsHandler.o writeToFile.o encoder.o
+OBJS = filesReader.o commandsIdentifier.o macroService.o dataService.o errorsHandler.o writeToFile.o encoder.o helpfulFunctions.o
 
 .PHONY: all clean
 
@@ -44,18 +44,11 @@ writeToFile.o: Assembler/Lib/Helpers/writeToFile.c
 
 encoder.o: Assembler/Lib/Helpers/encoder.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+	
+helpfulFunctions.o: Assembler/Lib/Helpers/helpfulFunctions.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@	
 
 # Clean target to remove object files and the executable
 clean:
 	$(RM) *.o *~ $(MAIN)
-
-
-
-
-
-
-
-
-
-
 

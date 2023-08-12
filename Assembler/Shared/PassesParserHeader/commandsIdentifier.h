@@ -107,7 +107,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName);
  * @param length A pointer to a size_t variable where the number of parsed integers will be stored.
  * @return A pointer to the first element of the dynamically allocated integer array.
  */
-int *parseIntArray(char *input, size_t *length);
+int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNumber);
 
 /**
  * Predicts the number of machine code lines a command will be translated to.

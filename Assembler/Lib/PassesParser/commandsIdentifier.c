@@ -306,7 +306,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     {
         if (prefixIndex < 2)
         {
-            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
+            INVALID_LABEL_FORMAT(fileName, lineNumber, label);
         }
         else
         {
@@ -382,7 +382,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         {
             size_t length;
             int *data;
-            data = parseIntArray(secondVar, &length);
+            data = parseIntArray(secondVar, &length, fileName, lineNumber);
             addData(data, label, length);
             return;
         }
@@ -412,18 +412,32 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
  * The function returns a dynamically allocated array of integers and stores the array size in 'length'.
  * If an error occurs during parsing, the function returns NULL and 'length' is undefined.
  */
-int *parseIntArray(char *input, size_t *length)
+int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNumber)
 {
     int *array = NULL;
     char *token;
     int num;
     int *temp;
+    size_t i;
     *length = 0;
 
-    /* Check for trailing comma */
-    if (input[strlen(input) - 1] == ',')
+    /* Check for extraneous comma or trailing comma */
+    if (input[0] == ',')
     {
-        fprintf(stderr, "Error: Trailing comma detected.\n");
+        EXTRANEOUS_TEXT_ERROR(fileName, lineNumber);
+    }
+    else if (input[strlen(input) - 1] == ',')
+    {
+        TRAILING_COMMA_ERROR(fileName, lineNumber);
+    }
+
+    /* Check for consecutive commas */
+    for (i = 0; i < strlen(input) - 1; i++)
+    {
+        if (input[i] == ',' && input[i + 1] == ',')
+        {
+            MULTIPLE_CONSECUTIVE_COMMAS_ERROR(fileName, lineNumber);
+        }
     }
 
     token = strtok(input, ",");
@@ -441,6 +455,7 @@ int *parseIntArray(char *input, size_t *length)
         array = temp;
 
         array[(*length) - 1] = num;
+
         token = strtok(NULL, ",");
     }
 
@@ -480,7 +495,7 @@ int determineLinesNumber(char *command)
     }
 }
 
-static bool isMacro = false;
+/* static bool isMacro = false; */
 
 void commandParser(char *command, char *fileName, int lineNumber)
 {
@@ -537,12 +552,9 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
     tryGetLabel(&originalCommand); /*we want to remove the label before sending it to determin lines number*/
 
-    printf("originalCommand: %s\n", originalCommand);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
     command = command + strlen(commandsNames[commandIndex]);
     remove_spaces(command);
-    printf("originalCommand: %s\n", originalCommand);
-    printf("commandIndex %d \n", commandIndex);
 
     if (commandIndex == -1)
     {
@@ -568,7 +580,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
             }
             else
             {
-                INVALID_OPTION_FOR_COMMAND(fileName, lineNumber); /* if there is another char that we dont want */
+                EXTRANEOUS_TEXT_ERROR(fileName, lineNumber); /* if there is another char that we dont want */
             }
         }
         else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumber(originalCommand) - 1))
@@ -620,7 +632,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
             printf("error\n");
             INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
         }
-        printf("addNewLine: filename %s  commandIndex %d register1 %c register2 %c label1 %s label2 %s immidiate1 %f immidiate2 %f\n", fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
+
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2);
     }
 }

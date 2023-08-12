@@ -135,7 +135,7 @@ void setARE(char AREcode, int *commandCode)
         commandCode[11] = 1;
         break;
     default:
-        INVALID_ARE_CODE(__FILE__, __LINE__);
+        fprintf(stderr, "Inavlid 'ARE' code. \n");
         exit(1);
     }
 }
@@ -156,7 +156,7 @@ char *binaryArrayToBase64(int *inrArray, int length)
         if (base64String)
             free(base64String);
 
-        printf("Memory allocation failed");
+        fprintf(stderr, "Memory allocation failed");
         return NULL;
     }
 
@@ -234,7 +234,7 @@ char *concatenateStrings(const char *str1, const char *str2)
     char *result = (char *)malloc(totalLength);
     if (!result)
     {
-        printf("Memory allocation failed");
+        fprintf(stderr, "Memory allocation failed");
         return NULL;
     }
 
@@ -252,7 +252,7 @@ char *removeFileNameExtension(const char *filename)
         char *result = (char *)malloc(extensionIndex + 1);
         if (!result)
         {
-            printf("Memory allocation failed");
+            fprintf(stderr, "Memory allocation failed");
         }
 
         strncpy(result, filename, extensionIndex);

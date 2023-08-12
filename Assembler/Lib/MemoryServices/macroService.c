@@ -34,7 +34,7 @@ struct macroDataNode *getMacro(char *macroName)
     char *macroNameCopy = (char *)malloc(strlen(macroName) + 1);
     if (macroNameCopy == NULL)
     {
-        MEMORY_ALLOCATION_FAILED(macroName, -1); /* TODO: handle -1 issue, need to add a relevent lineNumber */
+        MEMORY_ALLOCATION_FAILED(macroName, -1);
         return NULL;
     }
 

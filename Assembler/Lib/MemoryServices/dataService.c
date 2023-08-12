@@ -198,7 +198,7 @@ bool addNewExtern(char *externName)
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
     if (label == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         return false;
     }
 
@@ -211,7 +211,7 @@ bool addNewExtern(char *externName)
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         free(label); /*Clean up the previously allocated memory*/
         return false;
     }
@@ -253,7 +253,7 @@ bool addNewEntry(char *entryName)
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
     if (label == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         return false;
     }
 
@@ -266,7 +266,7 @@ bool addNewEntry(char *entryName)
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         free(label); /*Clean up the previously allocated memory*/
         return false;
     }
@@ -295,7 +295,7 @@ bool addData(int data[], char *labelName, int length)
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
     if (label == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         return false;
     }
 
@@ -309,7 +309,7 @@ bool addData(int data[], char *labelName, int length)
     newNode = (struct DataLabel *)malloc(sizeof(struct DataLabel));
     if (newNode == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         free(label); /*Clean up the previously allocated memory*/
         return false;
     }
@@ -343,7 +343,7 @@ bool addString(char *string, char *labelName)
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
     if (label == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         return false;
     }
 
@@ -409,7 +409,7 @@ bool addNewLabel(char *labelName)
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
     if (label == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         return false;
     }
 
@@ -422,7 +422,7 @@ bool addNewLabel(char *labelName)
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
     {
-        /*Memory allocation failed*/
+        fprintf(stderr, "Memory allocation failed");
         free(label); /*Clean up the previously allocated memory*/
         return false;
     }
@@ -604,7 +604,6 @@ void updateAddress(struct Label *labelToUpdate)
 {
 
     labelToUpdate->address += TotalInstructions;
-    printf("updateAddress ######################### %d \n", labelToUpdate->address);
 }
 
 /**

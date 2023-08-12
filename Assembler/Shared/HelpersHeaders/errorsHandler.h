@@ -1,15 +1,6 @@
 #ifndef ERRORSHANDLER_H
 #define ERRORSHANDLER_H
 
-#define ERROR_MISSING_COMMA "Illegal comma\n"
-#define ERROR_MISSING_PARAMETER "Missing parameter\n"
-#define ERROR_INVALID_COMMAND "Undefined command name\n"
-#define ERROR_UNDEFINED_COMPLEX_VAR "Undefined complex variable\n"
-#define ERROR_EXTRANEOUS_TEXT "Extraneous text after end of command\n"
-#define ERROR_MULTIPLE_CONSECUTIVE_COMMAS "Multiple consecutive commas\n"
-#define ERROR_THIRD_PARAMETER_ISNT_NUMBER "Third parameter is not a number\n"
-#define ERROR_SECOND_PARAMETER_ISNT_NUMBER "Second parameter is not a number\n"
-
 extern int errorsCounter;
 
 /**
@@ -30,53 +21,35 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName Name of the assembly file where the error occurred.
  * @param lineNumber Line number in the file where the error was found.
  */
-#define EXTRANEOUS_TEXT_ERROR(fileName, lineNumber)                \
-    do                                                             \
-    {                                                              \
-        logNewError(fileName, lineNumber);                         \
-        fprintf(stderr, "Extraneous text after end of command\n"); \
-        return;                                                    \
+#define EXTRANEOUS_TEXT_ERROR(fileName, lineNumber)     \
+    do                                                  \
+    {                                                   \
+        logNewError(fileName, lineNumber);              \
+        fprintf(stderr, "Extraneous text detected.\n"); \
     } while (0)
 
 /**
- * Logs an error when multiple consecutive commas are found.
+ * Logs an error when having a trailing comma was found.
  * @param fileName Name of the assembly file where the error occurred.
  * @param lineNumber Line number in the file where the error was found.
  */
-#define TRAILING_COMMA_ERROR(fileName, lineNumber)                            \
-    do                                                                        \
-    {                                                                         \
-        logNewError(fileName, lineNumber);                                    \
-        fprintf(stderr, "Error in %s at line %d: Trailing comma detected.\n", \
-                fileName, lineNumber);                                        \
+#define TRAILING_COMMA_ERROR(fileName, lineNumber)               \
+    do                                                           \
+    {                                                            \
+        logNewError(fileName, lineNumber);                       \
+        fprintf(stderr, "Trailing comma has been detected. \n"); \
     } while (0)
 
 /**
- * Logs an error when an invalid floating point number is detected.
- * @param fileName The name of the file where the error occurred.
- * @param lineNumber The line number in the file where the error occurred.
- * @param token The actual token or value that caused the error.
+ * Logs an error when a multipule consecutive commas founded.
+ * @param fileName Name of the assembly file where the error occurred.
+ * @param lineNumber Line number in the file where the error was found.
  */
-#define INVALID_FLOAT_ERROR(fileName, lineNumber, token)                                 \
-    do                                                                                   \
-    {                                                                                    \
-        logNewError(fileName, lineNumber);                                               \
-        fprintf(stderr, "Error in %s at line %d: Invalid float value encountered: %s\n", \
-                fileName, lineNumber, token);                                            \
-    } while (0)
-
-/**
- * Logs an error when an invalid character is detected.
- * @param fileName The name of the file where the error occurred.
- * @param lineNumber The line number in the file where the error occurred.
- * @param token The actual token or character that caused the error.
- */
-#define INVALID_CHAR_ERROR(fileName, lineNumber, token)                                   \
-    do                                                                                    \
-    {                                                                                     \
-        logNewError(fileName, lineNumber);                                                \
-        fprintf(stderr, "Error in %s at line %d: Invalid character encountered in: %s\n", \
-                fileName, lineNumber, token);                                             \
+#define MULTIPLE_CONSECUTIVE_COMMAS_ERROR(fileName, lineNumber)                \
+    do                                                                         \
+    {                                                                          \
+        logNewError(fileName, lineNumber);                                     \
+        fprintf(stderr, "Multipule consecutive commas has been detected. \n"); \
     } while (0)
 
 /**
@@ -176,18 +149,6 @@ void logNewError(const char *fileName, int lineNumber);
     } while (0)
 
 /**
- * Logs an error when an invalid 'ARE' code is detected.
- * @param fileName The name of the file where the error occurred.
- * @param address The address or line number where the error was found.
- */
-#define INVALID_ARE_CODE(fileName, lineNumber)                                                                                      \
-    do                                                                                                                              \
-    {                                                                                                                               \
-        logNewError(fileName, lineNumber);                                                                                          \
-        fprintf(stderr, "This line has been failed according to: There is an invalid 'ARE' code  in the line you tried to ran.\n"); \
-    } while (0)
-
-/**
  * Logs an error when an invalid command is detected.
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
@@ -218,11 +179,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param lineNumber The line number in the file where the error occurred.
  */
-#define INVALID_LABEL_FORMAT(fileName, lineNumber)                                                                                                                         \
-    do                                                                                                                                                                     \
-    {                                                                                                                                                                      \
-        logNewError(fileName, lineNumber);                                                                                                                                 \
-        fprintf(stderr, "This line has been failed according to: Invalid label format. Labels must start with capital letters and be immediately followed by a colon.\n"); \
+#define INVALID_LABEL_FORMAT(fileName, lineNumber, label)                                                                                                                                        \
+    do                                                                                                                                                                                           \
+    {                                                                                                                                                                                            \
+        logNewError(fileName, lineNumber);                                                                                                                                                       \
+        fprintf(stderr, "This line has been failed according to: Invalid label format for label '%s'. Labels must start with capital letters and be immediately followed by a colon.\n", label); \
     } while (0)
 
 #define INVALID_INTEGER_VALUE(fileName, lineNumber, token)                                                                  \

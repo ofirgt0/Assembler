@@ -42,6 +42,7 @@ void fileReader(const char *fileName)
     char *asmFileName;
     char *macroFileName;
     int i;
+    int errorCount;
     FILE *file;
     FILE *macroFile;
 
@@ -56,7 +57,7 @@ void fileReader(const char *fileName)
 
     if (file == NULL)
     {
-        OPENING_FILE_ERROR(fileName, __LINE__);
+        OPENING_FILE_ERROR(fileName, -1);
         free(asmFileName);
         return;
     }
@@ -87,7 +88,7 @@ void fileReader(const char *fileName)
 
     if (macroFile == NULL)
     {
-        OPENING_FILE_ERROR(macroFileName, __LINE__);
+        OPENING_FILE_ERROR(fileName, -1);
         return;
     }
 
@@ -103,6 +104,13 @@ void fileReader(const char *fileName)
 
     printLabels(fileName);
     fclose(macroFile);
+
+    /* Print total number of errors found */
+    errorCount = getErrorsCounter();
+    if (errorCount > 0)
+    {
+        fprintf(stderr, "\nTotal Errors in file %s: %d\n", fileName, errorCount);
+    }
 }
 
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile)
@@ -127,7 +135,7 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
 
     if (file == NULL)
     {
-        OPENING_FILE_ERROR(__FILE__, __LINE__);
+        OPENING_FILE_ERROR(fileName, -1);
         return;
     }
 
