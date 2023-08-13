@@ -71,8 +71,7 @@ struct StringLabel
  * @param immidiate1: First immediate value.
  * @param immidiate2: Second immediate value.
  */
-void addNewLine(char *fileName, int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2);
-
+void addNewLine(char *fileName, int opcode, int register1, int register2, char *label1, char *label2, double immidiate1, double immidiate2, int lineNumber);
 /*
  * Validates if the opcode matches the given addressing methods.
  * @param opcode: The operation code.
@@ -191,18 +190,10 @@ void printLabels(const char *filename);
  */
 bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand);
 
-/*
- * Sends the value of a string label to a file.
- * @param fileName: Name of the file to send the value to.
- * @param labelName: Name of the string label.
- */
-void sendStringValue(char *fileName, char *labelName);
+void sendStringValue(char *fileName, char *labelName, char *string);
 
-/*
- * Sends the value of a data label to a file.
- * @param fileName: Name of the file to send the value to.
- * @param labelName: Name of the data label.
- */
-void sendDataValue(char *fileName, char *labelName);
+void sendDataValue(char *fileName, char *labelName, int *data, int size);
+
+bool isLabelExistWithoutEntries(char *label);
 
 #endif /* DATASERVICE_H */

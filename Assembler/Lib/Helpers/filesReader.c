@@ -42,6 +42,7 @@ void fileReader(const char *fileName)
     char *asmFileName;
     char *macroFileName;
     int i;
+    int notEmptyLinesCounter = 0;
     int errorCount;
     FILE *file;
     FILE *macroFile;
@@ -64,17 +65,27 @@ void fileReader(const char *fileName)
 
     for (i = 0; fgets(line, sizeof(line), file) != NULL; i++)
     {
-        if (line[0] == '\0')
+        if (line[0] == '\0' || line[0] == '\n' || strlen(line) == 0)
             continue;
 
         removePrefixSpaces(line);
-        logNewLine(line, i);
-        startFirstRun(line, i, fileName);
+        logNewLine(line, notEmptyLinesCounter);
+        startFirstRun(line, notEmptyLinesCounter, fileName);
+        notEmptyLinesCounter++;
+    }
+    notEmptyLinesCounter = 0;
+    if (getErrorsCounter() > 0)
+    {
+        printf("\nErrors found in file. program stopped.\n");
+        fprintf(stderr, "\nErrors found in file. program stopped.\n");
+        fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
+        fclose(file);
+        free(asmFileName);
+        return;
     }
 
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
-
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
 
     macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
@@ -98,19 +109,13 @@ void fileReader(const char *fileName)
         if (line[0] == '\0' || line[0] == '\n' || strlen(line) == 0)
             continue;
 
-        logNewLine(line, 0);
-        commandParser(line, fileName, i);
+        notEmptyLinesCounter++;
+        logNewLine(line, notEmptyLinesCounter);
+        commandParser(line, fileName, notEmptyLinesCounter);
     }
 
     printLabels(fileName);
     fclose(macroFile);
-
-    /* Print total number of errors found */
-    errorCount = getErrorsCounter();
-    if (errorCount > 0)
-    {
-        fprintf(stderr, "\nTotal Errors in file %s: %d\n", fileName, errorCount);
-    }
 }
 
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile)
@@ -123,22 +128,23 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     FILE *file;
 
     fileName = removeFileNameExtension(fileName);
+    printf("########################### layoutBulkOfLines - after remove file extension: %s\n", fileName);
 
     asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
     if (!asmFileName)
     {
         return;
     }
-
+    printf("########################### layoutBulkOfLines - after remove asmFileName extension: %s\n", asmFileName);
     file = fopen(asmFileName, "r");
-    free(asmFileName);
 
     if (file == NULL)
     {
-        OPENING_FILE_ERROR(fileName, -1);
+        OPENING_FILE_ERROR(asmFileName, -1);
+        free(asmFileName);
         return;
     }
-
+    free(asmFileName);
     currentLine = 1;
 
     while (currentLine < lineNumber && fgets(line, sizeof(line), file))
@@ -157,7 +163,7 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
         logNewLine(line, 1);
         printf("line: %s\n", line);
         printf("macroFileName %s \n", macroFileName);
-        startFirstRun(line, i + macroLineInFile, macroFileName);
+        startFirstRun(line, i + macroLineInFile, fileName);
         currentLine++;
         i++;
     }

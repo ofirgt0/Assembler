@@ -81,11 +81,12 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define INVALID_INSTRUCTION(fileName, lineNumber)                                                      \
-    do                                                                                                 \
-    {                                                                                                  \
-        logNewError(fileName, lineNumber);                                                             \
-        fprintf(stderr, "This line has been failed according to: There is an invalid instruction.\n"); \
+
+#define UNKNOWN_OPERAND(fileName, lineNumber)                                                   \
+    do                                                                                          \
+    {                                                                                           \
+        logNewError(fileName, lineNumber);                                                      \
+        fprintf(stderr, "This line has been failed according to: Unknown operator founded.\n"); \
     } while (0)
 
 /**

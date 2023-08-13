@@ -115,7 +115,7 @@ int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNu
  * @param command The assembly command string.
  * @return An estimate of how many lines of machine code this will produce.
  */
-int determineLinesNumber(char *command);
+int determineLinesNumber(char *command, int lineNumber, char *fileName);
 
 /**
  * The main function that turns our assembly command into its machine code counterpart.

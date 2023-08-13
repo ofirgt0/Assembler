@@ -34,7 +34,7 @@ void appendStringToFile(const char *filename, const char *text)
 {
     FILE *file;
 
-    printf("add new command in base64: %s\n", text);
+    printf("debug: write the line %s to file %s\n", text, filename);
 
     file = fopen(filename, "a");
     if (file == NULL)

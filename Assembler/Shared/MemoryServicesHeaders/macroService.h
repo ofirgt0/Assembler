@@ -29,7 +29,7 @@ struct macroDataNode *getMacro(char *macroName);
  * @param macroName The name of the macro.
  * @param fileName The name of the file.
  */
-/*void sendMacro(char *macroName, char *fileName);*/
+void sendMacro(char *macroName, char *fileName);
 
 /**
  * Adds a new macro.
