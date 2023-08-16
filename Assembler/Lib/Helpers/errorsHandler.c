@@ -13,6 +13,10 @@ int getErrorsCounter()
     return errorsCounter;
 }
 
+void initErrorsCounter(){
+    errorsCounter = 0;
+}
+
 /* Logs a new error for a given file and line number, and increments the error counter.
  * @param fileName Name of the assembly file where the error occurred.
  * @param lineNumber Line number in the file where the error was found.

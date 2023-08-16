@@ -17,6 +17,8 @@ typedef struct macroDataNode
  */
 bool isMacroName(char *macroName);
 
+void initMacroStaticVariables();
+
 /**
  * Retrieves a macro based on its name.
  * @param macroName The name of the macro.
@@ -62,3 +64,4 @@ void updateLinesCount(const char *macroName, int newLinesCount);
 void macroLayout(char *macroName, char *fileName, int macroLineInFile);
 
 #endif /* MACROSERVICE_H */
+

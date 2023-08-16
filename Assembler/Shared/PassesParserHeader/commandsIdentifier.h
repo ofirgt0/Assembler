@@ -16,7 +16,7 @@
 #define RELOCATABLE_A_R_E_DECIMAL_CODE 2
 
 typedef struct commandsIdentifier commandsIdentifier;
-typedef struct Line Line;
+typedef struct Line Line; 
 
 /**
  * Simplifies the command by reducing any sequence of spaces to a single space.
@@ -78,8 +78,6 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber);
  * Attempts to interpret a part of the command string as a numeric operand.
  * Some commands have immediate numeric values as operands, and this helps fetch them.
  * @param str The string segment that might represent a number.
- * @param fileName the name of the file.
- * @param lineNumber the number of the line.
  * @return The numeric value if it's a valid number, or 0.5 as a placeholder for invalid numbers.
  */
 double tryGetNumber(char *str, const char *fileName, int lineNumber);
@@ -128,4 +126,8 @@ int determineLinesNumber(char *command, int lineNumber, char *fileName);
  */
 void commandParser(char *command, char *fileName, int lineNumber);
 
+void initCommandsIdentifierStaticVariable();
+
 #endif /* COMMANDSIDENTIFIER_H */
+
+

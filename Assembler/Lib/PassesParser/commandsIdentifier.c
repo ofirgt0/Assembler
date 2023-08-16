@@ -228,9 +228,10 @@ bool validateLabel(char *command)
  */
 char *tryGetLabel(char **command, char *fileName, int lineNumber)
 {
+
     int index;
     char *label;
-    printf("tryGetLabel: %s %d\n", fileName, lineNumber);
+    printf("*************tryGetLabel: %s %d\n", fileName, lineNumber);
     index = getCharIndexBySeparator(*command, LABEL_SEPERATOR);
 
     if (index <= 0)
@@ -244,7 +245,7 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber)
     if (!validateLabel(label))
         INVALID_LABEL_FORMAT(fileName, lineNumber, label);
 
-    return label;
+    return validateLabel(label) ? label :  "VALUE";
 }
 
 /**
@@ -265,14 +266,15 @@ double tryGetNumber(char *str, const char *fileName, int lineNumber)
         if (number != (int)number)
         {
             INVALID_NUMBER_VALUE(fileName, lineNumber, str);
-            return 0.5;
+            return 0.5;  
         }
         return number;
     }
-
+    
     /*If conversion failed or not the entire string was processed, return NaN (Not a Number)*/
     return 0.5;
 }
+
 
 /**
  * Extracts a substring from a string up to the first occurrence of a separator character.
@@ -311,6 +313,13 @@ char *getSubstringBySeparator(char *str, char separator)
 
 static int linesCounter = 0;      /* Counter for the number of lines processed in the  code. */
 static char *currentMacro = NULL; /* Holds the name of the macro that is currently being processed. */
+
+
+void initCommandsIdentifierStaticVariable(){
+    linesCounter = 0;
+    currentMacro = NULL;
+    macroFlag = false;
+}
 
 /**
  * This function is the heart of the program, handling the first run of the assembler.
@@ -364,8 +373,8 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 
         appendStringToFile(fullFileName, originalCommand);
     }
-
-    tryGetLabel(&originalCommand, fileName, lineNumber); /* for determining lines number */
+    if (label != NULL && strcmp(label, "VALUE") != 0)
+        tryGetLabel(&originalCommand, fileName, lineNumber); /* for determining lines number */
 
     if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
     {
@@ -541,7 +550,7 @@ int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNu
         {
             MULTIPLE_CONSECUTIVE_COMMAS_ERROR(fileName, lineNumber);
             free(array);
-            return NULL;
+        	  return NULL;
         }
     }
 
@@ -575,6 +584,7 @@ int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNu
 
     return array;
 }
+
 
 /**
  * Determines the number of lines that a command will occupy in the machine code.
@@ -622,8 +632,11 @@ int determineLinesNumber(char *command, int lineNumber, char *fileName)
         return linesNumber > 1 ? linesNumber : 0;
     }
 }
+/*
+bool isValidOperand(char *operand){
+    return isLabelExist(operand, 0, 0, false, 1)
+}*/
 
-/* static bool isMacro = false; */
 
 /**
  * The second heart of this program. The commandParser function process each command from the assembly code.
@@ -652,6 +665,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
 
     printf("getCommandIndexByList: %s--------------\n", command);
+    
     if (prefixIndex != -1)
     {
         if (prefixIndex < 3)
@@ -687,9 +701,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
     }
 
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
-    command = command + strlen(commandsNames[commandIndex]);
-    remove_spaces(command);
-    printf("commandIndex: %d\n", commandIndex);
     if (commandIndex == -1)
     {
         UNKNOWN_COMMAND_ERROR(fileName, lineNumber);
@@ -698,6 +709,10 @@ void commandParser(char *command, char *fileName, int lineNumber)
             free(label);
         return;
     }
+    printf("commandIndex: %d--------------\n", commandIndex);
+    command = command + strlen(commandsNames[commandIndex]);
+    remove_spaces(command);
+    printf("commandIndex: %d\n", commandIndex);
 
     if (commandIndex > 13) /*0 vars*/
     {
@@ -727,7 +742,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         }
         else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
         {
-            addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command, fileName, lineNumber), 0.5, lineNumber);
+            addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command,fileName,lineNumber), 0.5, lineNumber);
         }
         else
         {
@@ -743,7 +758,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         printf("firstVar %s command %s\n", firstVar, command);
 
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0]))
-            immidiate1 = tryGetNumber(firstVar, fileName, lineNumber);
+            immidiate1 = tryGetNumber(firstVar,fileName,lineNumber);
 
         else if (isLabelExist(firstVar, lineNumber, fileName, true, determineLinesNumberResult))
         {
@@ -754,7 +769,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
             register1 = firstVar[2] - '0';
 
         if (command[0] == '-' || isdigit(command[0]))
-            immidiate2 = tryGetNumber(command, fileName, lineNumber);
+            immidiate2 = tryGetNumber(command,fileName,lineNumber);
 
         else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumberResult))
         {
@@ -780,3 +795,5 @@ void commandParser(char *command, char *fileName, int lineNumber)
     if (label1 != firstVar && label2 != firstVar)
         free(firstVar);
 }
+
+

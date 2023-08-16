@@ -12,6 +12,10 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
 
 static struct macroDataNode *head = NULL;
 
+void initMacroStaticVariables(){
+    *head=NULL;
+}
+
 /**
  * Checks if a given macro name exists.
  * @param macroName The name of the macro.
@@ -34,10 +38,10 @@ struct macroDataNode *getMacro(char *macroName)
     char *macroNameCopy = (char *)malloc(strlen(macroName) + 1);
     if (macroNameCopy == NULL)
     {
-        MEMORY_ALLOCATION_FAILED(macroName, -1);
+        MEMORY_ALLOCATION_FAILED(macroName, -1); 
         return NULL;
     }
-
+    
     strcpy(macroNameCopy, macroName);
     remove_spaces(macroNameCopy);
 
@@ -58,7 +62,7 @@ struct macroDataNode *getMacro(char *macroName)
 }
 
 /**
- * Processes the layout of a specific macro. This involves checking the macro's
+ * Processes the layout of a specific macro. This involves checking the macro's 
  * line number and lines count, and laying out its content accordingly.
  * @param macroName: The name of the macro to layout.
  * @param fileName: The name of the file where the macro is located.
@@ -98,7 +102,7 @@ struct macroDataNode *searchNode(const char *macroName)
 }
 
 /**
- * Adds a new macro to the list. If a macro with the same name already exists,
+ * Adds a new macro to the list. If a macro with the same name already exists, 
  * it flags a name conflict error.
  * @param macroName: The name of the macro to add.
  * @param lineNumber: The line number where the macro starts in the file.
@@ -160,7 +164,7 @@ void updateLinesCount(const char *macroName, int newLinesCount)
 }
 
 /**
- * Frees all allocated memory associated with the macro list.
+ * Frees all allocated memory associated with the macro list. 
  * This function is intended to be called when the program terminates.
  */
 void freeMacroList()
@@ -174,3 +178,4 @@ void freeMacroList()
         free(temp);
     }
 }
+

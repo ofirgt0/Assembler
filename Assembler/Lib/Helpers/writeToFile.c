@@ -30,7 +30,7 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
     }
     else
     {
-        OPENING_FILE_ERROR(filename, -1); /* TODO: to handle -1 issue, need to set the real lineNumber */
+        OPENING_FILE_ERROR(filename,-1); /* TODO: to handle -1 issue, need to set the real lineNumber */
         return false;
     }
 }
@@ -51,13 +51,13 @@ void appendStringToFile(const char *filename, const char *text)
         OPENING_FILE_ERROR(filename, -1); /* TODO: to handle -1 issue, need to set the real lineNumber */
         return;
     }
-
+	
     fprintf(file, "%s\n", text);
 
     fclose(file);
 }
 
-/* Writes a label and its corresponding address to the specified file, returning true on success.
+/* Writes a label and its corresponding address to the specified file, returning true on success. 
  * @param filename: The name of the file to write to.
  * @param labelName: The label's name to write.
  * @param address: The address associated with the label.

@@ -7,6 +7,7 @@
 #include "encoder.h"
 #include "helpfulFunctions.h"
 
+
 /**
  * Encodes an 'extern' label with the ARE code set to 'E'.
  * This function takes a filename and encodes an 'extern' label
@@ -53,7 +54,7 @@ void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int o
     setBinaryCodeInRange(0, 2, srcAddressing, code);
     setBinaryCodeInRange(3, 6, opcode, code);
     setBinaryCodeInRange(7, 9, dstAddressing, code);
-
+    
     setARE(AREcode, code);
     base64Str = binaryArrayToBase64(code, 12);
     concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
@@ -157,10 +158,10 @@ void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])
     }
 }
 
-/* Sets the ARE code for a given command code.
+/* Sets the ARE code for a given command code. 
  * @param AREcode The ARE code character ('A', 'R', or 'E').
  * @param commandCode The command code array in which the ARE code will be set.
- */
+*/
 
 void setARE(char AREcode, int *commandCode)
 {
@@ -206,7 +207,7 @@ char *binaryArrayToBase64(int *inrArray, int length)
         if (base64String)
             free(base64String);
 
-        fprintf(stderr, "Memory allocation failed");
+        fprintf(stderr,"Memory allocation failed");
         return NULL;
     }
 
@@ -298,7 +299,7 @@ char *concatenateStrings(const char *str1, const char *str2)
     char *result = (char *)malloc(totalLength);
     if (!result)
     {
-        fprintf(stderr, "Memory allocation failed");
+        fprintf(stderr,"Memory allocation failed");
         return NULL;
     }
 
@@ -323,7 +324,7 @@ char *removeFileNameExtension(const char *filename)
         char *result = (char *)malloc(extensionIndex + 1);
         if (!result)
         {
-            fprintf(stderr, "Memory allocation failed");
+            fprintf(stderr,"Memory allocation failed");
         }
 
         strncpy(result, filename, extensionIndex);

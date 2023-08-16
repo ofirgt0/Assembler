@@ -58,6 +58,7 @@ char *charToString(char c);
  */
 int getLabelAddressWithoutExtern(char *label);
 
+
 /* Initialize the global counters. */
 static int IC = 100;              /* Instruction counter. */
 static int TotalInstructions = 0; /* Total Instruction counter. */
@@ -179,11 +180,6 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     }
 }
 
-void printAm(char *fileName, char *command)
-{
-    printf("printAm %s", command);
-}
-
 /**
  * The validateOpcodeMatchAddressingMethod function checks if the opcode matches
  * the addressing methods. It accepts the opcode, source addressing, and destination
@@ -209,7 +205,7 @@ bool addNewExtern(char *externName)
 {
     struct Label *label = NULL;
     struct LabelNode *newNode = NULL;
-
+    
     if (isLabelExistWithoutEntries(externName))
     {
         return false;
@@ -316,7 +312,7 @@ bool addData(int data[], char *labelName, int length)
 {
     struct Label *label = NULL;
     struct DataLabel *newNode = NULL;
-
+    
     if (labelName != NULL && isLabelExistWithoutEntries(labelName))
     {
         return false;
@@ -565,7 +561,6 @@ void prepareSecondRun(char *fileName)
  */
 bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand)
 {
-    printf("isLabelExist: label - %s lineNumber - %d fileName %s writeToFile linesNumberForCommand %d \n", label, lineNumber, fileName, linesNumberForCommand);
     if (searchExternLabel(label) != -1)
     {
         if (writeToFile)
@@ -597,7 +592,7 @@ int getLabelAddressWithoutExtern(char *label)
 {
     struct DataLabel *dataLabel = searchDataLabel(label);
     struct StringLabel *stringLabel = searchStringLabel(label);
-
+    
     int address = searchLabel(label);
     if (address != -1)
         return address;
@@ -720,7 +715,7 @@ void updateEntryLabelAddress(char *entryName, int address)
 int searchLabel(char *labelName)
 {
     struct LabelNode *current;
-
+    
     printf("searchLabel: %s\n", labelName);
     current = normalCommandLabelList;
     while (current != NULL)
@@ -861,8 +856,21 @@ void printLabels(const char *filename)
 /* charToString function converts a single character to a string. */
 char *charToString(char c)
 {
-    static char str[2];
+    char str[2];
     str[0] = c;
     str[1] = '\0';
     return str;
 }
+
+void initStaticVariable(){
+    externalLabelList = NULL;
+    entryLabelList = NULL;
+    normalCommandLabelList = NULL;
+    dataLabelList = NULL;
+    stringLabelList = NULL;
+    IC = 100;
+    DC = 0;
+    TotalInstructions = 0;
+}
+
+

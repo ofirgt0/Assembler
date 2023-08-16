@@ -37,3 +37,4 @@ bool writeLabelToFile(const char *filename, char *labelName, int address);
 void appendStringToFile(const char *filename, const char *text);
 
 #endif /* WRITE_TO_FILE_H */
+

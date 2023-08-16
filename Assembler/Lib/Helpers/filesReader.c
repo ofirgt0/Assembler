@@ -106,17 +106,7 @@ void fileReader(const char *fileName)
         notEmptyLinesCounter++;
     }
     notEmptyLinesCounter = 0;
-    errorCount = getErrorsCounter();
-    if (errorCount > 0)
-    {
-        printf("\nErrors found in file. program stopped.\n");
-        fprintf(stderr, "\nErrors found in file. program stopped.\n");
-        fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
-        fclose(file);
-        free(asmFileName);
-        return;
-    }
-
+    
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
     printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
@@ -147,6 +137,18 @@ void fileReader(const char *fileName)
         commandParser(line, fileName, notEmptyLinesCounter);
     }
 
+    errorCount = getErrorsCounter();
+    if (errorCount > 0)
+    {
+        printf("\nErrors found in file. program stopped.\n");
+        fprintf(stderr, "\nErrors found in file. program stopped.\n");
+        fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
+        fclose(file);
+        remove(getFileNameWithExtension(fileName, ".ob"));
+        free(asmFileName);
+        return;
+    }
+    free(asmFileName);
     printLabels(fileName);
     fclose(macroFile);
 }
@@ -207,9 +209,16 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
         currentLine++;
         i++;
     }
-
+    setUpStaticVariables();
     free(macroFileName);
     fclose(file);
+}
+
+void setUpStaticVariables(){
+    initCommandsIdentifierStaticVariable();
+    initErrorsCounter();
+    initStaticVariable();
+    initMacroStaticVariables();
 }
 
 /**
@@ -232,3 +241,5 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+

@@ -85,12 +85,7 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
  */
 bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstAddressing);
 
-/*
- * Prints the assembly memory (.am) for a given command.
- * @param fileName: Name of the file being processed.
- * @param command: The command to be printed in assembly memory format.
- */
-void printAm(char *fileName, char *command);
+void initStaticVariable();
 
 /*
  * Adds a new external label.
@@ -219,3 +214,4 @@ void sendDataValue(char *fileName, char *labelName, int *data, int size);
 bool isLabelExistWithoutEntries(char *label);
 
 #endif /* DATASERVICE_H */
+

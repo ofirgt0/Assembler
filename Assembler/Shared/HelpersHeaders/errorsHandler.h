@@ -1,13 +1,13 @@
 #ifndef ERRORSHANDLER_H
 #define ERRORSHANDLER_H
 
-#define REGISTER_PREFIX '@'
-
 /**
  * Retrieves the current count of errors encountered during assembly file processing.
  * @return The total count of errors so far.
  */
 int getErrorsCounter();
+
+void initErrorsCounter();
 
 /**
  * Logs a new error to the global errorsCounter and prints the error details.
@@ -21,10 +21,10 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName Name of the assembly file where the error occurred.
  * @param lineNumber Line number in the file where the error was found.
  */
-#define EXTRANEOUS_TEXT_ERROR(fileName, lineNumber)     \
-    do                                                  \
-    {                                                   \
-        logNewError(fileName, lineNumber);              \
+#define EXTRANEOUS_TEXT_ERROR(fileName, lineNumber)                \
+    do                                                             \
+    {                                                              \
+        logNewError(fileName, lineNumber);                         \
         fprintf(stderr, "Extraneous text detected.\n"); \
     } while (0)
 
@@ -33,24 +33,26 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName Name of the assembly file where the error occurred.
  * @param lineNumber Line number in the file where the error was found.
  */
-#define TRAILING_COMMA_ERROR(fileName, lineNumber)               \
-    do                                                           \
-    {                                                            \
-        logNewError(fileName, lineNumber);                       \
-        fprintf(stderr, "Trailing comma has been detected. \n"); \
+#define TRAILING_COMMA_ERROR(fileName, lineNumber)                            \
+    do                                                                        \
+    {                                                                         \
+        logNewError(fileName, lineNumber);                                    \
+        fprintf(stderr, "Trailing comma has been detected. \n");                                        \
     } while (0)
+
 
 /**
  * Logs an error when a multipule consecutive commas founded.
  * @param fileName Name of the assembly file where the error occurred.
  * @param lineNumber Line number in the file where the error was found.
  */
-#define MULTIPLE_CONSECUTIVE_COMMAS_ERROR(fileName, lineNumber)                \
-    do                                                                         \
-    {                                                                          \
-        logNewError(fileName, lineNumber);                                     \
-        fprintf(stderr, "Multipule consecutive commas has been detected. \n"); \
+#define MULTIPLE_CONSECUTIVE_COMMAS_ERROR(fileName, lineNumber)                            \
+    do                                                                        \
+    {                                                                         \
+        logNewError(fileName, lineNumber);                                    \
+        fprintf(stderr, "Multipule consecutive commas has been detected. \n");                                        \
     } while (0)
+
 
 /**
  * Logs an error when an invalid option for a command is found.
@@ -61,7 +63,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                                                \
     {                                                                                                                                 \
         logNewError(fileName, lineNumber);                                                                                            \
-        fprintf(stderr, "This line has been failed according to: The command does not match the type of parameters that entered.\n"); \
+        fprintf(stderr, "The command does not match the type of parameters that entered.\n"); \
     } while (0)
 
 /**
@@ -73,7 +75,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                              \
     {                                                                                                               \
         logNewError(fileName, lineNumber);                                                                          \
-        fprintf(stderr, "This line has been failed according to: Invalid file format, cant open/create a file.\n"); \
+        fprintf(stderr, "Invalid file format, cant open/create a file.\n"); \
     } while (0)
 
 /**
@@ -82,11 +84,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param address The address or line number where the error was found.
  */
 
-#define UNKNOWN_OPERAND(fileName, lineNumber)                                                   \
-    do                                                                                          \
-    {                                                                                           \
-        logNewError(fileName, lineNumber);                                                      \
-        fprintf(stderr, "This line has been failed according to: Unknown operator founded.\n"); \
+#define UNKNOWN_OPERAND(fileName, lineNumber)                                                      \
+    do                                                                                                 \
+    {                                                                                                  \
+        logNewError(fileName, lineNumber);                                                             \
+        fprintf(stderr, "Unknown operator founded.\n"); \
     } while (0)
 
 /**
@@ -98,7 +100,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                   \
     {                                                                                                    \
         logNewError(fileName, lineNumber);                                                               \
-        fprintf(stderr, "This line has been failed according to: Memory allocation has been failed.\n"); \
+        fprintf(stderr, "Memory allocation has been failed.\n"); \
     } while (0)
 
 /**
@@ -110,7 +112,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                                                             \
     {                                                                                                                                              \
         logNewError(fileName, lineNumber);                                                                                                         \
-        fprintf(stderr, "This line has been failed according to: The number of operands that in this line, corresponds to the type of operand\n"); \
+        fprintf(stderr, "The number of operands that in this line, corresponds to the type of operand\n"); \
     } while (0)
 
 /**
@@ -122,7 +124,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                               \
     {                                                                                                                \
         logNewError(fileName, lineNumber);                                                                           \
-        fprintf(stderr, "This line has been failed according to: The register that you tried to use is invalid.\n"); \
+        fprintf(stderr, "The register that you tried to use is invalid.\n"); \
     } while (0)
 
 /**
@@ -134,7 +136,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                              \
     {                                                                                                               \
         logNewError(fileName, lineNumber);                                                                          \
-        fprintf(stderr, "This line has been failed according to: Invalid file format, cant open/create a file.\n"); \
+        fprintf(stderr, "Invalid file format, cant open/create a file.\n"); \
     } while (0)
 
 /**
@@ -146,8 +148,9 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                                           \
     {                                                                                                                            \
         logNewError(fileName, lineNumber);                                                                                       \
-        fprintf(stderr, "This line has been failed according to: There is a conflict in the macro name in the file you ran.\n"); \
+        fprintf(stderr, "There is a conflict in the macro name in the file you ran.\n"); \
     } while (0)
+
 
 /**
  * Logs an error when an invalid command is detected.
@@ -158,7 +161,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                          \
     {                                                                                                           \
         logNewError(fileName, lineNumber);                                                                      \
-        fprintf(stderr, "This line has been failed according to: The command that in this line is invalid.\n"); \
+        fprintf(stderr, "The command that in this line is invalid.\n"); \
     } while (0)
 
 /**
@@ -171,7 +174,7 @@ void logNewError(const char *fileName, int lineNumber);
     do                                                                                                                                    \
     {                                                                                                                                     \
         logNewError(fileName, lineNumber);                                                                                                \
-        fprintf(stderr, "This line has been failed according to: In the current line no matching label was found for: %s.\n", labelName); \
+        fprintf(stderr, "In the current line no matching label was found for: %s.\n", labelName); \
     } while (0)
 
 /**
@@ -180,25 +183,25 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param lineNumber The line number in the file where the error occurred.
  */
-#define INVALID_LABEL_FORMAT(fileName, lineNumber, label)                                                         \
-    do                                                                                                            \
-    {                                                                                                             \
-        logNewError(fileName, lineNumber);                                                                        \
-        fprintf(stderr, "This line has been failed according to: Invalid label format for label '%s'.\n", label); \
+#define INVALID_LABEL_FORMAT(fileName, lineNumber,label)                                                                                                                         \
+    do                                                                                                                                                                     \
+    {                                                                                                                                                                      \
+        logNewError(fileName, lineNumber);                                                                                                                                 \
+        fprintf(stderr, "Invalid label format for label '%s'.\n",label); \
     } while (0)
 
-#define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                                                   \
+#define INVALID_INTEGER_VALUE(str, fileName, lineNumber)                                                                  \
     do                                                                                                                      \
     {                                                                                                                       \
         logNewError(fileName, lineNumber);                                                                                  \
-        fprintf(stderr, "This line has been failed according to: Invalid number type. Only integer values are allowed.\n"); \
+        fprintf(stderr, "Invalid number type. Only integer values are allowed.\n"); \
     } while (0)
 
 #define LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label)                                                          \
     do                                                                                                                   \
     {                                                                                                                    \
         logNewError(fileName, lineNumber);                                                                               \
-        fprintf(stderr, "This line has been failed according to: The label '%s' in this line already exists.\n", label); \
+        fprintf(stderr, "The label '%s' in this line already exists.\n", label); \
     } while (0)
 
 #define INVALID_REGISTER_FOUND(fileName, lineNumber, registerName)           \
@@ -235,11 +238,33 @@ void logNewError(const char *fileName, int lineNumber);
  * @param lineNumber The line number in the file where the error occurred.
  * @param label The label or parameter that caused the error.
  */
-#define INVALID_ENTRY_EXTERN_PARAM(fileName, lineNumber, label)                                         \
-    do                                                                                                  \
-    {                                                                                                   \
-        logNewError(fileName, lineNumber);                                                              \
-        fprintf(stderr, "Error: Invalid parameter '%s' for 'entry' or 'extern' instruction.\n", label); \
+#define INVALID_ENTRY_EXTERN_PARAM(fileName, lineNumber, label)                                 \
+    do                                                                                          \
+    {                                                                                           \
+        logNewError(fileName, lineNumber);                                                      \
+        fprintf(stderr, "Error: Invalid parameter '%s' for 'entry' or 'extern' instruction.\n", label);     \
     } while (0)
 
+
+
+#define LINE_LENGTH_ERROR(fileName, lineNumber)                                        \
+    do                                                                                 \
+    {                                                                                  \
+        logNewError(fileName, lineNumber);                                             \
+        fprintf(stderr, "ERROR in file %s at line %d: Line exceeds 80 characters!\n",  \
+                fileName, lineNumber);                                                 \
+    } while (0)
+
+
+
+#define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                                                   \
+    do                                                                                                                      \
+    {                                                                                                                       \
+        logNewError(fileName, lineNumber);                                                                                  \
+        fprintf(stderr, "Invalid number '%s'. Only integer values are allowed.\n", token); \
+    } while (0)
+
+
+
 #endif /* ERRORSHANDLER_H */
+

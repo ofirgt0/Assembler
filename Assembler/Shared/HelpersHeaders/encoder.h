@@ -7,7 +7,7 @@
 #define fileSuffix_MACRO ".am"
 
 /**
- * Encodes a label operand into a 12-bit binary code,
+ * Encodes a label operand into a 12-bit binary code, 
  * then translates it to a base64 representation and appends it to the output file.
  * @param fileName The name of the assembly file currently being processed.
  * @param AREcode The Absolute, Relocatable, or External code.
@@ -16,7 +16,7 @@
 void encodLabelOperand(char *fileName, char AREcode, int address);
 
 /**
- * Encodes an immediate value into a 12-bit binary code,
+ * Encodes an immediate value into a 12-bit binary code, 
  * then translates it to a base64 representation and appends it to the output file.
  * @param fileName The name of the assembly file currently being processed.
  * @param immediate The immediate value to be encoded.
@@ -37,7 +37,7 @@ void setARE(char AREcode, int *commandCode);
 void encodExternLabel(char *fileName);
 
 /**
- * Encodes a given instruction code into a 12-bit binary code,
+ * Encodes a given instruction code into a 12-bit binary code, 
  * then translates it to a base64 representation and appends it to the output file.
  * @param fileName The name of the assembly file currently being processed.
  * @param AREcode The Absolute, Relocatable, or External code.
@@ -82,7 +82,7 @@ char *concatenateStrings(const char *str1, const char *str2);
 void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell);
 
 /**
- * Encodes a register-based instruction using given register details into a 12-bit binary code,
+ * Encodes a register-based instruction using given register details into a 12-bit binary code, 
  * then translates it to a base64 representation and appends it to the output file.
  * @param fileName The name of the assembly file currently being processed.
  * @param register1 The source register.
