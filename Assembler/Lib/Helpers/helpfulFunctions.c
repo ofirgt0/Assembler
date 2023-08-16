@@ -3,18 +3,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Splits a string into tokens based on delimiter characters, with reentrancy support. */
 char *my_strtok_r(char *str, const char *delim, char **saveptr)
 {
     char *token;
+
     if (str == NULL)
     {
-        if (saveptr == NULL)
+        if (saveptr == NULL || *saveptr == NULL)
         {
-            printf("Error: saveptr is NULL\n");
+            printf("Error: both str and *saveptr are NULL\n");
             return NULL;
         }
         str = *saveptr;
     }
+
     str += strspn(str, delim);
     if (*str == '\0')
     {
@@ -35,6 +38,7 @@ char *my_strtok_r(char *str, const char *delim, char **saveptr)
     return token;
 }
 
+/* Creates a new string that is a duplicate of the specified string. */
 char *my_strdup(const char *s)
 {
     char *new;

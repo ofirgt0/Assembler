@@ -1,7 +1,7 @@
 #ifndef ERRORSHANDLER_H
 #define ERRORSHANDLER_H
 
-extern int errorsCounter;
+#define REGISTER_PREFIX '@'
 
 /**
  * Retrieves the current count of errors encountered during assembly file processing.
@@ -226,6 +226,19 @@ void logNewError(const char *fileName, int lineNumber);
     {                                                                                                 \
         logNewError(fileName, lineNumber);                                                            \
         fprintf(stderr, "In file %s, at line %d: Unknown command detected.\n", fileName, lineNumber); \
+    } while (0)
+
+/**
+ * Logs an error when an invalid parameter is passed to 'entry' or 'extern'.
+ * @param fileName The name of the file where the error occurred.
+ * @param lineNumber The line number in the file where the error occurred.
+ * @param label The label or parameter that caused the error.
+ */
+#define INVALID_ENTRY_EXTERN_PARAM(fileName, lineNumber, label)                                         \
+    do                                                                                                  \
+    {                                                                                                   \
+        logNewError(fileName, lineNumber);                                                              \
+        fprintf(stderr, "Error: Invalid parameter '%s' for 'entry' or 'extern' instruction.\n", label); \
     } while (0)
 
 #endif /* ERRORSHANDLER_H */

@@ -4,12 +4,42 @@
 #include "filesReader.h"
 #include "errorsHandler.h"
 
+/**
+ * Removes the file extension from a given filename.
+ * @param filename The original filename.
+ * @return A new string with the extension removed.
+ */
 char *removeFileNameExtension(const char *filename);
+
+/**
+ * Prepares for the second run of the file reader.
+ * @param fileName The name of the source file.
+ */
 void prepareSecondRun(const char *fileName);
+
+/**
+ * Parses a given assembly command.
+ * @param command The assembly command to parse.
+ * @param fileName The name of the source file.
+ * @param lineNumber The line number in the source file.
+ */
 void commandParser(char *command, const char *fileName, int lineNumber);
+
+/**
+ * Prints the labels from a given source file.
+ * @param fileName The name of the source file.
+ */
 void printLabels(const char *);
+
+/**
+ * Starts the first run of the file reader.
+ * @param line The current line from the source file.
+ * @param lineNumber The line number in the source file.
+ * @param fileName The name of the source file.
+ */
 void startFirstRun(char *, int, const char *);
 
+/* Logs the currently processed line */
 void logNewLine(const char *line, int lineNumber)
 {
     printf("\n\n\n ----------------------------------------------------\n");
@@ -17,6 +47,7 @@ void logNewLine(const char *line, int lineNumber)
     printf("Processing line: %s\n", line);
 }
 
+/* Constructs a file name by appending a given extension to the base file name. */
 char *getFileNameWithExtension(const char *fileName, char *extension)
 {
     char *fileNameWithExtension = (char *)malloc(strlen(fileName) + strlen(extension) + 1);
@@ -35,6 +66,7 @@ char *getFileNameWithExtension(const char *fileName, char *extension)
  *  This function reads and processes a given file.
  *  In the first run, it saves labels, macros, entries, externs, data, and strings.
  *  In the second run, it processes each line and parses the commands.
+ * @param fileName The name of the source file.
  */
 void fileReader(const char *fileName)
 {
@@ -119,6 +151,13 @@ void fileReader(const char *fileName)
     fclose(macroFile);
 }
 
+/**
+ * Processes multiple lines of a macro, laying out their content.
+ * @param lineNumber The starting line number in the source file.
+ * @param linesNumber The total number of lines to process.
+ * @param fileName The name of the source file.
+ * @param macroLineInFile The line number of the macro in the source file.
+ */
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile)
 {
     char line[256];

@@ -7,12 +7,23 @@
 #include "encoder.h"
 #include "helpfulFunctions.h"
 
+/**
+ * Encodes an 'extern' label with the ARE code set to 'E'.
+ * This function takes a filename and encodes an 'extern' label
+ * in the associated file using the ARE encoding scheme.
+ * @param fileName The name of the file where the 'extern' label resides.
+ */
 void encodExternLabel(char *fileName)
 {
     int code[12] = {0};
     setARE('E', code);
 }
 
+/**
+ * Prints the values of a given integer array.
+ * Useful for debugging and checking the encoded values.
+ * @param array The integer array to print.
+ */
 void printIntArray(const int array[])
 {
     int i;
@@ -24,6 +35,16 @@ void printIntArray(const int array[])
     printf("\n");
 }
 
+/**
+ * Encodes an instruction code using ARE encoding.
+ * This function takes several parameters that specify different
+ * parts of an instruction code and encodes them using the ARE scheme.
+ * @param fileName The name of the file to which the instruction will be written.
+ * @param AREcode The ARE code character ('A', 'R', or 'E').
+ * @param srcAddressing The source addressing mode.
+ * @param opcode The operation code.
+ * @param dstAddressing The destination addressing mode.
+ */
 void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int opcode, int dstAddressing)
 {
     int code[12] = {0};
@@ -41,6 +62,12 @@ void encodInstructionCode(char *fileName, char AREcode, int srcAddressing, int o
     free(concatenatedStr);
 } /*in the encoder: (ARE, dstAddressing, opcode, srcAddressing)*/
 
+/**
+ * Encodes a label operand using the ARE encoding scheme.
+ * @param fileName The name of the file to which the label operand will be written.
+ * @param AREcode The ARE code character ('A', 'R', or 'E').
+ * @param address The address of the label operand.
+ */
 void encodLabelOperand(char *fileName, char AREcode, int address)
 {
     int code[12] = {0};
@@ -61,6 +88,11 @@ void encodLabelOperand(char *fileName, char AREcode, int address)
     free(concatenatedStr);
 }
 
+/**
+ * Encodes an immediate value using the ARE encoding scheme.
+ * @param fileName The name of the file to which the immediate value will be written.
+ * @param immediate The immediate value to encode.
+ */
 void encodImmidiate(char *fileName, int immediate)
 {
 
@@ -76,6 +108,11 @@ void encodImmidiate(char *fileName, int immediate)
     free(concatenatedStr);
 }
 
+/**
+ * Encodes a given value into its binary representation.
+ * @param fileName The name of the file to which the encoded value will be written.
+ * @param value The value to encode.
+ */
 void encodValue(char *fileName, int value)
 {
     int code[12] = {0};
@@ -91,6 +128,7 @@ void encodValue(char *fileName, int value)
     free(concatenatedStr);
 }
 
+/* Encodes a register value, setting the appropriate ARE code and register values. */
 void encodeRegister(char *fileName, int register1, int register2)
 {
     int code[12] = {0};
@@ -108,6 +146,7 @@ void encodeRegister(char *fileName, int register1, int register2)
     free(concatenatedStr);
 }
 
+/* Sets a binary code for a given number within a specific range in the array. */
 void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])
 {
     int i;
@@ -117,6 +156,11 @@ void setBinaryCodeInRange(int startCell, int endCell, int number, int arr[])
         number /= 2;
     }
 }
+
+/* Sets the ARE code for a given command code.
+ * @param AREcode The ARE code character ('A', 'R', or 'E').
+ * @param commandCode The command code array in which the ARE code will be set.
+ */
 
 void setARE(char AREcode, int *commandCode)
 {
@@ -140,6 +184,12 @@ void setARE(char AREcode, int *commandCode)
     }
 }
 
+/**
+ * Converts a binary array to a Base64 encoded string.
+ * @param inrArray The binary array to convert.
+ * @param length The length of the binary array.
+ * @return A string representing the Base64 encoded version of the binary array.
+ */
 char base64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 char *binaryArrayToBase64(int *inrArray, int length)
@@ -183,6 +233,7 @@ char *binaryArrayToBase64(int *inrArray, int length)
     return base64String;
 }
 
+/* Sets a binary array representation for a given decimal number up to a specified cell. */
 void setBinaryArray(int binaryArray[], int decimalNumber, int borderCell)
 {
 
@@ -196,6 +247,7 @@ void setBinaryArray(int binaryArray[], int decimalNumber, int borderCell)
     }
 }
 
+/* Increments a binary array representation by 1. */
 void addOneToBinaryArray(int binaryArray[], int size)
 {
     int carry = 1;
@@ -214,6 +266,12 @@ void addOneToBinaryArray(int binaryArray[], int size)
     }
 }
 
+/**
+ * Sets a binary array representation for a negative decimal number up to a specified cell.
+ * @param arr The binary array to set.
+ * @param decimalNumber The negative decimal number to convert to binary.
+ * @param borderCell The cell up to which the binary representation should be set.
+ */
 void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell)
 {
     int i;
@@ -228,6 +286,12 @@ void setNegativeBinaryArray(int arr[], int decimalNumber, int borderCell)
     addOneToBinaryArray(arr, borderCell);
 }
 
+/**
+ * Concatenates two strings and returns the result.
+ * @param str1 The first string.
+ * @param str2 The second string.
+ * @return A newly allocated string containing the concatenation of str1 and str2.
+ */
 char *concatenateStrings(const char *str1, const char *str2)
 {
     size_t totalLength = strlen(str1) + strlen(str2) + 1;
@@ -243,6 +307,13 @@ char *concatenateStrings(const char *str1, const char *str2)
     return result;
 }
 
+/**
+ * Removes the file extension from a given filename.
+ * This function takes a filename and returns a copy of the filename
+ * without its extension.
+ * @param filename The filename from which to remove the extension.
+ * @return A newly allocated string containing the filename without its extension.
+ */
 char *removeFileNameExtension(const char *filename)
 {
     const char *extension = strrchr(filename, '.');

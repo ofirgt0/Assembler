@@ -72,7 +72,7 @@ int getCharIndexBySeparator(char *str, char seperator);
  * @param command Pointer to the command string. This gets adjusted if a label is found.
  * @return The label if present, or NULL if there's no label in the command.
  */
-char *tryGetLabel(char **command);
+char *tryGetLabel(char **command, char *fileName, int lineNumber);
 
 /**
  * Attempts to interpret a part of the command string as a numeric operand.

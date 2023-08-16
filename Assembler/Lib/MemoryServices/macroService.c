@@ -23,9 +23,9 @@ bool isMacroName(char *macroName)
 }
 
 /**
- * Retrieves a macro based on its name.
- * @param macroName The name of the macro.
- * @return The macro structure if found, or NULL if not found.
+ * Retrieves a macro node from the list based on its name.
+ * @param macroName The name of the macro to retrieve.
+ * @return Pointer to the macroDataNode if found, or NULL if not found.
  */
 struct macroDataNode *getMacro(char *macroName)
 {
@@ -57,6 +57,13 @@ struct macroDataNode *getMacro(char *macroName)
     return NULL;
 }
 
+/**
+ * Processes the layout of a specific macro. This involves checking the macro's
+ * line number and lines count, and laying out its content accordingly.
+ * @param macroName: The name of the macro to layout.
+ * @param fileName: The name of the file where the macro is located.
+ * @param macroLineInFile: The line number where the macro starts in the file.
+ */
 void macroLayout(char *macroName, char *fileName, int macroLineInFile)
 {
     struct macroDataNode *macro = getMacro(macroName);
@@ -71,6 +78,11 @@ void macroLayout(char *macroName, char *fileName, int macroLineInFile)
     }
 }
 
+/**
+ * Searches for a specific macro node in the list.
+ * @param macroName The name of the macro to search for.
+ * @return Pointer to the macroDataNode if found, or NULL if not found.
+ */
 struct macroDataNode *searchNode(const char *macroName)
 {
     struct macroDataNode *current = head;
@@ -85,6 +97,12 @@ struct macroDataNode *searchNode(const char *macroName)
     return NULL; /*Node with the given macroName not found*/
 }
 
+/**
+ * Adds a new macro to the list. If a macro with the same name already exists,
+ * it flags a name conflict error.
+ * @param macroName: The name of the macro to add.
+ * @param lineNumber: The line number where the macro starts in the file.
+ */
 void addMacro(const char *macroName, int lineNumber)
 {
     /*Create a new node*/
@@ -115,6 +133,11 @@ void addMacro(const char *macroName, int lineNumber)
     head = newNode;
 }
 
+/**
+ * Updates the number of lines associated with a specific macro in the list.
+ * @param macroName: The name of the macro to update.
+ * @param newLinesCount: The new lines count for the macro.
+ */
 void updateLinesCount(const char *macroName, int newLinesCount)
 {
     struct macroDataNode *current;
@@ -136,7 +159,10 @@ void updateLinesCount(const char *macroName, int newLinesCount)
     MACRO_NAME_CONFLICT(macroName, newLinesCount);
 }
 
-/* This function is used to free all the allocated memory when the program terminates. */
+/**
+ * Frees all allocated memory associated with the macro list.
+ * This function is intended to be called when the program terminates.
+ */
 void freeMacroList()
 {
     struct macroDataNode *current = head, *temp;

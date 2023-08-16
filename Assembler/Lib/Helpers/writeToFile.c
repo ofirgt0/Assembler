@@ -4,6 +4,11 @@
 #include <stdbool.h>
 #include "errorsHandler.h"
 
+/* Writes an integer array to the specified file, returning true on success.
+ * @param filename: The name of the file to write to.
+ * @param arr: The integer array to write.
+ * @return true if the array was written successfully, false otherwise.
+ */
 bool writeIntArrayToFile(const char *filename, const int arr[])
 {
     int i;
@@ -30,6 +35,10 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
     }
 }
 
+/* Appends a string to a file.
+ * @param filename: The name of the file to append to.
+ * @param text: The text string to append.
+ */
 void appendStringToFile(const char *filename, const char *text)
 {
     FILE *file;
@@ -48,6 +57,12 @@ void appendStringToFile(const char *filename, const char *text)
     fclose(file);
 }
 
+/* Writes a label and its corresponding address to the specified file, returning true on success.
+ * @param filename: The name of the file to write to.
+ * @param labelName: The label's name to write.
+ * @param address: The address associated with the label.
+ * @return true if the label and its address were written successfully, false otherwise.
+ */
 bool writeLabelToFile(const char *filename, char *labelName, int address)
 {
     FILE *file;
@@ -67,6 +82,10 @@ bool writeLabelToFile(const char *filename, char *labelName, int address)
     return true;
 }
 
+/* Checks if a file exists and returns true if it does.
+ * @param fileName: The name of the file to check.
+ * @return true if the file exists, false otherwise.
+ */
 bool isFileExist(const char *fileName)
 {
     FILE *file;

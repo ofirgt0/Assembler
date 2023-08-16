@@ -49,6 +49,21 @@ void printLabel(const char *filename)
     printLabels(filename);
 }
 
+bool isNumber(const char *str)
+{
+    int i = 0;
+    int length = strlen(str);
+
+    for (i = 0; i < length; i++)
+    {
+        if (!isdigit(str[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 /**
  * Replaces multiple consecutive spaces with a single space in a string.
  * The function modifies the input string in-place.
@@ -170,6 +185,10 @@ int getCharIndexBySeparator(char *str, char separator)
     return -1;
 }
 
+/**
+ * Validates the format of the provided label. Ensures that the label adheres to
+ * the assembly language's naming conventions.
+ */
 bool validateLabel(char *command)
 {
 
@@ -184,7 +203,9 @@ bool validateLabel(char *command)
     {
         printf("validateLabel: %d\n", i);
 
-        if (!(command[i] >= 48 && command[i] < 58) && !(command[i] >= 65 && command[i] < 91) && !(command[i] >= 98 && command[i] < 123))
+        if (!(command[i] >= '0' && command[i] <= '9') &&
+            !(command[i] >= 'A' && command[i] <= 'Z') &&
+            !(command[i] >= 'a' && command[i] <= 'z'))
         {
             printf("Forbidden char: %c\n", command[i]);
             return false;
@@ -194,8 +215,9 @@ bool validateLabel(char *command)
 }
 
 /**
- * Extracts the label from a command string.
- * If the label is found, it is removed from the command string.
+ * Extracts a label from a command string, if present. It's one of the crucial
+ * functions as labels in assembly can be associated with data or a particular
+ * point in the instruction set.
  */
 char *tryGetLabel(char **command, char *fileName, int lineNumber)
 {
@@ -278,8 +300,9 @@ static int linesCounter = 0;      /* Counter for the number of lines processed i
 static char *currentMacro = NULL; /* Holds the name of the macro that is currently being processed. */
 
 /**
- * Handles the first run of the assembler.
- * The function extracts labels and commands from each line and updates the symbol table and the instruction counter.
+ * This function is the heart of the program, handling the first run of the assembler.
+ * It processes each line of the input assembly code, extracting labels, identifying
+ * commands, and updating relevant data structures accordingly.
  */
 void startFirstRun(char command[], int lineNumber, char *fileName)
 {
@@ -351,6 +374,12 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         {
         case 0: /*extern*/
         {
+            if (isNumber(secondVar))
+            {
+                INVALID_ENTRY_EXTERN_PARAM(fileName, lineNumber, secondVar);
+                return;
+            }
+
             if (!isLabelExist(secondVar, lineNumber, fileName, false, 1))
             {
                 addNewExtern(secondVar);
@@ -363,6 +392,12 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         }
         case 1: /*entry*/
         {
+            if (isNumber(secondVar))
+            {
+                INVALID_ENTRY_EXTERN_PARAM(fileName, lineNumber, secondVar);
+                return;
+            }
+
             if (isValidNewEntry(secondVar))
             {
                 addNewEntry(secondVar);
@@ -562,6 +597,11 @@ int determineLinesNumber(char *command, int lineNumber, char *fileName)
 
 /* static bool isMacro = false; */
 
+/**
+ * The second heart of this program. The commandParser function process each command from the assembly code.
+ * It categorizes the command, extracts relevant information, and delegates
+ * to other functions for specific processing.
+ */
 void commandParser(char *command, char *fileName, int lineNumber)
 {
     char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
@@ -587,7 +627,12 @@ void commandParser(char *command, char *fileName, int lineNumber)
     if (prefixIndex != -1)
     {
         if (prefixIndex < 3)
+        {
+            free(originalCommand);
+            if (label)
+                free(label);
             return;
+        }
 
         commandPrefix = commandsPrefix[prefixIndex];
         secondVar = command + strlen(commandPrefix);
@@ -604,8 +649,12 @@ void commandParser(char *command, char *fileName, int lineNumber)
             size_t length = 0;
             data = parseIntArray(secondVar, &length, fileName, lineNumber);
             sendDataValue(fileName, label, data, length);
+            free(data);
         }
 
+        free(originalCommand);
+        if (label)
+            free(label);
         return;
     }
 
@@ -616,6 +665,9 @@ void commandParser(char *command, char *fileName, int lineNumber)
     if (commandIndex == -1)
     {
         UNKNOWN_COMMAND_ERROR(fileName, lineNumber);
+        free(originalCommand);
+        if (label)
+            free(label);
         return;
     }
 
@@ -693,4 +745,10 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
         addNewLine(fileName, commandIndex, register1, register2, label1, label2, immidiate1, immidiate2, lineNumber);
     }
+
+    free(originalCommand);
+    if (label)
+        free(label);
+    if (label1 != firstVar && label2 != firstVar)
+        free(firstVar);
 }

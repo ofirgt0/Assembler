@@ -52,6 +52,13 @@ struct macroDataNode *searchNode(const char *macroName);
  */
 void updateLinesCount(const char *macroName, int newLinesCount);
 
+/**
+ * Processes the layout of a specific macro. This involves checking the macro's
+ * line number and lines count, and laying out its content accordingly.
+ * @param macroName: The name of the macro to layout.
+ * @param fileName: The name of the file where the macro is located.
+ * @param macroLineInFile: The line number where the macro starts in the file.
+ */
 void macroLayout(char *macroName, char *fileName, int macroLineInFile);
 
 #endif /* MACROSERVICE_H */

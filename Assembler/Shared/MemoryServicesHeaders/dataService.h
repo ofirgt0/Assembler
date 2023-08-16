@@ -32,6 +32,7 @@ typedef enum
     RegisterDirect = 5
 } AddressingMethod;
 
+/* Struct representing a label with its type, name, and address. */
 struct Label
 {
     char *type;
@@ -39,12 +40,14 @@ struct Label
     int address;
 } Label;
 
+/* Node for a linked list of labels. */
 struct LabelNode
 {
     struct Label *label;
     struct LabelNode *next;
 } LabelNode;
 
+/* Node for a linked list of data labels. */
 struct DataLabel
 {
     struct Label *label;
@@ -53,6 +56,7 @@ struct DataLabel
     struct DataLabel *next;
 } DataLabel;
 
+/* Node for a linked list of string labels. */
 struct StringLabel
 {
     struct Label *label;
@@ -190,10 +194,28 @@ void printLabels(const char *filename);
  */
 bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand);
 
+/**
+ * Sends the string value of a label to be encoded.
+ * @param fileName: Name of the file.
+ * @param labelName: Name of the label.
+ * @param string: The string to be encoded.
+ */
 void sendStringValue(char *fileName, char *labelName, char *string);
 
+/**
+ * Sends the data values of a label to be encoded.
+ * @param fileName: Name of the file.
+ * @param labelName: Name of the label.
+ * @param data: Pointer to the array of data values.
+ * @param size: Number of elements in the data array.
+ */
 void sendDataValue(char *fileName, char *labelName, int *data, int size);
 
+/**
+ * Checks if a given label exists in certain label lists, excluding entries.
+ * @param label: The label to search for.
+ * @return true if the label exists, false otherwise.
+ */
 bool isLabelExistWithoutEntries(char *label);
 
 #endif /* DATASERVICE_H */

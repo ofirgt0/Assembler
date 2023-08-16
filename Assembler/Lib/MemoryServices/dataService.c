@@ -18,10 +18,44 @@ static struct LabelNode *normalCommandLabelList = NULL;
 static struct DataLabel *dataLabelList = NULL;
 static struct StringLabel *stringLabelList = NULL;
 
+/**
+ * searchLabel:
+ * - Searches for a label in the normal command label list.
+ * @param labelName: Name of the label to search for.
+ * @return int: Address of the label if found, -1 if not.
+ */
 int searchLabel(char *labelName);
+
+/**
+ * updateEntryLabelAddress:
+ * - Updates the address of a specified entry label.
+ * @param entryName: Name of the entry label.
+ * @param address: New address to set for the entry label.
+ */
 void updateEntryLabelAddress(char *entryName, int address);
+
+/**
+ * encodValue:
+ * - Encodes a character to its binary representation and writes to a file.
+ * @param fileName: Name of the file to write to.
+ * @param character: Character to encode.
+ */
 void encodValue(char *fileName, char character);
+
+/**
+ * charToString:
+ * - Converts a character to its string representation.
+ * @param c: Character to convert.
+ * @return char*: String representation of the character.
+ */
 char *charToString(char c);
+
+/**
+ * getLabelAddressWithoutExtern:
+ * - Gets the address of a label excluding external labels.
+ * @param label: Name of the label to search for.
+ * @return int: Address of the label if found, -1 if not.
+ */
 int getLabelAddressWithoutExtern(char *label);
 
 /* Initialize the global counters. */
@@ -210,6 +244,11 @@ bool addNewExtern(char *externName)
     return true;
 }
 
+/**
+ * printLabelList:
+ * - Prints all labels in a given list for debugging purposes.
+ * @param head: Head of the label list.
+ */
 void printLabelList(struct LabelNode *head)
 {
     struct LabelNode *current = head;
@@ -459,8 +498,9 @@ bool addNewLabel(char *labelName)
 }
 
 /**
- * The increaseIC function is used to increment the IC (Instruction Counter) by a given value.
- * This function is typically used after a machine instruction or directive has been processed.
+ * increaseIC:
+ * - Increments the global Instruction Counter (IC) by a specified value.
+ * @param value: Value to increment the IC by.
  */
 void increaseIC(int value)
 {
@@ -476,6 +516,12 @@ void increaseIC(int value)
     }
 }
 
+/**
+ * Converts two integer values (ic and dc) to a single string, separated by a space.
+ * @param ic: The first integer.
+ * @param dc: The second integer.
+ * @return A string in the format "ic dc". The caller is responsible for freeing the memory.
+ */
 char *intToStringWithSpace(int ic, int dc)
 {
     /* Calculate length of numbers in string format */
@@ -496,6 +542,10 @@ char *intToStringWithSpace(int ic, int dc)
     return result;
 }
 
+/**
+ * Prepares for the second run by setting the IC counter and appending a string to a file.
+ * @param fileName: Name of the file to prepare.
+ */
 void prepareSecondRun(char *fileName)
 {
     TotalInstructions = IC;
@@ -503,6 +553,16 @@ void prepareSecondRun(char *fileName)
     IC = 100;
 }
 
+/**
+ * Checks if a given label exists in extern labels, entries, or other label lists.
+ * Optionally writes the label to a file if it's an extern label.
+ * @param label: The label to search for.
+ * @param lineNumber: The line number in the source file.
+ * @param fileName: The name of the source file.
+ * @param writeToFile: Flag to determine if the label should be written to a file.
+ * @param linesNumberForCommand: Number of lines for the command.
+ * @return true if the label exists, false otherwise.
+ */
 bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand)
 {
     printf("isLabelExist: label - %s lineNumber - %d fileName %s writeToFile linesNumberForCommand %d \n", label, lineNumber, fileName, linesNumberForCommand);
@@ -517,12 +577,22 @@ bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile,
            searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
 }
 
+/**
+ * Checks if a given label exists in certain label lists, excluding entries.
+ * @param label: The label to search for.
+ * @return true if the label exists, false otherwise.
+ */
 bool isLabelExistWithoutEntries(char *label)
 {
     return searchExternLabel(label) != -1 || searchLabel(label) != -1 ||
            searchDataLabel(label) != NULL || searchStringLabel(label) != NULL;
 }
 
+/**
+ * Retrieves the address of a given label, excluding extern labels.
+ * @param label: The label whose address is to be retrieved.
+ * @return Address of the label or -1 if not found.
+ */
 int getLabelAddressWithoutExtern(char *label)
 {
     struct DataLabel *dataLabel = searchDataLabel(label);
@@ -549,7 +619,12 @@ int getLabelAddressWithoutExtern(char *label)
     return -1;
 }
 
-/* validate if entries and externs list doesn already contain the label*/
+/**
+ * Validates if a given label can be considered as a new entry.
+ * Ensures the label does not already exist in the entries and externs lists.
+ * @param label: The label to validate.
+ * @return true if the label is a valid new entry, false otherwise.
+ */
 bool isValidNewEntry(char *label)
 {
     return searchEntry(label) == -1 && searchExternLabel(label) == -1;
@@ -610,6 +685,11 @@ int searchEntry(char *entryName)
     return -1; /*Label was not found*/
 }
 
+/**
+ * Updates the address of an entry label.
+ * @param entryName: Name of the entry label.
+ * @param address: New address to set.
+ */
 void updateEntryLabelAddress(char *entryName, int address)
 {
     struct LabelNode *current;
@@ -632,6 +712,11 @@ void updateEntryLabelAddress(char *entryName, int address)
     }
 }
 
+/**
+ * Searches for a regular label by its name.
+ * @param labelName: Name of the label.
+ * @return Address of the label or -1 if not found.
+ */
 int searchLabel(char *labelName)
 {
     struct LabelNode *current;
@@ -709,6 +794,12 @@ struct StringLabel *searchStringLabel(char *labelName)
     return NULL; /*Label was not found*/
 }
 
+/**
+ * Sends the string value of a label to be encoded.
+ * @param fileName: Name of the file.
+ * @param labelName: Name of the label.
+ * @param string: The string to be encoded.
+ */
 void sendStringValue(char *fileName, char *labelName, char *string)
 {
     int i;
@@ -725,6 +816,13 @@ void sendStringValue(char *fileName, char *labelName, char *string)
     encodValue(fileName, string[i]);
 }
 
+/**
+ * Sends the data values of a label to be encoded.
+ * @param fileName: Name of the file.
+ * @param labelName: Name of the label.
+ * @param data: Pointer to the array of data values.
+ * @param size: Number of elements in the data array.
+ */
 void sendDataValue(char *fileName, char *labelName, int *data, int size)
 {
     int i;
@@ -736,6 +834,10 @@ void sendDataValue(char *fileName, char *labelName, int *data, int size)
     }
 }
 
+/**
+ * Prints the labels associated with a file.
+ * @param filename: Name of the file.
+ */
 void printLabels(const char *filename)
 {
     struct LabelNode *current_LabelNode;
@@ -756,6 +858,7 @@ void printLabels(const char *filename)
     }
 }
 
+/* charToString function converts a single character to a string. */
 char *charToString(char c)
 {
     static char str[2];
