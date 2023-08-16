@@ -256,24 +256,22 @@ double tryGetNumber(char *str, const char *fileName, int lineNumber)
 {
     char *endptr;
     double number;
-
-    /* Check if the string has a decimal point */
-    if (strchr(str, '.') != NULL)
-    {
-        INVALID_NUMBER_VALUE(fileName, lineNumber, str);
-        return 0.5;
-    }
-
     number = strtod(str, &endptr);
 
-    /* Check if conversion was successful and if the entire string was processed */
-    if (*endptr != '\0')
+    /*Check if conversion was successful and if the entire string was processed*/
+    if (*endptr == '\0')
     {
-        INVALID_NUMBER_VALUE(fileName, lineNumber, str);
-        return 0.5;
+        /* Check if the number is not an integer */
+        if (number != (int)number)
+        {
+            INVALID_NUMBER_VALUE(fileName, lineNumber, str);
+            return 0.5;
+        }
+        return number;
     }
 
-    return number;
+    /*If conversion failed or not the entire string was processed, return NaN (Not a Number)*/
+    return 0.5;
 }
 
 /**
