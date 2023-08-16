@@ -247,7 +247,7 @@ bool addNewEntry(char *entryName)
     strncpy(label->name, entryName, MAX_LABEL_NAME_LENGTH);
     label->name[MAX_LABEL_NAME_LENGTH - 1] = '\0'; /* ensure NULL termination (because the use of 'strncpy') */
     address = searchLabel(entryName);
-    label->address = address != -1 ? address : 9; /*The address will be set later when the entry is resolved.*/
+    label->address = address != -1 ? address : 0; /*The address will be set later when the entry is resolved.*/
 
     newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     if (newNode == NULL)
@@ -387,6 +387,7 @@ bool addString(char *string, char *labelName)
 
     label->address = DC; /*The address will be set later when the string is linked to the code.*/
     DC += stringLength;
+    printf("updated DC is %d\n", DC);
 
     newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
     if (newNode == NULL)
@@ -610,6 +611,7 @@ void updateEntryLabelAddress(char *entryName, int address)
 {
     struct LabelNode *current;
     current = entryLabelList;
+    printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ updateEntryLabelAddress: %s %d\n", entryName, address);
     while (current != NULL)
     {
         size_t newlinePos = strcspn(entryName, "\n");
@@ -651,6 +653,7 @@ int searchLabel(char *labelName)
 
 void updateAddress(struct Label *labelToUpdate)
 {
+    printf("TotalInstructions: %d\n", TotalInstructions);
     if (labelToUpdate->address < 100)
         labelToUpdate->address += TotalInstructions;
 }
@@ -732,9 +735,18 @@ void sendDataValue(char *fileName, char *labelName, int *data, int size)
 void printLabels(const char *filename)
 {
     struct LabelNode *current_LabelNode;
+    int addressFromDifferentList = 0;
+
     current_LabelNode = entryLabelList;
     while (current_LabelNode != NULL)
     {
+        updateAddress(current_LabelNode->label);
+
+        addressFromDifferentList = searchDataLabel(current_LabelNode->label->name) != NULL ? searchDataLabel(current_LabelNode->label->name)->label->address : (searchStringLabel(current_LabelNode->label->name) != NULL ? searchStringLabel(current_LabelNode->label->name)->label->address : -1);
+
+        if (addressFromDifferentList != -1)
+            current_LabelNode->label->address = addressFromDifferentList;
+
         writeLabelToFile(concatenateStrings(filename, ".ent"), current_LabelNode->label->name, current_LabelNode->label->address);
         current_LabelNode = current_LabelNode->next;
     }

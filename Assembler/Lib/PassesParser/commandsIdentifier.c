@@ -170,15 +170,38 @@ int getCharIndexBySeparator(char *str, char separator)
     return -1;
 }
 
+bool *validateLabel(char *command)
+{
+
+    int i, length = strlen(command);
+    if (length > 31)
+    {
+        printf("LABEL_TOO_LONG_ERROR: %s\n", command);
+        return false;
+    }
+    printf("validateLabel: %s\n", command);
+    for (i = 0; i < length; i++)
+    {
+        printf("validateLabel: %d\n", i);
+
+        if (!(command[i] >= 48 && command[i] < 58) && !(command[i] >= 65 && command[i] < 91) && !(command[i] >= 98 && command[i] < 123))
+        {
+            printf("forbidden char: %c\n", command[i]);
+            return false;
+        }
+    }
+    return true;
+}
+
 /**
  * Extracts the label from a command string.
  * If the label is found, it is removed from the command string.
  */
-char *tryGetLabel(char **command)
+char *tryGetLabel(char **command, char *fileName, int lineNumber)
 {
     int index;
     char *label;
-
+    printf("tryGetLabel: %s %d\n", fileName, lineNumber);
     index = getCharIndexBySeparator(*command, LABEL_SEPERATOR);
 
     if (index <= 0)
@@ -188,6 +211,10 @@ char *tryGetLabel(char **command)
     strncpy(label, *command, index);
     label[index] = '\0';   /* Null-terminate the new string */
     *command += index + 1; /* Move the command pointer to skip the label and separator */
+    printf("before validation\n");
+    if (!validateLabel(label))
+        INVALID_LABEL_FORMAT(fileName, lineNumber, label);
+
     return label;
 }
 
@@ -270,7 +297,8 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     }
 
     strcpy(originalCommand, command);
-    label = tryGetLabel(&command); /*if label exist - we will get the label name and remove it from the command*/
+    printf("tryGetLabel: %s\n", fileName);
+    label = tryGetLabel(&command, fileName, lineNumber); /*if label exist - we will get the label name and remove it from the command*/
 
     removePrefixSpaces(command);
     prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
@@ -301,7 +329,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         appendStringToFile(fullFileName, originalCommand);
     }
 
-    tryGetLabel(&originalCommand); /* for determining lines number */
+    tryGetLabel(&originalCommand, fileName, lineNumber); /* for determining lines number */
 
     if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
     {
@@ -551,7 +579,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         MEMORY_ALLOCATION_FAILED(fileName, lineNumber);
     }
 
-    label = tryGetLabel(&command);
+    label = tryGetLabel(&command, fileName, lineNumber);
     strcpy(originalCommand, command);
     removePrefixSpaces(command);
 

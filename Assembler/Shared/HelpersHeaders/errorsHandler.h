@@ -180,11 +180,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param lineNumber The line number in the file where the error occurred.
  */
-#define INVALID_LABEL_FORMAT(fileName, lineNumber, label)                                                                                                                                        \
-    do                                                                                                                                                                                           \
-    {                                                                                                                                                                                            \
-        logNewError(fileName, lineNumber);                                                                                                                                                       \
-        fprintf(stderr, "This line has been failed according to: Invalid label format for label '%s'. Labels must start with capital letters and be immediately followed by a colon.\n", label); \
+#define INVALID_LABEL_FORMAT(fileName, lineNumber, label)                                                         \
+    do                                                                                                            \
+    {                                                                                                             \
+        logNewError(fileName, lineNumber);                                                                        \
+        fprintf(stderr, "This line has been failed according to: Invalid label format for label '%s'.\n", label); \
     } while (0)
 
 #define INVALID_INTEGER_VALUE(fileName, lineNumber, token)                                                                  \
