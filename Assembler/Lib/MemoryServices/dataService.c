@@ -22,6 +22,7 @@ int searchLabel(char *labelName);
 void updateEntryLabelAddress(char *entryName, int address);
 void encodValue(char *fileName, char character);
 char *charToString(char c);
+int getLabelAddressWithoutExtern(char *label);
 
 /* Initialize the global counters. */
 static int IC = 100;              /* Instruction counter. */
@@ -172,13 +173,13 @@ bool validateOpcodeMatchAddressingMethod(int opcode, int srcAddressing, int dstA
  */
 bool addNewExtern(char *externName)
 {
+    struct Label *label = NULL;
+    struct LabelNode *newNode = NULL;
+
     if (isLabelExistWithoutEntries(externName))
     {
         return false;
     }
-
-    struct Label *label = NULL;
-    struct LabelNode *newNode = NULL;
 
     /* Allocating an extra byte because of the "Ensure NULL termination" in the label name, according to the  "strncpy" method */
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
@@ -274,13 +275,13 @@ bool addNewEntry(char *entryName)
  */
 bool addData(int data[], char *labelName, int length)
 {
+    struct Label *label = NULL;
+    struct DataLabel *newNode = NULL;
+
     if (labelName != NULL && isLabelExistWithoutEntries(labelName))
     {
         return false;
     }
-
-    struct Label *label = NULL;
-    struct DataLabel *newNode = NULL;
 
     /* Allocating an extra byte because of the "Ensure NULL termination" in the label name, according to the  "strncpy" method */
     label = (struct Label *)malloc(sizeof(struct Label) + 1);
@@ -524,16 +525,18 @@ bool isLabelExistWithoutEntries(char *label)
 
 int getLabelAddressWithoutExtern(char *label)
 {
+    struct DataLabel *dataLabel = searchDataLabel(label);
+    struct StringLabel *stringLabel = searchStringLabel(label);
+
     int address = searchLabel(label);
     if (address != -1)
         return address;
     printf("not found in labels\n");
-    struct DataLabel *dataLabel = searchDataLabel(label);
+
     if (dataLabel != NULL)
         return dataLabel->label->address;
     printf("not found in dataLabels\n");
 
-    struct StringLabel *stringLabel = searchStringLabel(label);
     if (stringLabel != NULL)
         return stringLabel->label->address;
     printf("not found in stringLabel\n");
@@ -631,8 +634,9 @@ void updateEntryLabelAddress(char *entryName, int address)
 
 int searchLabel(char *labelName)
 {
-    printf("searchLabel: %s\n", labelName);
     struct LabelNode *current;
+
+    printf("searchLabel: %s\n", labelName);
     current = normalCommandLabelList;
     while (current != NULL)
     {

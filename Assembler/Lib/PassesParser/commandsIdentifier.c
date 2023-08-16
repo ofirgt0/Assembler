@@ -170,7 +170,7 @@ int getCharIndexBySeparator(char *str, char separator)
     return -1;
 }
 
-bool *validateLabel(char *command)
+bool validateLabel(char *command)
 {
 
     int i, length = strlen(command);
@@ -186,7 +186,7 @@ bool *validateLabel(char *command)
 
         if (!(command[i] >= 48 && command[i] < 58) && !(command[i] >= 65 && command[i] < 91) && !(command[i] >= 98 && command[i] < 123))
         {
-            printf("forbidden char: %c\n", command[i]);
+            printf("Forbidden char: %c\n", command[i]);
             return false;
         }
     }
@@ -564,13 +564,11 @@ int determineLinesNumber(char *command, int lineNumber, char *fileName)
 
 void commandParser(char *command, char *fileName, int lineNumber)
 {
-    printf("the line in commandParser %d\n", lineNumber);
     char *label = NULL, *label1 = NULL, *label2 = NULL, *firstVar = NULL, *originalCommand = NULL;
     int prefixIndex, commandIndex, register1 = -1, register2 = -1;
     double immidiate1 = 0.5, immidiate2 = 0.5; /* 0.5 represent the default value for immidiate */
     int determineLinesNumberResult;
     char *secondVar;
-    size_t length;
     char *commandPrefix;
 
     originalCommand = (char *)malloc(strlen(command) + 1);

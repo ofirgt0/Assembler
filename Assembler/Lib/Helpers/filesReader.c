@@ -74,7 +74,8 @@ void fileReader(const char *fileName)
         notEmptyLinesCounter++;
     }
     notEmptyLinesCounter = 0;
-    if (getErrorsCounter() > 0)
+    errorCount = getErrorsCounter();
+    if (errorCount > 0)
     {
         printf("\nErrors found in file. program stopped.\n");
         fprintf(stderr, "\nErrors found in file. program stopped.\n");
