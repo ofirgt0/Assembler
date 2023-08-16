@@ -187,7 +187,7 @@ void logNewError(const char *fileName, int lineNumber);
         fprintf(stderr, "This line has been failed according to: Invalid label format for label '%s'.\n", label); \
     } while (0)
 
-#define INVALID_INTEGER_VALUE(fileName, lineNumber, token)                                                                  \
+#define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                                                   \
     do                                                                                                                      \
     {                                                                                                                       \
         logNewError(fileName, lineNumber);                                                                                  \
@@ -215,10 +215,11 @@ void logNewError(const char *fileName, int lineNumber);
         fprintf(stderr, "In file %s, at line %d: Invalid command prefix detected.\n", fileName, lineNumber); \
     } while (0)
 
-#define INVALID_OPERAND_COUNT(fileName, lineNumber)                                                                                   \
-    do                                                                                                                                \
-    {                                                                                                                                 \
-        fprintf(stderr, "In the file %s there is an error at line number %d: Incorrect number of operands.\n", fileName, lineNumber); \
+#define INVALID_OPERAND_COUNT(fileName, lineNumber)                                                                                       \
+    do                                                                                                                                    \
+    {                                                                                                                                     \
+        logNewError(fileName, lineNumber)                                                                                                 \
+            fprintf(stderr, "In the file %s there is an error at line number %d: Incorrect number of operands.\n", fileName, lineNumber); \
     } while (0)
 
 #define UNKNOWN_COMMAND_ERROR(fileName, lineNumber)                                                   \

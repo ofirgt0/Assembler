@@ -49,6 +49,13 @@ void printLabel(const char *filename)
     printLabels(filename);
 }
 
+/**
+ * This function checks whether a given null-terminated string consists
+ * only of numeric digits (0-9).
+ * @param str The input string to be checked for numeric content.
+ * @return Returns `true` if the entire string contains only numeric digits,
+ * and `false` otherwise.
+ */
 bool isNumber(const char *str)
 {
     int i = 0;
@@ -245,20 +252,28 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber)
  * If the string represents a valid number, the function returns the number.
  * If the string does not represent a valid number, the function returns NaN.
  */
-double tryGetNumber(char *str)
+double tryGetNumber(char *str, const char *fileName, int lineNumber)
 {
     char *endptr;
     double number;
-    number = strtod(str, &endptr);
 
-    /*Check if conversion was successful and if the entire string was processed*/
-    if (*endptr == '\0')
+    /* Check if the string has a decimal point */
+    if (strchr(str, '.') != NULL)
     {
-        return number;
+        INVALID_NUMBER_VALUE(fileName, lineNumber, str);
+        return 0.5;
     }
 
-    /*If conversion failed or not the entire string was processed, return NaN (Not a Number)*/
-    return 0.5;
+    number = strtod(str, &endptr);
+
+    /* Check if conversion was successful and if the entire string was processed */
+    if (*endptr != '\0')
+    {
+        INVALID_NUMBER_VALUE(fileName, lineNumber, str);
+        return 0.5;
+    }
+
+    return number;
 }
 
 /**
@@ -511,10 +526,14 @@ int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNu
     if (input[0] == ',')
     {
         EXTRANEOUS_TEXT_ERROR(fileName, lineNumber);
+        free(array);
+        return NULL;
     }
     else if (input[strlen(input) - 1] == ',')
     {
         TRAILING_COMMA_ERROR(fileName, lineNumber);
+        free(array);
+        return NULL;
     }
 
     /* Check for consecutive commas */
@@ -523,15 +542,26 @@ int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNu
         if (input[i] == ',' && input[i + 1] == ',')
         {
             MULTIPLE_CONSECUTIVE_COMMAS_ERROR(fileName, lineNumber);
+            free(array);
+            return NULL;
         }
     }
 
     token = strtok(input, ",");
     while (token != NULL)
     {
-        (*length)++;
-        num = atoi(token);
+        /* Check if token has a decimal point */
+        if (strchr(token, '.') != NULL)
+        {
+            INVALID_NUMBER_VALUE(fileName, lineNumber, token);
+            free(array);
+            return NULL;
+        }
+
+        num = atoi(token); /* Using your original atoi function */
         printf("%d \n", num);
+        (*length)++;
+
         temp = realloc(array, (*length) * sizeof(int));
         if (temp == NULL)
         {
@@ -699,7 +729,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         }
         else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
         {
-            addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command), 0.5, lineNumber);
+            addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command, fileName, lineNumber), 0.5, lineNumber);
         }
         else
         {
@@ -715,7 +745,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
         printf("firstVar %s command %s\n", firstVar, command);
 
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0]))
-            immidiate1 = tryGetNumber(firstVar);
+            immidiate1 = tryGetNumber(firstVar, fileName, lineNumber);
 
         else if (isLabelExist(firstVar, lineNumber, fileName, true, determineLinesNumberResult))
         {
@@ -726,7 +756,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
             register1 = firstVar[2] - '0';
 
         if (command[0] == '-' || isdigit(command[0]))
-            immidiate2 = tryGetNumber(command);
+            immidiate2 = tryGetNumber(command, fileName, lineNumber);
 
         else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumberResult))
         {

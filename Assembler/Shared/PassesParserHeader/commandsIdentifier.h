@@ -78,9 +78,11 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber);
  * Attempts to interpret a part of the command string as a numeric operand.
  * Some commands have immediate numeric values as operands, and this helps fetch them.
  * @param str The string segment that might represent a number.
+ * @param fileName the name of the file.
+ * @param lineNumber the number of the line.
  * @return The numeric value if it's a valid number, or 0.5 as a placeholder for invalid numbers.
  */
-double tryGetNumber(char *str);
+double tryGetNumber(char *str, const char *fileName, int lineNumber);
 
 /**
  * Grabs a segment of the string up to a specified character.
