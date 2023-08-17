@@ -14,7 +14,7 @@ LIBS = -lm
 MAIN = assembler
 
 # Define the object files
-OBJS = filesReader.o commandsIdentifier.o macroService.o dataService.o errorsHandler.o writeToFile.o encoder.o helpfulFunctions.o
+OBJS = assembler.o commandsIdentifier.o macroService.o dataService.o errorsHandler.o writeToFile.o encoder.o helpfulFunctions.o
 
 .PHONY: all clean
 
@@ -24,7 +24,7 @@ all: $(MAIN)
 $(MAIN): $(OBJS)
 	$(CC) -Wall -ansi -pedantic -o $(MAIN) $^ $(LIBS)
 
-filesReader.o: Assembler/Lib/Helpers/filesReader.c
+assembler.o: Assembler/Lib/Helpers/assembler.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 commandsIdentifier.o: Assembler/Lib/PassesParser/commandsIdentifier.c

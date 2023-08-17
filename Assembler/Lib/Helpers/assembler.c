@@ -1,9 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "filesReader.h"
+#include "assembler.h"
 #include "errorsHandler.h"
 #include "writeToFile.h"
+
+/**
+ *  The main function reads and processes multiple files provided as command-line arguments.
+ *  It iterates through each command-line argument, treating each as a file name.
+ *  It then calls the fileReader function on each file.
+ */
+int main(int argc, char *argv[])
+{
+    int i;
+    if (argc < 2)
+    {
+        printf("Usage: %s <file1> <file2> ...\n", argv[0]);
+        return 1;
+    }
+
+    /*Iterate through each command-line argument (file name)*/
+    for (i = 1; i < argc; i++)
+        fileReader(argv[i]);
+
+    return 0;
+}
 
 /**
  * Parses a given assembly command.
@@ -228,24 +249,3 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     initStaticVariable();
     initMacroStaticVariables();
 }*/
-
-/**
- *  The main function reads and processes multiple files provided as command-line arguments.
- *  It iterates through each command-line argument, treating each as a file name.
- *  It then calls the fileReader function on each file.
- */
-int main(int argc, char *argv[])
-{
-    int i;
-    if (argc < 2)
-    {
-        printf("Usage: %s <file1> <file2> ...\n", argv[0]);
-        return 1;
-    }
-
-    /*Iterate through each command-line argument (file name)*/
-    for (i = 1; i < argc; i++)
-        fileReader(argv[i]);
-
-    return 0;
-}

@@ -1,5 +1,5 @@
-#ifndef FILESREADER_H
-#define FILESREADER_H
+#ifndef ASSEMBLER_H
+#define ASSEMBLER_H
 
 #define ASM_FILE_NAME_EXTENSION ".as"
 #define MACRO_FILE_NAME_EXTENSION ".am"
@@ -58,4 +58,4 @@ void prepareSecondRun(const char *fileName);
  */
 void printLabels(const char *);
 
-#endif /* FILESREADER_H */
+#endif /* ASSEMBLER */

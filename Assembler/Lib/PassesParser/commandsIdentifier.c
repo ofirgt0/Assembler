@@ -7,7 +7,7 @@
 #include "commandsIdentifier.h"
 #include "macroService.h"
 #include "dataService.h"
-#include "filesReader.h"
+#include "assembler.h"
 #include "errorsHandler.h"
 #include "writeToFile.h"
 #include "helpfulFunctions.h"
