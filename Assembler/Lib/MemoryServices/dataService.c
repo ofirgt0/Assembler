@@ -811,7 +811,15 @@ char *charToString(char c)
     return NULL;
 }
 
-/*void initStaticVariable(){
+/**
+ * Initializes static variables to their default values.
+ * This function resets several static variables related to label lists
+ * (for external, entry, normal command, data, and string labels),
+ * the instruction counter (IC), the data counter (DC),
+ * and the total number of instructions.
+ */
+void initStaticVariable()
+{
     externalLabelList = NULL;
     entryLabelList = NULL;
     normalCommandLabelList = NULL;
@@ -820,4 +828,4 @@ char *charToString(char c)
     IC = 100;
     DC = 0;
     TotalInstructions = 0;
-}*/
+}

@@ -44,7 +44,7 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
 /* Flag to indicate if we're currently processing a macro. */
 static bool macroFlag = false;
 
-void printLabel(const char *filename)
+void printLabel(char *filename)
 {
     printLabels(filename);
 }
@@ -165,13 +165,20 @@ int getCommandIndexByList(char *command, char *list[], int listLength)
     Checks if a character represents a valid register name.
     Input: register - the character to check.
     Output: true if the character is a valid register name, false otherwise.
+    valid: @r0-@r7, LENGTH, $r5
 */
-bool isRegisterName(char registerName[])
+bool isRegisterName(char registerName[], int lineNumber, char *fileName)
 {
-    if (strlen(registerName) < 2)
+    if (registerName[0] != REGISTER_PREFIX)
         return false;
 
-    return registerName[0] == REGISTER_PREFIX && registerName[1] == 'r' && registerName[2] >= '0' && registerName[2] <= '7';
+    if (strlen(registerName) != 3 || registerName[1] != 'r' || registerName[2] < '0' || registerName[2] > '7')
+    {
+        INVALID_REGISTER_NAME(fileName, lineNumber);
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -247,7 +254,7 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber)
  * If the string represents a valid number, the function returns the number.
  * If the string does not represent a valid number, the function returns NaN.
  */
-double tryGetNumber(char *str, const char *fileName, int lineNumber)
+double tryGetNumber(char *str, char *fileName, int lineNumber)
 {
     char *endptr;
     double number;
@@ -500,7 +507,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
  * The function returns a dynamically allocated array of integers and stores the array size in 'length'.
  * If an error occurs during parsing, the function returns NULL and 'length' is undefined.
  */
-int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNumber)
+int *parseIntArray(char *input, size_t *length, char *fileName, int lineNumber)
 {
     int *array = NULL;
     char *token;
@@ -570,6 +577,8 @@ int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNu
  */
 int determineLinesNumber(char *command, int lineNumber, char *fileName)
 {
+    bool isFirstOprndReg;
+    bool isSecOprndReg;
     char *firstVar;
     int commandIndex, linesNumber = 1;
     removePrefixSpaces(command);
@@ -588,13 +597,16 @@ int determineLinesNumber(char *command, int lineNumber, char *fileName)
     {
         command = command + strlen(commandsNames[commandIndex]);
         remove_spaces(command);
+
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /* + 1 for seperator ','*/
 
-        if (isRegisterName(firstVar) && isRegisterName(command))
+        isFirstOprndReg = isRegisterName(firstVar, lineNumber, fileName);
+        isSecOprndReg = isRegisterName(command, lineNumber, fileName);
+        if (isFirstOprndReg && isSecOprndReg)
             return 2;
 
-        if (isRegisterName(firstVar) || isRegisterName(command))
+        if (isFirstOprndReg || isSecOprndReg)
             linesNumber++;
 
         if (isLabelExist(firstVar, lineNumber, fileName, false, 1) ||
@@ -656,8 +668,11 @@ void commandParser(char *command, char *fileName, int lineNumber)
             int *data;
             size_t length = 0;
             data = parseIntArray(secondVar, &length, fileName, lineNumber);
-            sendDataValue(fileName, label, data, length);
-            free(data);
+            if (data != NULL)
+            {
+                sendDataValue(fileName, label, data, length);
+                free(data);
+            }
         }
 
         free(originalCommand);
@@ -690,7 +705,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     }
     else if (commandIndex < 14 && commandIndex > 3 && commandIndex != 6) /*one var*/
     {
-        if (isRegisterName(command))
+        if (isRegisterName(command, lineNumber, fileName))
         {
             if (strlen(command) == 3)
             {
@@ -730,7 +745,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
             label1 = firstVar;
         }
 
-        else if (isRegisterName(firstVar))
+        else if (isRegisterName(firstVar, lineNumber, fileName))
             register1 = firstVar[2] - '0';
 
         if (command[0] == '-' || isdigit(command[0]))
@@ -741,7 +756,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
             label2 = command;
         }
 
-        else if (isRegisterName(command))
+        else if (isRegisterName(command, lineNumber, fileName))
             register2 = command[2] - '0';
 
         else

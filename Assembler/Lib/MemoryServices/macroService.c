@@ -9,9 +9,15 @@
 
 static struct macroDataNode *head = NULL;
 
-/* void initMacroStaticVariables(){
-     head = NULL;
-}*/
+/**
+ * Initializes the macro static variables.
+ * This function sets up static variables specifically used for macro operations.
+ * It should be called before any macro-related processing starts.
+ */
+void initMacroStaticVariables()
+{
+    head = NULL;
+}
 
 /**
  * Checks if a given macro name exists.

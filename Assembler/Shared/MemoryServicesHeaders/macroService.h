@@ -76,4 +76,11 @@ void remove_spaces(char *str);
  */
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile);
 
+/**
+ * Initializes the macro static variables.
+ * This function sets up static variables specifically used for macro operations.
+ * It should be called before any macro-related processing starts.
+ */
+void initMacroStaticVariables();
+
 #endif /* MACROSERVICE_H */

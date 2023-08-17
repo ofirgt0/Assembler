@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "writeToFile.h"
-#include <stdbool.h>
 #include "errorsHandler.h"
 
 /* Writes an integer array to the specified file, returning true on success.
@@ -12,9 +11,8 @@
 bool writeIntArrayToFile(const char *filename, const int arr[])
 {
     int i;
-    /* Open the file in "append" mode */
     FILE *file;
-    file = fopen(filename, "a");
+    file = fopen(filename, "w");
 
     if (file != NULL)
     {
@@ -64,8 +62,6 @@ void appendStringToFile(const char *filename, const char *text)
 bool writeLabelToFile(const char *filename, char *labelName, int address)
 {
     FILE *file;
-
-    printf("writeLabelToFile: %s  %d\n", labelName, address);
 
     file = fopen(filename, "a");
     if (file == NULL)

@@ -4,6 +4,7 @@
 #include "assembler.h"
 #include "errorsHandler.h"
 #include "writeToFile.h"
+#include "commandsIdentifier.h"
 
 /**
  *  The main function of the project.
@@ -22,33 +23,12 @@ int main(int argc, char *argv[])
 
     /*Iterate through each command-line argument (file name)*/
     for (i = 1; i < argc; i++)
+    {
+        setUpStaticVariables();
         fileReader(argv[i]);
+    }
 
     return 0;
-}
-
-/**
- * Parses a given assembly command.
- * @param command The assembly command to parse.
- * @param fileName The name of the source file.
- * @param lineNumber The line number in the source file.
- */
-void commandParser(char *command, const char *fileName, int lineNumber);
-
-/**
- * Starts the first run of the file reader.
- * @param line The current line from the source file.
- * @param lineNumber The line number in the source file.
- * @param fileName The name of the source file.
- */
-void startFirstRun(char *, int, const char *);
-
-/* Logs the currently processed line */
-void logNewLine(const char *line, int lineNumber)
-{
-    printf("\n\n\n ----------------------------------------------------\n");
-
-    printf("Processing line: %s\n", line);
 }
 
 /* Constructs a file name by appending a given extension to the base file name. */
@@ -111,15 +91,24 @@ void fileReader(const char *fileName)
             continue;
 
         removePrefixSpaces(line);
-        logNewLine(line, notEmptyLinesCounter);
-        startFirstRun(line, notEmptyLinesCounter, fileName);
+        startFirstRun(line, notEmptyLinesCounter, (char *)fileName);
         notEmptyLinesCounter++;
     }
+
+    errorCount = getErrorsCounter();
+    if (errorCount > 0)
+    {
+        fprintf(stderr, "\nErrors found in first run. Not proceeding to second run.\n");
+        fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
+        fclose(file);
+        free(asmFileName);
+        return;
+    }
+
     notEmptyLinesCounter = 0;
 
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
-    printf("\n################################ S--E--C--O--N--D--R--U--N ################################\n");
 
     macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
     if (!macroFileName)
@@ -149,8 +138,7 @@ void fileReader(const char *fileName)
             continue;
 
         notEmptyLinesCounter++;
-        logNewLine(line, notEmptyLinesCounter);
-        commandParser(line, fileName, notEmptyLinesCounter);
+        commandParser(line, (char *)fileName, notEmptyLinesCounter);
     }
 
     errorCount = getErrorsCounter();
@@ -178,6 +166,8 @@ void fileReader(const char *fileName)
 
     printLabels(fileName);
     fclose(macroFile);
+    fclose(file);
+    free(asmFileName);
 }
 
 /**
@@ -228,21 +218,27 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     while (currentLine <= lineNumber + linesNumber - 1 && fgets(line, sizeof(line), file))
     {
         removePrefixSpaces(line);
-        logNewLine(line, 1);
-        startFirstRun(line, i + macroLineInFile, fileName);
+        startFirstRun(line, i + macroLineInFile, (char *)fileName);
         currentLine++;
         i++;
     }
-
-    /*setUpStaticVariables();*/
 
     free(macroFileName);
     fclose(file);
 }
 
-/*void setUpStaticVariables(){
+/**
+ * Sets up all necessary static variables used in the program.
+ * This function initializes various static variables across different modules.
+ * It ensures that the program's environment is set up correctly before any
+ * significant processing starts. Specifically, it prepares variables for
+ * command identification, error counting, general static variables, and
+ * macro-related static variables.
+ */
+void setUpStaticVariables()
+{
     initCommandsIdentifierStaticVariable();
     initErrorsCounter();
     initStaticVariable();
     initMacroStaticVariables();
-}*/
+}

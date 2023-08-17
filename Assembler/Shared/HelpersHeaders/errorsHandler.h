@@ -102,18 +102,6 @@ void logNewError(const char *fileName, int lineNumber);
     } while (0)
 
 /**
- * Logs an error when the number of operands is incorrect.
- * @param fileName The name of the file where the error occurred.
- * @param address The address or line number where the error was found.
- */
-#define INCORRECT_OPERANDS_NUMBER_ERROR(fileName, lineNumber)                                                \
-    do                                                                                                       \
-    {                                                                                                        \
-        logNewError(fileName, lineNumber);                                                                   \
-        fprintf(stderr, "The number of operands that in this line, corresponds to the type of operand\n\n"); \
-    } while (0)
-
-/**
  * Logs an error when an invalid register name is used.
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
@@ -187,13 +175,12 @@ void logNewError(const char *fileName, int lineNumber);
         fprintf(stderr, "Invalid label format for label '%s'.\n\n", label); \
     } while (0)
 
-#define INVALID_INTEGER_VALUE(str, fileName, lineNumber)                              \
-    do                                                                                \
-    {                                                                                 \
-        logNewError(fileName, lineNumber);                                            \
-        fprintf(stderr, "Invalid number type. Only integer values are allowed.\n\n"); \
-    } while (0)
-
+/**
+ * Logs an error when a label already exists.
+ * @param fileName Name of the assembly file where the error occurred.
+ * @param lineNumber Line number in the file where the error was found.
+ * @param label The duplicate label name.
+ */
 #define LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label)                    \
     do                                                                             \
     {                                                                              \
@@ -201,27 +188,11 @@ void logNewError(const char *fileName, int lineNumber);
         fprintf(stderr, "The label '%s' in this line already exists.\n\n", label); \
     } while (0)
 
-#define INVALID_REGISTER_FOUND(fileName, lineNumber, registerName)             \
-    do                                                                         \
-    {                                                                          \
-        logNewError(fileName, lineNumber);                                     \
-        fprintf(stderr, "Invalid register encountered: %s\n\n", registerName); \
-    } while (0)
-
-#define INVALID_PREFIX_ERROR(fileName, lineNumber)                                                             \
-    do                                                                                                         \
-    {                                                                                                          \
-        logNewError(fileName, lineNumber);                                                                     \
-        fprintf(stderr, "In file %s, at line %d: Invalid command prefix detected.\n\n", fileName, lineNumber); \
-    } while (0)
-
-#define INVALID_OPERAND_COUNT(fileName, lineNumber)                                                                                         \
-    do                                                                                                                                      \
-    {                                                                                                                                       \
-        logNewError(fileName, lineNumber)                                                                                                   \
-            fprintf(stderr, "In the file %s there is an error at line number %d: Incorrect number of operands.\n\n", fileName, lineNumber); \
-    } while (0)
-
+/**
+ * Logs an error when an unknown command is detected in the assembly code.
+ * @param fileName The name of the assembly file where the error occurred.
+ * @param lineNumber The line number in the file where the error occurred.
+ */
 #define UNKNOWN_COMMAND_ERROR(fileName, lineNumber)                                                     \
     do                                                                                                  \
     {                                                                                                   \
@@ -242,6 +213,11 @@ void logNewError(const char *fileName, int lineNumber);
         fprintf(stderr, "Error: Invalid parameter '%s' for 'entry' or 'extern' instruction.\n\n", label); \
     } while (0)
 
+/**
+ * Logs an error when a line in the assembly file exceeds the allowable length.
+ * @param fileName The name of the assembly file where the error occurred.
+ * @param lineNumber The line number in the file where the error occurred.
+ */
 #define LINE_LENGTH_ERROR(fileName, lineNumber)                                         \
     do                                                                                  \
     {                                                                                   \
@@ -250,6 +226,12 @@ void logNewError(const char *fileName, int lineNumber);
                 fileName, lineNumber);                                                  \
     } while (0)
 
+/**
+ * Logs an error when an invalid number is detected in the assembly code.
+ * @param fileName The name of the assembly file where the error occurred.
+ * @param lineNumber The line number in the file where the error occurred.
+ * @param token The string representation of the invalid number.
+ */
 #define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                    \
     do                                                                                       \
     {                                                                                        \

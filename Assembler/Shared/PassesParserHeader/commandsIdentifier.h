@@ -47,7 +47,7 @@ int getCommandIndexByList(char *command, char *list[], int listLength);
  * This helps in tracking which labels are being processed or encountered errors.
  * @param filename The name of the assembly file currently being processed.
  */
-void printLabel(const char *filename);
+void printLabel(char *filename);
 
 /**
  * Checks if the given string matches the naming convention for a register in our assembly language.
@@ -55,7 +55,7 @@ void printLabel(const char *filename);
  * @param registerName The string that we suspect to be a register name.
  * @return true if the string is a valid register name, false otherwise.
  */
-bool isRegisterName(char registerName[]);
+bool isRegisterName(char registerName[], int lineNumber, char *fileName);
 
 /**
  * Fetches the position of a specific character within a string.
@@ -80,7 +80,7 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber);
  * @param str The string segment that might represent a number.
  * @return The numeric value if it's a valid number, or 0.5 as a placeholder for invalid numbers.
  */
-double tryGetNumber(char *str, const char *fileName, int lineNumber);
+double tryGetNumber(char *str, char *fileName, int lineNumber);
 
 /**
  * Grabs a segment of the string up to a specified character.
@@ -107,7 +107,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName);
  * @param length A pointer to a size_t variable where the number of parsed integers will be stored.
  * @return A pointer to the first element of the dynamically allocated integer array.
  */
-int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNumber);
+int *parseIntArray(char *input, size_t *length, char *fileName, int lineNumber);
 
 /**
  * Predicts the number of machine code lines a command will be translated to.

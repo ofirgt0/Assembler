@@ -258,4 +258,11 @@ void updateEntryLabelAddress(char *entryName, int address);
  */
 void encodValue(char *fileName, int value);
 
+/**
+ * Initializes other necessary static variables.
+ * This function sets up other static variables which might be used in the program.
+ * Call this function to ensure all static variables are in their initial states.
+ */
+void initStaticVariable();
+
 #endif /* DATASERVICE_H */

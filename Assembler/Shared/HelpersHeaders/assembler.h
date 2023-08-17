@@ -5,11 +5,32 @@
 #define MACRO_FILE_NAME_EXTENSION ".am"
 
 /**
- * Logs each new line being processed.
- * @param line The line being logged.
- * @param lineNumber The line number in the file.
+ * Initializes the commands identifier static variable.
+ * This function sets up the static variable used for identifying commands.
+ * It should be called before processing any commands.
  */
-void logNewLine(const char *line, int lineNumber);
+void initCommandsIdentifierStaticVariable();
+
+/**
+ * Initializes the errors counter static variable.
+ * This function sets up the static variable used for counting errors encountered
+ * during file processing. It should be called before any file processing starts.
+ */
+void initErrorsCounter();
+
+/**
+ * Initializes other necessary static variables.
+ * This function sets up other static variables which might be used in the program.
+ * Call this function to ensure all static variables are in their initial states.
+ */
+void initStaticVariable();
+
+/**
+ * Initializes the macro static variables.
+ * This function sets up static variables specifically used for macro operations.
+ * It should be called before any macro-related processing starts.
+ */
+void initMacroStaticVariables();
 
 /**
  * Reads and processes an assembly file.
@@ -57,5 +78,15 @@ void prepareSecondRun(const char *fileName);
  * @param fileName The name of the source file.
  */
 void printLabels(const char *);
+
+/**
+ * Sets up all necessary static variables used in the program.
+ * This function initializes various static variables across different modules.
+ * It ensures that the program's environment is set up correctly before any
+ * significant processing starts. Specifically, it prepares variables for
+ * command identification, error counting, general static variables, and
+ * macro-related static variables.
+ */
+void setUpStaticVariables();
 
 #endif /* ASSEMBLER */
