@@ -20,22 +20,6 @@ void encodExternLabel(char *fileName)
 }
 
 /**
- * Prints the values of a given integer array.
- * Useful for debugging and checking the encoded values.
- * @param array The integer array to print.
- */
-void printIntArray(const int array[])
-{
-    int i;
-    printf("Int Array: ");
-    for (i = 0; i < 12; i++)
-    {
-        printf("%d ", array[i]);
-    }
-    printf("\n");
-}
-
-/**
  * Encodes an instruction code using ARE encoding.
  * This function takes several parameters that specify different
  * parts of an instruction code and encodes them using the ARE scheme.
@@ -73,7 +57,6 @@ void encodLabelOperand(char *fileName, char AREcode, int address)
     int code[12] = {0};
     char *concatenatedStr;
 
-    printf("encod Label Operand in address: %d\n", address);
     if (AREcode == 'E')
         code[11] = 1;
     else
@@ -82,7 +65,6 @@ void encodLabelOperand(char *fileName, char AREcode, int address)
         setARE(AREcode, code);
     }
 
-    printf("add new command in base64 to file: %s\n", binaryArrayToBase64(code, 12));
     concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
     appendStringToFile(concatenatedStr, binaryArrayToBase64(code, 12));
     free(concatenatedStr);
@@ -119,8 +101,6 @@ void encodValue(char *fileName, int value)
     char *base64Str;
     char *concatenatedStr;
     (value < 0) ? setNegativeBinaryArray(code, value, 12) : setBinaryArray(code, value, 12);
-
-    printIntArray(code);
     base64Str = binaryArrayToBase64(code, 12);
     concatenatedStr = concatenateStrings(fileName, fileSuffix_commands);
     appendStringToFile(concatenatedStr, base64Str);
@@ -134,7 +114,7 @@ void encodeRegister(char *fileName, int register1, int register2)
     int code[12] = {0};
     char *base64Str;
     char *concatenatedStr;
-    printf("encode Register: %s \n", fileName);
+
     setBinaryCodeInRange(0, 4, register1, code);
     setBinaryCodeInRange(5, 9, register2, code);
     setARE('A', code);

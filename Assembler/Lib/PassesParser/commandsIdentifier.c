@@ -149,7 +149,8 @@ int getCommandIndexByList(char *command, char *list[], int listLength)
         commandLength++;
     }
 
-    for (commandIndex = 0; commandIndex < listLength; commandIndex++) /*TODO: change to real list length*/
+    for (commandIndex = 0; commandIndex < listLength; commandIndex++)
+
     {
         /* Two-way inclusion check of the string*/
         if (strlen(list[commandIndex]) == commandLength && strncmp(list[commandIndex], command, commandLength) == 0)
@@ -167,8 +168,6 @@ int getCommandIndexByList(char *command, char *list[], int listLength)
 */
 bool isRegisterName(char registerName[])
 {
-    printf("registerName on : %s\n", registerName);
-    printf("return %d\n", registerName[0] == REGISTER_PREFIX && registerName[1] == 'r' && registerName[2] >= '0' && registerName[2] <= '7');
     if (strlen(registerName) < 2)
         return false;
 
@@ -202,19 +201,17 @@ bool validateLabel(char *command)
     int i, length = strlen(command);
     if (length > 31)
     {
-        printf("LABEL_TOO_LONG_ERROR: %s\n", command);
+        fprintf(stderr, "LABEL_TOO_LONG_ERROR: %s\n", command);
         return false;
     }
-    printf("validateLabel: %s\n", command);
     for (i = 0; i < length; i++)
     {
-        printf("validateLabel: %d\n", i);
 
         if (!(command[i] >= '0' && command[i] <= '9') &&
             !(command[i] >= 'A' && command[i] <= 'Z') &&
             !(command[i] >= 'a' && command[i] <= 'z'))
         {
-            printf("Forbidden char: %c\n", command[i]);
+            fprintf(stderr, "Forbidden char: %c\n", command[i]);
             return false;
         }
     }
@@ -230,7 +227,6 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber)
 {
     int index;
     char *label;
-    printf("tryGetLabel: %s %d\n", fileName, lineNumber);
     index = getCharIndexBySeparator(*command, LABEL_SEPERATOR);
 
     if (index <= 0)
@@ -240,7 +236,6 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber)
     strncpy(label, *command, index);
     label[index] = '\0';   /* Null-terminate the new string */
     *command += index + 1; /* Move the command pointer to skip the label and separator */
-    printf("before validation\n");
     if (!validateLabel(label))
         INVALID_LABEL_FORMAT(fileName, lineNumber, label);
 
@@ -340,7 +335,6 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
     }
 
     strcpy(originalCommand, command);
-    printf("tryGetLabel: %s\n", fileName);
     label = tryGetLabel(&command, fileName, lineNumber); /*if label exist - we will get the label name and remove it from the command*/
 
     removePrefixSpaces(command);
@@ -367,8 +361,6 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 
         char *fullFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
 
-        printf("fullFileNameWithExtension: %s \n", fileName);
-
         appendStringToFile(fullFileName, originalCommand);
     }
 
@@ -386,9 +378,6 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         char *secondVar;
         char *commandPrefix = commandsPrefix[prefixIndex];
         secondVar = command + strlen(commandPrefix); /*in this part wer'e holding the label*/
-
-        printf("commandPrefix %s\n", commandPrefix);
-        printf("secondVar: %s\n", secondVar);
 
         switch (prefixIndex)
         {
@@ -462,16 +451,11 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
         {
             size_t length;
             int *data;
-            int i;
             data = parseIntArray(secondVar, &length, fileName, lineNumber);
-            for (i = 0; i < length; i++)
-            {
-                printf("Parsed data[%d]: %d\n", i, data[i]);
-            }
             isSuccess = addData(data, label, length);
             if (!isSuccess)
             {
-                printf("LABEL_ALREADY_EXISTS_ERROR: %s\n", label);
+                fprintf(stderr, "LABEL_ALREADY_EXISTS_ERROR: %s\n", label);
                 LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label);
             }
             return;
@@ -481,7 +465,7 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             isSuccess = addString(secondVar, label);
             if (!isSuccess)
             {
-                printf("LABEL_ALREADY_EXISTS_ERROR: %s\n", label);
+                fprintf(stderr, "LABEL_ALREADY_EXISTS_ERROR: %s\n", label);
                 LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label);
             }
             return;
@@ -498,7 +482,6 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             if (!isSuccess)
                 LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label);
         }
-        printf("determineLinesNumber: %s\n", originalCommand);
         linesNumber = determineLinesNumber(originalCommand, lineNumber, fileName);
         if (linesNumber == 0)
         {
@@ -506,7 +489,6 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
             return;
         }
 
-        printf("increaseIC by linesNumber: %d\n", linesNumber);
         increaseIC(linesNumber);
     }
     if (label != NULL)
@@ -564,7 +546,6 @@ int *parseIntArray(char *input, size_t *length, const char *fileName, int lineNu
         }
 
         num = atoi(token); /* Using your original atoi function */
-        printf("%d \n", num);
         (*length)++;
 
         temp = realloc(array, (*length) * sizeof(int));
@@ -591,10 +572,9 @@ int determineLinesNumber(char *command, int lineNumber, char *fileName)
 {
     char *firstVar;
     int commandIndex, linesNumber = 1;
-    printf("command: %s\n", command);
     removePrefixSpaces(command);
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
-    printf("commandIndex: %d\n", commandIndex);
+
     if (commandIndex == -1)
         return 0;
 
@@ -611,16 +591,11 @@ int determineLinesNumber(char *command, int lineNumber, char *fileName)
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /* + 1 for seperator ','*/
 
-        printf("first if: %s\n", firstVar);
         if (isRegisterName(firstVar) && isRegisterName(command))
             return 2;
 
-        printf("second if: %s\n", firstVar);
-
         if (isRegisterName(firstVar) || isRegisterName(command))
             linesNumber++;
-
-        printf("third if linesNumber: %d\n", linesNumber);
 
         if (isLabelExist(firstVar, lineNumber, fileName, false, 1) ||
             isLabelExist(command, lineNumber, fileName, false, 1))
@@ -658,7 +633,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
     prefixIndex = getCommandIndexByList(command, commandsPrefix, COMMANDS_PREFIX_NUMBER);
 
-    printf("getCommandIndexByList: %s--------------\n", command);
     if (prefixIndex != -1)
     {
         if (prefixIndex < 3)
@@ -674,7 +648,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
         if (prefixIndex == 5)
         {
-            printf("sendStringValue: %s\n", secondVar);
             sendStringValue(fileName, label, secondVar);
         }
 
@@ -706,7 +679,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
     command = command + strlen(commandsNames[commandIndex]);
     remove_spaces(command);
-    printf("commandIndex: %d\n", commandIndex);
 
     if (commandIndex > 13) /*0 vars*/
     {
@@ -731,10 +703,10 @@ void commandParser(char *command, char *fileName, int lineNumber)
         }
         else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumber(originalCommand, lineNumber, fileName) - 1))
         {
-            printf("addNewLine \n");
             addNewLine(fileName, commandIndex, -1, -1, command, NULL, 0.5, 0.5, lineNumber);
         }
-        else if (isdigit(command[0]) || command[0] == '-') /*TODO: check if this option exist*/
+        else if (isdigit(command[0]) || command[0] == '-')
+
         {
             addNewLine(fileName, commandIndex, -1, -1, NULL, NULL, tryGetNumber(command, fileName, lineNumber), 0.5, lineNumber);
         }
@@ -749,7 +721,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
         firstVar = getSubstringBySeparator(command, VAR_SEPARATOR);
         command += strlen(firstVar) + 1; /*+ 1 for seperator ','*/
         determineLinesNumberResult = determineLinesNumber(originalCommand, lineNumber, fileName) - 1;
-        printf("firstVar %s command %s\n", firstVar, command);
 
         if (firstVar[0] == '+' || firstVar[0] == '-' || isdigit(firstVar[0]))
             immidiate1 = tryGetNumber(firstVar, fileName, lineNumber);
@@ -768,7 +739,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
         else if (isLabelExist(command, lineNumber, fileName, true, determineLinesNumberResult))
         {
             label2 = command;
-            printf("label2\n");
         }
 
         else if (isRegisterName(command))
@@ -776,7 +746,6 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
         else
         {
-            printf("error\n");
             INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
         }
 

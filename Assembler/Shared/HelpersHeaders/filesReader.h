@@ -39,5 +39,23 @@ char *getFileNameWithExtension(const char *fileName, char *extension);
  * @param macroLineInFile The line number of the macro in the file.
  */
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile);
+/**
+ * Removes the file extension from a given filename.
+ * @param filename The original filename.
+ * @return A new string with the extension removed.
+ */
+char *removeFileNameExtension(const char *filename);
+
+/**
+ * Prepares for the second run of the file reader.
+ * @param fileName The name of the source file.
+ */
+void prepareSecondRun(const char *fileName);
+
+/**
+ * Prints the labels from a given source file.
+ * @param fileName The name of the source file.
+ */
+void printLabels(const char *);
 
 #endif /* FILESREADER_H */

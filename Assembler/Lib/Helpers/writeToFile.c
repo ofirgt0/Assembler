@@ -30,7 +30,7 @@ bool writeIntArrayToFile(const char *filename, const int arr[])
     }
     else
     {
-        OPENING_FILE_ERROR(filename, -1); /* TODO: to handle -1 issue, need to set the real lineNumber */
+        OPENING_FILE_ERROR(filename, -1);
         return false;
     }
 }
@@ -43,12 +43,10 @@ void appendStringToFile(const char *filename, const char *text)
 {
     FILE *file;
 
-    printf("debug: write the line %s to file %s\n", text, filename);
-
     file = fopen(filename, "a");
     if (file == NULL)
     {
-        OPENING_FILE_ERROR(filename, -1); /* TODO: to handle -1 issue, need to set the real lineNumber */
+        OPENING_FILE_ERROR(filename, -1);
         return;
     }
 

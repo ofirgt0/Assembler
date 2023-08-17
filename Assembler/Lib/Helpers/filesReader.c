@@ -6,31 +6,12 @@
 #include "writeToFile.h"
 
 /**
- * Removes the file extension from a given filename.
- * @param filename The original filename.
- * @return A new string with the extension removed.
- */
-char *removeFileNameExtension(const char *filename);
-
-/**
- * Prepares for the second run of the file reader.
- * @param fileName The name of the source file.
- */
-void prepareSecondRun(const char *fileName);
-
-/**
  * Parses a given assembly command.
  * @param command The assembly command to parse.
  * @param fileName The name of the source file.
  * @param lineNumber The line number in the source file.
  */
 void commandParser(char *command, const char *fileName, int lineNumber);
-
-/**
- * Prints the labels from a given source file.
- * @param fileName The name of the source file.
- */
-void printLabels(const char *);
 
 /**
  * Starts the first run of the file reader.
@@ -71,7 +52,7 @@ char *getFileNameWithExtension(const char *fileName, char *extension)
  */
 void fileReader(const char *fileName)
 {
-    char line[256];
+    char line[81];
     char *asmFileName;
     char *macroFileName;
     int i;
@@ -98,6 +79,12 @@ void fileReader(const char *fileName)
 
     for (i = 0; fgets(line, sizeof(line), file) != NULL; i++)
     {
+        if (strlen(line) > 80)
+        {
+            LINE_LENGTH_ERROR(fileName, i + 1);
+            continue;
+        }
+
         if (line[0] == '\0' || line[0] == '\n' || strlen(line) == 0)
             continue;
 
@@ -129,6 +116,12 @@ void fileReader(const char *fileName)
 
     for (i = 0; fgets(line, sizeof(line), macroFile) != NULL; i++)
     {
+        if (strlen(line) > 80)
+        {
+            LINE_LENGTH_ERROR(fileName, i + 1);
+            continue;
+        }
+
         removePrefixSpaces(line);
         if (line[0] == '\0' || line[0] == '\n' || strlen(line) == 0)
             continue;
@@ -175,7 +168,7 @@ void fileReader(const char *fileName)
  */
 void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile)
 {
-    char line[256];
+    char line[81];
     int currentLine;
     int i = 0;
     char *asmFileName;

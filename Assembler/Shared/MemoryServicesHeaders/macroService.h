@@ -61,4 +61,19 @@ void updateLinesCount(const char *macroName, int newLinesCount);
  */
 void macroLayout(char *macroName, char *fileName, int macroLineInFile);
 
+/**
+ * Removes leading and trailing spaces from a string.
+ * @param str The string to remove spaces from.
+ */
+void remove_spaces(char *str);
+
+/**
+ * Processes multiple lines of a macro, laying out their content.
+ * @param lineNumber The starting line number in the source file.
+ * @param linesNumber The total number of lines to process.
+ * @param fileName The name of the source file.
+ * @param macroLineInFile The line number of the macro in the source file.
+ */
+void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile);
+
 #endif /* MACROSERVICE_H */

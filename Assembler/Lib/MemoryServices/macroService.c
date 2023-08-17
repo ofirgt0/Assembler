@@ -7,9 +7,6 @@
 #include "errorsHandler.h"
 #include "helpfulFunctions.h"
 
-void remove_spaces(char *str);
-void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macroLineInFile);
-
 static struct macroDataNode *head = NULL;
 
 /* void initMacroStaticVariables(){
@@ -49,7 +46,6 @@ struct macroDataNode *getMacro(char *macroName)
 
     while (macro != NULL)
     {
-        printf("%s strcmp %s \n", macro->macroName, macroNameCopy);
         if (strcmp(macro->macroName, macroNameCopy) == 0)
         {
             free(macroNameCopy);
@@ -77,7 +73,6 @@ void macroLayout(char *macroName, char *fileName, int macroLineInFile)
     }
     else
     {
-        printf("layout macro: %s %d %d\n", macro->macroName, macro->lineNumber, macro->linesCount);
         layoutBulkOfLines(macro->lineNumber, macro->linesCount, fileName, macroLineInFile);
     }
 }
@@ -146,15 +141,12 @@ void updateLinesCount(const char *macroName, int newLinesCount)
 {
     struct macroDataNode *current;
 
-    printf("update macro Lines Count: %s lines: %d\n", macroName, newLinesCount);
-
     current = head;
 
     while (current != NULL)
     {
         if (strcmp(current->macroName, macroName) == 0)
         {
-            printf("line number %d to line %d\n", current->lineNumber, current->lineNumber + newLinesCount);
             current->linesCount = newLinesCount; /*Update the linesCount property*/
             return;
         }

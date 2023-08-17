@@ -218,4 +218,44 @@ void sendDataValue(char *fileName, char *labelName, int *data, int size);
  */
 bool isLabelExistWithoutEntries(char *label);
 
+/**
+ * charToString:
+ * - Converts a character to its string representation.
+ * @param c: Character to convert.
+ * @return char*: String representation of the character.
+ */
+char *charToString(char c);
+
+/**
+ * getLabelAddressWithoutExtern:
+ * - Gets the address of a label excluding external labels.
+ * @param label: Name of the label to search for.
+ * @return int: Address of the label if found, -1 if not.
+ */
+int getLabelAddressWithoutExtern(char *label);
+
+/**
+ * searchLabel:
+ * - Searches for a label in the normal command label list.
+ * @param labelName: Name of the label to search for.
+ * @return int: Address of the label if found, -1 if not.
+ */
+int searchLabel(char *labelName);
+
+/**
+ * updateEntryLabelAddress:
+ * - Updates the address of a specified entry label.
+ * @param entryName: Name of the entry label.
+ * @param address: New address to set for the entry label.
+ */
+void updateEntryLabelAddress(char *entryName, int address);
+
+/**
+ * encodValue:
+ * - Encodes a character to its binary representation and writes to a file.
+ * @param fileName: Name of the file to write to.
+ * @param value: the value to encode.
+ */
+void encodValue(char *fileName, int value);
+
 #endif /* DATASERVICE_H */
