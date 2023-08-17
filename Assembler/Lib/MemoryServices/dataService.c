@@ -370,7 +370,6 @@ bool addString(char *string, char *labelName)
 
     label->address = DC; /*The address will be set later when the string is linked to the code.*/
     DC += stringLength;
-    printf("updated DC is %d\n", DC);
 
     newNode = (struct StringLabel *)malloc(sizeof(struct StringLabel));
     if (newNode == NULL)
@@ -432,7 +431,6 @@ bool addNewLabel(char *labelName)
 
     if (searchEntry(labelName) != -1)
     {
-        printf("updateEntryLabelAddress to address %d \n", label->address);
         updateEntryLabelAddress(labelName, label->address);
     }
 
@@ -449,8 +447,6 @@ void increaseIC(int value)
     if (value >= 0)
     {
         IC += value;
-        printf("current IC is %d\n", IC);
-        printf("current DC is %d\n", DC);
     }
     else
     {

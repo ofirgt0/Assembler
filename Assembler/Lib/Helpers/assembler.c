@@ -6,7 +6,8 @@
 #include "writeToFile.h"
 
 /**
- *  The main function reads and processes multiple files provided as command-line arguments.
+ *  The main function of the project.
+ *  This function reads and processes multiple files provided as command-line arguments.
  *  It iterates through each command-line argument, treating each as a file name.
  *  It then calls the fileReader function on each file.
  */
@@ -167,7 +168,6 @@ void fileReader(const char *fileName)
             free(obFileName);
         }
 
-        printf("\nErrors found in file. program stopped.\n");
         fprintf(stderr, "\nErrors found in file. program stopped.\n");
         fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
         fclose(file);
@@ -197,14 +197,13 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     FILE *file;
 
     fileName = removeFileNameExtension(fileName);
-    printf("########################### layoutBulkOfLines - after remove file extension: %s\n", fileName);
 
     asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
     if (!asmFileName)
     {
         return;
     }
-    printf("########################### layoutBulkOfLines - after remove asmFileName extension: %s\n", asmFileName);
+
     file = fopen(asmFileName, "r");
 
     if (file == NULL)
@@ -230,8 +229,6 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
     {
         removePrefixSpaces(line);
         logNewLine(line, 1);
-        printf("line: %s\n", line);
-        printf("macroFileName %s \n", macroFileName);
         startFirstRun(line, i + macroLineInFile, fileName);
         currentLine++;
         i++;
