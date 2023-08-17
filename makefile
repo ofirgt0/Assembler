@@ -11,7 +11,7 @@ INCLUDES = -I./Assembler/Shared/PassesParserHeader -I./Assembler/Shared/HelpersH
 LIBS = -lm
 
 # Define the executable file 
-MAIN = asm
+MAIN = assembler
 
 # Define the object files
 OBJS = filesReader.o commandsIdentifier.o macroService.o dataService.o errorsHandler.o writeToFile.o encoder.o helpfulFunctions.o
