@@ -12,6 +12,10 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
 
 static struct macroDataNode *head = NULL;
 
+/* void initMacroStaticVariables(){
+     head = NULL;
+}*/
+
 /**
  * Checks if a given macro name exists.
  * @param macroName The name of the macro.

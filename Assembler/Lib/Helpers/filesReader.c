@@ -3,6 +3,7 @@
 #include <string.h>
 #include "filesReader.h"
 #include "errorsHandler.h"
+#include "writeToFile.h"
 
 /**
  * Removes the file extension from a given filename.
@@ -106,16 +107,6 @@ void fileReader(const char *fileName)
         notEmptyLinesCounter++;
     }
     notEmptyLinesCounter = 0;
-    errorCount = getErrorsCounter();
-    if (errorCount > 0)
-    {
-        printf("\nErrors found in file. program stopped.\n");
-        fprintf(stderr, "\nErrors found in file. program stopped.\n");
-        fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
-        fclose(file);
-        free(asmFileName);
-        return;
-    }
 
     fseek(file, 0, SEEK_SET);
     prepareSecondRun(fileName);
@@ -146,6 +137,30 @@ void fileReader(const char *fileName)
         logNewLine(line, notEmptyLinesCounter);
         commandParser(line, fileName, notEmptyLinesCounter);
     }
+
+    errorCount = getErrorsCounter();
+    if (errorCount > 0)
+    {
+
+        char *obFileName = getFileNameWithExtension(fileName, ".ob");
+        if (obFileName)
+        {
+            if (isFileExist(obFileName))
+            {
+                /* Delete the .ob file if it exists */
+                remove(obFileName);
+            }
+            free(obFileName);
+        }
+
+        printf("\nErrors found in file. program stopped.\n");
+        fprintf(stderr, "\nErrors found in file. program stopped.\n");
+        fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
+        fclose(file);
+        free(asmFileName);
+        return;
+    }
+    free(asmFileName);
 
     printLabels(fileName);
     fclose(macroFile);
@@ -208,9 +223,18 @@ void layoutBulkOfLines(int lineNumber, int linesNumber, char *fileName, int macr
         i++;
     }
 
+    /*setUpStaticVariables();*/
+
     free(macroFileName);
     fclose(file);
 }
+
+/*void setUpStaticVariables(){
+    initCommandsIdentifierStaticVariable();
+    initErrorsCounter();
+    initStaticVariable();
+    initMacroStaticVariables();
+}*/
 
 /**
  *  The main function reads and processes multiple files provided as command-line arguments.

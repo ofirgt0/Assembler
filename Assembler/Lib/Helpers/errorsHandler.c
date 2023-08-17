@@ -5,6 +5,11 @@
 /* Counter for tracking the number of logged errors. */
 static int errorsCounter = 0;
 
+void initErrorsCounter()
+{
+    errorsCounter = 0;
+}
+
 /* Returns the current count of logged errors.
  * @return The total count of errors so far.
  */

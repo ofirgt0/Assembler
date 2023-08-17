@@ -179,11 +179,6 @@ void addNewLine(char *fileName, int opcode, int register1, int register2, char *
     }
 }
 
-void printAm(char *fileName, char *command)
-{
-    printf("printAm %s", command);
-}
-
 /**
  * The validateOpcodeMatchAddressingMethod function checks if the opcode matches
  * the addressing methods. It accepts the opcode, source addressing, and destination
@@ -548,6 +543,10 @@ char *intToStringWithSpace(int ic, int dc)
  */
 void prepareSecondRun(char *fileName)
 {
+    /* If there are errors, we won't proceed. */
+    if (getErrorsCounter() > 0)
+        return;
+
     TotalInstructions = IC;
     appendStringToFile(concatenateStrings(fileName, ".ob"), intToStringWithSpace(IC - 100, DC));
     IC = 100;
@@ -566,9 +565,10 @@ void prepareSecondRun(char *fileName)
 bool isLabelExist(char *label, int lineNumber, char *fileName, bool writeToFile, int linesNumberForCommand)
 {
     printf("isLabelExist: label - %s lineNumber - %d fileName %s writeToFile linesNumberForCommand %d \n", label, lineNumber, fileName, linesNumberForCommand);
+
     if (searchExternLabel(label) != -1)
     {
-        if (writeToFile)
+        if (writeToFile && getErrorsCounter() == 0)
             writeLabelToFile(concatenateStrings(fileName, ".ext"), label, IC + linesNumberForCommand);
         return true;
     }
@@ -843,6 +843,10 @@ void printLabels(const char *filename)
     struct LabelNode *current_LabelNode;
     int addressFromDifferentList = 0;
 
+    /* If there are errors, we won't proceed. */
+    if (getErrorsCounter() > 0)
+        return;
+
     current_LabelNode = entryLabelList;
     while (current_LabelNode != NULL)
     {
@@ -859,10 +863,30 @@ void printLabels(const char *filename)
 }
 
 /* charToString function converts a single character to a string. */
+/* charToString function converts a single character to a dynamically allocated string. */
 char *charToString(char c)
 {
-    static char str[2];
+    char *str = (char *)malloc(2 * sizeof(char)); /* Allocate memory for 2 characters (1 for the char, 1 for '\0') */
+    if (!str)
+    {
+        return NULL;
+    }
     str[0] = c;
     str[1] = '\0';
-    return str;
+
+    /* Free the memory before returning */
+    free(str);
+
+    return NULL;
 }
+
+/*void initStaticVariable(){
+    externalLabelList = NULL;
+    entryLabelList = NULL;
+    normalCommandLabelList = NULL;
+    dataLabelList = NULL;
+    stringLabelList = NULL;
+    IC = 100;
+    DC = 0;
+    TotalInstructions = 0;
+}*/

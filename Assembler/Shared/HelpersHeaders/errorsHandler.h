@@ -57,11 +57,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define INVALID_OPTION_FOR_COMMAND(fileName, lineNumber)                                                                              \
-    do                                                                                                                                \
-    {                                                                                                                                 \
-        logNewError(fileName, lineNumber);                                                                                            \
-        fprintf(stderr, "This line has been failed according to: The command does not match the type of parameters that entered.\n"); \
+#define INVALID_OPTION_FOR_COMMAND(fileName, lineNumber)                                      \
+    do                                                                                        \
+    {                                                                                         \
+        logNewError(fileName, lineNumber);                                                    \
+        fprintf(stderr, "The command does not match the type of parameters that entered.\n"); \
     } while (0)
 
 /**
@@ -69,11 +69,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define INVALID_FILE_FORMAT(fileName, lineNumber)                                                                   \
-    do                                                                                                              \
-    {                                                                                                               \
-        logNewError(fileName, lineNumber);                                                                          \
-        fprintf(stderr, "This line has been failed according to: Invalid file format, cant open/create a file.\n"); \
+#define INVALID_FILE_FORMAT(fileName, lineNumber)                           \
+    do                                                                      \
+    {                                                                       \
+        logNewError(fileName, lineNumber);                                  \
+        fprintf(stderr, "Invalid file format, cant open/create a file.\n"); \
     } while (0)
 
 /**
@@ -82,11 +82,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param address The address or line number where the error was found.
  */
 
-#define UNKNOWN_OPERAND(fileName, lineNumber)                                                   \
-    do                                                                                          \
-    {                                                                                           \
-        logNewError(fileName, lineNumber);                                                      \
-        fprintf(stderr, "This line has been failed according to: Unknown operator founded.\n"); \
+#define UNKNOWN_OPERAND(fileName, lineNumber)           \
+    do                                                  \
+    {                                                   \
+        logNewError(fileName, lineNumber);              \
+        fprintf(stderr, "Unknown operator founded.\n"); \
     } while (0)
 
 /**
@@ -94,11 +94,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define MEMORY_ALLOCATION_FAILED(fileName, lineNumber)                                                   \
-    do                                                                                                   \
-    {                                                                                                    \
-        logNewError(fileName, lineNumber);                                                               \
-        fprintf(stderr, "This line has been failed according to: Memory allocation has been failed.\n"); \
+#define MEMORY_ALLOCATION_FAILED(fileName, lineNumber)           \
+    do                                                           \
+    {                                                            \
+        logNewError(fileName, lineNumber);                       \
+        fprintf(stderr, "Memory allocation has been failed.\n"); \
     } while (0)
 
 /**
@@ -106,11 +106,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define INCORRECT_OPERANDS_NUMBER_ERROR(fileName, lineNumber)                                                                                      \
-    do                                                                                                                                             \
-    {                                                                                                                                              \
-        logNewError(fileName, lineNumber);                                                                                                         \
-        fprintf(stderr, "This line has been failed according to: The number of operands that in this line, corresponds to the type of operand\n"); \
+#define INCORRECT_OPERANDS_NUMBER_ERROR(fileName, lineNumber)                                              \
+    do                                                                                                     \
+    {                                                                                                      \
+        logNewError(fileName, lineNumber);                                                                 \
+        fprintf(stderr, "The number of operands that in this line, corresponds to the type of operand\n"); \
     } while (0)
 
 /**
@@ -118,11 +118,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define INVALID_REGISTER_NAME(fileName, lineNumber)                                                                  \
-    do                                                                                                               \
-    {                                                                                                                \
-        logNewError(fileName, lineNumber);                                                                           \
-        fprintf(stderr, "This line has been failed according to: The register that you tried to use is invalid.\n"); \
+#define INVALID_REGISTER_NAME(fileName, lineNumber)                          \
+    do                                                                       \
+    {                                                                        \
+        logNewError(fileName, lineNumber);                                   \
+        fprintf(stderr, "The register that you tried to use is invalid.\n"); \
     } while (0)
 
 /**
@@ -130,11 +130,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define OPENING_FILE_ERROR(fileName, lineNumber)                                                                    \
-    do                                                                                                              \
-    {                                                                                                               \
-        logNewError(fileName, lineNumber);                                                                          \
-        fprintf(stderr, "This line has been failed according to: Invalid file format, cant open/create a file.\n"); \
+#define OPENING_FILE_ERROR(fileName, lineNumber)                            \
+    do                                                                      \
+    {                                                                       \
+        logNewError(fileName, lineNumber);                                  \
+        fprintf(stderr, "Invalid file format, cant open/create a file.\n"); \
     } while (0)
 
 /**
@@ -142,11 +142,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define MACRO_NAME_CONFLICT(fileName, lineNumber)                                                                                \
-    do                                                                                                                           \
-    {                                                                                                                            \
-        logNewError(fileName, lineNumber);                                                                                       \
-        fprintf(stderr, "This line has been failed according to: There is a conflict in the macro name in the file you ran.\n"); \
+#define MACRO_NAME_CONFLICT(fileName, lineNumber)                                        \
+    do                                                                                   \
+    {                                                                                    \
+        logNewError(fileName, lineNumber);                                               \
+        fprintf(stderr, "There is a conflict in the macro name in the file you ran.\n"); \
     } while (0)
 
 /**
@@ -154,11 +154,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param address The address or line number where the error was found.
  */
-#define INVALID_COMMAND_ERROR(fileName, lineNumber)                                                             \
-    do                                                                                                          \
-    {                                                                                                           \
-        logNewError(fileName, lineNumber);                                                                      \
-        fprintf(stderr, "This line has been failed according to: The command that in this line is invalid.\n"); \
+#define INVALID_COMMAND_ERROR(fileName, lineNumber)                     \
+    do                                                                  \
+    {                                                                   \
+        logNewError(fileName, lineNumber);                              \
+        fprintf(stderr, "The command that in this line is invalid.\n"); \
     } while (0)
 
 /**
@@ -167,11 +167,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param address The address or line number where the error was found.
  * @param labelName The name of the missing label.
  */
-#define LABEL_WAS_NOT_FOUND_ERROR(fileName, lineNumber, labelName)                                                                        \
-    do                                                                                                                                    \
-    {                                                                                                                                     \
-        logNewError(fileName, lineNumber);                                                                                                \
-        fprintf(stderr, "This line has been failed according to: In the current line no matching label was found for: %s.\n", labelName); \
+#define LABEL_WAS_NOT_FOUND_ERROR(fileName, lineNumber, labelName)                                \
+    do                                                                                            \
+    {                                                                                             \
+        logNewError(fileName, lineNumber);                                                        \
+        fprintf(stderr, "In the current line no matching label was found for: %s.\n", labelName); \
     } while (0)
 
 /**
@@ -180,25 +180,25 @@ void logNewError(const char *fileName, int lineNumber);
  * @param fileName The name of the file where the error occurred.
  * @param lineNumber The line number in the file where the error occurred.
  */
-#define INVALID_LABEL_FORMAT(fileName, lineNumber, label)                                                         \
-    do                                                                                                            \
-    {                                                                                                             \
-        logNewError(fileName, lineNumber);                                                                        \
-        fprintf(stderr, "This line has been failed according to: Invalid label format for label '%s'.\n", label); \
+#define INVALID_LABEL_FORMAT(fileName, lineNumber, label)                 \
+    do                                                                    \
+    {                                                                     \
+        logNewError(fileName, lineNumber);                                \
+        fprintf(stderr, "Invalid label format for label '%s'.\n", label); \
     } while (0)
 
-#define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                                                   \
-    do                                                                                                                      \
-    {                                                                                                                       \
-        logNewError(fileName, lineNumber);                                                                                  \
-        fprintf(stderr, "This line has been failed according to: Invalid number type. Only integer values are allowed.\n"); \
+#define INVALID_INTEGER_VALUE(str, fileName, lineNumber)                            \
+    do                                                                              \
+    {                                                                               \
+        logNewError(fileName, lineNumber);                                          \
+        fprintf(stderr, "Invalid number type. Only integer values are allowed.\n"); \
     } while (0)
 
-#define LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label)                                                          \
-    do                                                                                                                   \
-    {                                                                                                                    \
-        logNewError(fileName, lineNumber);                                                                               \
-        fprintf(stderr, "This line has been failed according to: The label '%s' in this line already exists.\n", label); \
+#define LABEL_ALREADY_EXISTS_ERROR(fileName, lineNumber, label)                  \
+    do                                                                           \
+    {                                                                            \
+        logNewError(fileName, lineNumber);                                       \
+        fprintf(stderr, "The label '%s' in this line already exists.\n", label); \
     } while (0)
 
 #define INVALID_REGISTER_FOUND(fileName, lineNumber, registerName)           \
@@ -240,6 +240,21 @@ void logNewError(const char *fileName, int lineNumber);
     {                                                                                                   \
         logNewError(fileName, lineNumber);                                                              \
         fprintf(stderr, "Error: Invalid parameter '%s' for 'entry' or 'extern' instruction.\n", label); \
+    } while (0)
+
+#define LINE_LENGTH_ERROR(fileName, lineNumber)                                       \
+    do                                                                                \
+    {                                                                                 \
+        logNewError(fileName, lineNumber);                                            \
+        fprintf(stderr, "ERROR in file %s at line %d: Line exceeds 80 characters!\n", \
+                fileName, lineNumber);                                                \
+    } while (0)
+
+#define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                  \
+    do                                                                                     \
+    {                                                                                      \
+        logNewError(fileName, lineNumber);                                                 \
+        fprintf(stderr, "Invalid number '%s'. Only integer values are allowed.\n", token); \
     } while (0)
 
 #endif /* ERRORSHANDLER_H */

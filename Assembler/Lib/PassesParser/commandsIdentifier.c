@@ -312,6 +312,13 @@ char *getSubstringBySeparator(char *str, char separator)
 static int linesCounter = 0;      /* Counter for the number of lines processed in the  code. */
 static char *currentMacro = NULL; /* Holds the name of the macro that is currently being processed. */
 
+void initCommandsIdentifierStaticVariable()
+{
+    linesCounter = 0;
+    currentMacro = NULL;
+    macroFlag = false;
+}
+
 /**
  * This function is the heart of the program, handling the first run of the assembler.
  * It processes each line of the input assembly code, extracting labels, identifying
@@ -687,9 +694,7 @@ void commandParser(char *command, char *fileName, int lineNumber)
     }
 
     commandIndex = getCommandIndexByList(command, commandsNames, COMMANDS_NUMBER);
-    command = command + strlen(commandsNames[commandIndex]);
-    remove_spaces(command);
-    printf("commandIndex: %d\n", commandIndex);
+
     if (commandIndex == -1)
     {
         UNKNOWN_COMMAND_ERROR(fileName, lineNumber);
@@ -698,6 +703,10 @@ void commandParser(char *command, char *fileName, int lineNumber)
             free(label);
         return;
     }
+
+    command = command + strlen(commandsNames[commandIndex]);
+    remove_spaces(command);
+    printf("commandIndex: %d\n", commandIndex);
 
     if (commandIndex > 13) /*0 vars*/
     {
