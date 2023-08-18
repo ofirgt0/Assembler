@@ -60,8 +60,9 @@ void fileReader(const char *fileName)
     int i;
     int notEmptyLinesCounter = 0;
     int errorCount;
-    FILE *file;
-    FILE *macroFile;
+    FILE *file = NULL;
+    FILE *macroFile = NULL;
+    ;
 
     asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
 
@@ -113,6 +114,8 @@ void fileReader(const char *fileName)
     macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
     if (!macroFileName)
     {
+        fclose(file);
+        free(asmFileName);
         return;
     }
 
@@ -122,6 +125,8 @@ void fileReader(const char *fileName)
     if (macroFile == NULL)
     {
         OPENING_FILE_ERROR(fileName, -1);
+        fclose(file);
+        free(asmFileName);
         return;
     }
 
@@ -158,16 +163,15 @@ void fileReader(const char *fileName)
 
         fprintf(stderr, "\nErrors found in file. program stopped.\n");
         fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
-        fclose(file);
-        free(asmFileName);
-        return;
     }
-    free(asmFileName);
 
     printLabels(fileName);
-    fclose(macroFile);
-    fclose(file);
-    free(asmFileName);
+    if (macroFile)
+        fclose(macroFile);
+    if (file)
+        fclose(file);
+    if (asmFileName)
+        free(asmFileName);
 }
 
 /**
