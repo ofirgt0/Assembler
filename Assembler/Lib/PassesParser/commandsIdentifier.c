@@ -44,6 +44,13 @@ char *commandsPrefix[COMMANDS_PREFIX_NUMBER] = {
 /* Flag to indicate if we're currently processing a macro. */
 static bool macroFlag = false;
 
+/**
+ * Prints all the labels associated with the given file.
+ * This function acts as a wrapper around the `printLabels` function
+ * and is responsible for displaying all the labels that are related
+ * to the specified file.
+ * @param filename The name of the file whose associated labels need to be printed.
+ */
 void printLabel(char *filename)
 {
     printLabels(filename);
@@ -726,6 +733,12 @@ void commandParser(char *command, char *fileName, int lineNumber)
 
         else if (isRegisterName(firstVar, lineNumber, fileName))
             register1 = firstVar[2] - '0';
+
+        else
+        {
+            INVALID_OPTION_FOR_COMMAND(fileName, lineNumber);
+            return;
+        }
 
         if (command[0] == '-' || isdigit(command[0]))
             immidiate2 = tryGetNumber(command, fileName, lineNumber);

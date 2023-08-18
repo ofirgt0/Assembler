@@ -143,8 +143,8 @@ void fileReader(const char *fileName)
         if (line[0] == '\0' || line[0] == '\n' || strlen(line) == 0)
             continue;
 
-        notEmptyLinesCounter++;
         commandParser(line, (char *)fileName, notEmptyLinesCounter);
+        notEmptyLinesCounter++;
     }
 
     errorCount = getErrorsCounter();

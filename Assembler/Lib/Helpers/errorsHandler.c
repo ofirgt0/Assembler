@@ -24,6 +24,7 @@ int getErrorsCounter()
  */
 void logNewError(const char *fileName, int lineNumber)
 {
+
     lineNumber++;
     if (lineNumber != -1)
     {
