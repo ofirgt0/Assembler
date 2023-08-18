@@ -232,11 +232,11 @@ void logNewError(const char *fileName, int lineNumber);
  * @param lineNumber The line number in the file where the error occurred.
  * @param token The string representation of the invalid number.
  */
-#define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                    \
-    do                                                                                       \
-    {                                                                                        \
-        logNewError(fileName, lineNumber);                                                   \
-        fprintf(stderr, "Invalid number '%s'. Only integer values are allowed.\n\n", token); \
+#define INVALID_NUMBER_VALUE(fileName, lineNumber, token)                                                                           \
+    do                                                                                                                              \
+    {                                                                                                                               \
+        logNewError(fileName, lineNumber);                                                                                          \
+        fprintf(stderr, "Invalid number '%s'. This number does not match the numbers that you can use in this course.\n\n", token); \
     } while (0)
 
 #endif /* ERRORSHANDLER_H */

@@ -19,11 +19,12 @@ typedef struct commandsIdentifier commandsIdentifier;
 typedef struct Line Line;
 
 /**
- * Simplifies the command by reducing any sequence of spaces to a single space.
- * This helps in ensuring that commands are standardized for easier parsing.
- * @param str The raw input command string that might have multiple spaces.
+ * Validates a given number to check if it lies within the permissible range.
+ * The function checks if the provided number is within the range of -4095 to 4096 (inclusive).
+ * @param number The integer value to be validated.
+ * @return Returns `true` if the number is within the range, otherwise returns `false`.
  */
-void replaceMultipleSpaces(char *str);
+bool validateNumber(int number);
 
 /**
  * Gets rid of leading spaces in a command string.

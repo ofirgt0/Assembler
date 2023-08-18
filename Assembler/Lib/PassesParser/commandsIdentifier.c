@@ -72,33 +72,6 @@ bool isNumber(const char *str)
 }
 
 /**
- * Replaces multiple consecutive spaces with a single space in a string.
- * The function modifies the input string in-place.
- */
-void replaceMultipleSpaces(char *str)
-{
-    int i, j;
-    int whitespaceCount = 0;
-    int len = strlen(str);
-
-    for (i = 0, j = 0; i < len; i++)
-    {
-        if (str[i] == ' ' || str[i] == '\t' || str[i] == '\n')
-            whitespaceCount++;
-        else
-            whitespaceCount = 0;
-
-        if (whitespaceCount <= 1)
-        {
-            str[j] = str[i];
-            j++;
-        }
-    }
-
-    str[j] = '\0';
-}
-
-/**
  * This function removes leading white space characters from a given string.
  * The function iterates over the string, identifies the leading spaces, and then
  * shifts the remaining characters to the start of the string, effectively removing the spaces.
@@ -165,7 +138,6 @@ int getCommandIndexByList(char *command, char *list[], int listLength)
     Checks if a character represents a valid register name.
     Input: register - the character to check.
     Output: true if the character is a valid register name, false otherwise.
-    valid: @r0-@r7, LENGTH, $r5
 */
 bool isRegisterName(char registerName[], int lineNumber, char *fileName)
 {
@@ -250,6 +222,17 @@ char *tryGetLabel(char **command, char *fileName, int lineNumber)
 }
 
 /**
+ * Validates a given number to check if it lies within the permissible range.
+ * The function checks if the provided number is within the range of -4095 to 4096 (inclusive).
+ * @param number The integer value to be validated.
+ * @return Returns `true` if the number is within the range, otherwise returns `false`.
+ */
+bool validateNumber(int number)
+{
+    return number <= 4096 && number >= -4095;
+}
+
+/**
  * Tries to parse a number from a string.
  * If the string represents a valid number, the function returns the number.
  * If the string does not represent a valid number, the function returns NaN.
@@ -265,6 +248,11 @@ double tryGetNumber(char *str, char *fileName, int lineNumber)
     {
         /* Check if the number is not an integer */
         if (number != (int)number)
+        {
+            INVALID_NUMBER_VALUE(fileName, lineNumber, str);
+            return 0.5;
+        }
+        if (!validateNumber(number))
         {
             INVALID_NUMBER_VALUE(fileName, lineNumber, str);
             return 0.5;
@@ -373,13 +361,6 @@ void startFirstRun(char command[], int lineNumber, char *fileName)
 
     tryGetLabel(&originalCommand, fileName, lineNumber); /* for determining lines number */
 
-    if (label != NULL && strcmp(label, "") != 0 && prefixIndex != -1) /*note in page 41*/
-    {
-        if (prefixIndex < 2)
-        {
-            /*INVALID_LABEL_FORMAT(fileName, lineNumber, label);*/ /* TODO: to check if needed - */
-        }
-    }
     if (prefixIndex != -1)
     {
         char *secondVar;
@@ -516,14 +497,8 @@ int *parseIntArray(char *input, size_t *length, char *fileName, int lineNumber)
     size_t i;
     *length = 0;
 
-    /* Check for extraneous comma or trailing comma */
-    if (input[0] == ',')
-    {
-        EXTRANEOUS_TEXT_ERROR(fileName, lineNumber);
-        free(array);
-        return NULL;
-    }
-    else if (input[strlen(input) - 1] == ',')
+    /* Check for trailing comma */
+    if (input[strlen(input) - 1] == ',')
     {
         TRAILING_COMMA_ERROR(fileName, lineNumber);
         free(array);
@@ -552,7 +527,7 @@ int *parseIntArray(char *input, size_t *length, char *fileName, int lineNumber)
             return NULL;
         }
 
-        num = atoi(token); /* Using your original atoi function */
+        num = atoi(token);
         (*length)++;
 
         temp = realloc(array, (*length) * sizeof(int));
@@ -564,6 +539,10 @@ int *parseIntArray(char *input, size_t *length, char *fileName, int lineNumber)
         array = temp;
 
         array[(*length) - 1] = num;
+        if (!validateNumber(num))
+        {
+            INVALID_NUMBER_VALUE(fileName, lineNumber, token);
+        }
 
         token = strtok(NULL, ",");
     }

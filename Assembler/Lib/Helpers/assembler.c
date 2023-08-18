@@ -60,9 +60,8 @@ void fileReader(const char *fileName)
     int i;
     int notEmptyLinesCounter = 0;
     int errorCount;
-    FILE *file = NULL;
-    FILE *macroFile = NULL;
-    ;
+    FILE *file;
+    FILE *macroFile;
 
     asmFileName = getFileNameWithExtension(fileName, ASM_FILE_NAME_EXTENSION);
 
@@ -75,6 +74,7 @@ void fileReader(const char *fileName)
 
     if (file == NULL)
     {
+        fprintf(stderr, "Error: no commands in file %s\n", asmFileName);
         OPENING_FILE_ERROR(fileName, -1);
         free(asmFileName);
         return;
@@ -88,23 +88,28 @@ void fileReader(const char *fileName)
             continue;
         }
 
-        if (line[0] == '\0' || line[0] == '\n' || strlen(line) == 0)
+        removePrefixSpaces(line);
+        if (line[0] == '\0' || line[0] == '\n' || line[0] == ';' || strlen(line) == 0)
             continue;
 
-        removePrefixSpaces(line);
         startFirstRun(line, notEmptyLinesCounter, (char *)fileName);
         notEmptyLinesCounter++;
     }
 
-    errorCount = getErrorsCounter();
-    if (errorCount > 0)
+    /**
+    * Note: Due to conflicting instructions, we left the exercise in the comment.
+    The course booklet states that after the first transition, the program must be stopped and the errors printed.
+    However, in the course forum and after contacting one of the other lecturers in the course, it was reported that the program should continue running for the second passage and print the errors there.
+    */
+    /*errorCount = getErrorsCounter();*/
+    /*if (errorCount > 0)
     {
         fprintf(stderr, "\nErrors found in first run. Not proceeding to second run.\n");
         fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
         fclose(file);
         free(asmFileName);
         return;
-    }
+    }*/
 
     notEmptyLinesCounter = 0;
 
@@ -114,8 +119,6 @@ void fileReader(const char *fileName)
     macroFileName = getFileNameWithExtension(fileName, MACRO_FILE_NAME_EXTENSION);
     if (!macroFileName)
     {
-        fclose(file);
-        free(asmFileName);
         return;
     }
 
@@ -125,8 +128,6 @@ void fileReader(const char *fileName)
     if (macroFile == NULL)
     {
         OPENING_FILE_ERROR(fileName, -1);
-        fclose(file);
-        free(asmFileName);
         return;
     }
 
@@ -163,8 +164,11 @@ void fileReader(const char *fileName)
 
         fprintf(stderr, "\nErrors found in file. program stopped.\n");
         fprintf(stderr, "Total Errors in file %s: %d\n", fileName, errorCount);
-    }
 
+        fclose(file);
+        free(asmFileName);
+        return;
+    }
     printLabels(fileName);
     if (macroFile)
         fclose(macroFile);
